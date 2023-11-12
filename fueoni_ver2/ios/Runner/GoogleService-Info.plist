@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>368513144302-qtubmk4em73h0c71e46q0eh6o6gnbuad.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.368513144302-qtubmk4em73h0c71e46q0eh6o6gnbuad</string>
+	<key>API_KEY</key>
+	<string>AIzaSyBdkaq5y-2mMjmTq9ku8Tp9dYINGIb1XXM</string>
+	<key>GCM_SENDER_ID</key>
+	<string>368513144302</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.example.fueoniVer2</string>
+	<key>PROJECT_ID</key>
+	<string>lilprogram</string>
+	<key>STORAGE_BUCKET</key>
+	<string>lilprogram.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:368513144302:ios:5bf0c47114ea8638caaaff</string>
+	<key>DATABASE_URL</key>
+	<string>https://lilprogram-default-rtdb.asia-southeast1.firebasedatabase.app</string>
+</dict>
+</plist>
