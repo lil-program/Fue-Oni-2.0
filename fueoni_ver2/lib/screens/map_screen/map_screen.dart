@@ -8,10 +8,17 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'components/sign_in_button.dart';
 import 'components/sign_out_button.dart';
 
+Future<MapScreen> initMapScreen() async {
+  // MapScreenの初期化処理をここに書く
+  // 例えば、Firebaseの初期化やデータの取得など
+  await Future.delayed(const Duration(seconds: 2)); // ここでは2秒待つだけの例を示しています
+  return const MapScreen();
+}
+
 class MapScreen extends StatefulWidget {
   const MapScreen({
-    super.key,
-  });
+    Key? key,
+  }) : super(key: key);
 
   @override
   State<MapScreen> createState() => _MapScreenState();
@@ -42,7 +49,10 @@ class _MapScreenState extends State<MapScreen> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        title: const Text('Map'),
+        title: Text(
+          'Map',
+          style: TextStyle(color: Theme.of(context).primaryColor),
+        ),
       ),
       body: GoogleMap(
         initialCameraPosition: initialCameraPosition,
@@ -65,7 +75,10 @@ class _MapScreenState extends State<MapScreen> {
               onPressed: () async {
                 await _moveToCurrentLocation();
               },
-              child: const Icon(Icons.my_location),
+              child: Icon(
+                Icons.my_location,
+                color: Theme.of(context).iconTheme.color,
+              ),
             ),
           ),
           Align(

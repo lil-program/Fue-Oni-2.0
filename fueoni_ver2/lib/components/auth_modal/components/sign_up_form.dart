@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:fueoni_ver2/components/auth_modal/components/animated_error_message.dart';
 import 'package:fueoni_ver2/components/auth_modal/components/auth_text_form_field.dart';
@@ -14,6 +15,7 @@ class SignUpForm extends StatefulWidget {
 class _SignUpFormState extends State<SignUpForm> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   String errorMessage = '';
   bool _isLoading = false;
@@ -31,9 +33,15 @@ class _SignUpFormState extends State<SignUpForm> {
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 16.0),
           AnimatedErrorMessage(
             errorMessage: errorMessage,
+          ),
+          const SizedBox(height: 16.0),
+          AuthTextFormField(
+            controller: _nameController, // ユーザー名用のコントローラを指定
+            labelText: 'Name', // ラベルを設定
+            validator: validateName, // バリデーション関数を設定
+            obscureText: false,
           ),
           const SizedBox(height: 16.0),
           AuthTextFormField(
@@ -69,13 +77,25 @@ class _SignUpFormState extends State<SignUpForm> {
   Future<UserCredential?> signUp({
     required String email,
     required String password,
+    required String name,
   }) async {
     try {
       _setIsLoading(true);
-      return await FirebaseAuth.instance.createUserWithEmailAndPassword(
+      UserCredential userCredential =
+          await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
+
+      // Realtime Databaseにユーザー情報を保存
+      DatabaseReference usersRef =
+          FirebaseDatabase.instance.ref().child('users');
+      usersRef.child(userCredential.user!.uid).set({
+        'name': name,
+        'email': email,
+      });
+
+      return userCredential;
     } on FirebaseAuthException catch (e) {
       if (e.code == 'weak-password') {
         _setErrorMessage('The password provided is too weak.');
@@ -93,6 +113,14 @@ class _SignUpFormState extends State<SignUpForm> {
   String? validateEmail(String? value) {
     if (value == null || value.isEmpty) {
       return 'Please enter some text';
+    }
+    return null;
+  }
+
+  String? validateName(String? value) {
+    // ユーザー名のバリデーション関数を追加
+    if (value == null || value.isEmpty) {
+      return 'Please enter your name';
     }
     return null;
   }
@@ -130,6 +158,7 @@ class _SignUpFormState extends State<SignUpForm> {
       final UserCredential? user = await signUp(
         email: _emailController.text,
         password: _passwordController.text,
+        name: _nameController.text,
       );
 
       if (!mounted) {
