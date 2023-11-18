@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fueoni_ver2/screens/map_screen/map_screen.dart';
+import 'package:fueoni_ver2/screens/home_screen/home_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class StartupScreen extends StatelessWidget {
@@ -63,20 +63,7 @@ class StartupScreen extends StatelessWidget {
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => FutureBuilder<MapScreen>(
-                        future: initMapScreen(), // 非同期関数を呼び出す
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return const CircularProgressIndicator(); // データを待っている間はローディングインジケータを表示
-                          } else if (snapshot.hasError) {
-                            return const Text(
-                                'エラーが発生しました'); // エラーが発生した場合はエラーメッセージを表示
-                          } else {
-                            return snapshot.data!; // データが取得できたらMapScreenを表示
-                          }
-                        },
-                      ),
+                      builder: (context) => const HomeScreen(), // ここを修正
                     ),
                   );
                 },
