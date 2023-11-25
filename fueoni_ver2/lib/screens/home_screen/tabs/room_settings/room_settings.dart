@@ -15,26 +15,38 @@ class RoomSettingsScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            OutlinedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const CreateRoomPage()),
-                );
-              },
-              child: const Text('ルーム作成'),
+            Card(
+              child: InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const CreateRoomPage()),
+                  );
+                },
+                child: const SizedBox(
+                  width: 300,
+                  height: 100,
+                  child: Center(child: Text('ルーム作成')),
+                ),
+              ),
             ),
             const SizedBox(height: 16),
-            OutlinedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const SearchRoomPage()),
-                );
-              },
-              child: const Text('ルーム検索'),
+            Card(
+              child: InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const SearchRoomPage()),
+                  );
+                },
+                child: const SizedBox(
+                  width: 300,
+                  height: 100,
+                  child: Center(child: Text('ルーム検索')),
+                ),
+              ),
             ),
           ],
         ),
