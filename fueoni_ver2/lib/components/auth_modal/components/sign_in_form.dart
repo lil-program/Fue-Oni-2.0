@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fueoni_ver2/components/auth_modal/components/auth_text_form_field.dart';
 import 'package:fueoni_ver2/components/auth_modal/components/submit_button.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 import 'animated_error_message.dart';
 
@@ -58,6 +59,33 @@ class _SignInFormState extends State<SignInForm> {
             isLoading: _isLoading,
             onTap: () => _submit(context),
           ),
+          const SizedBox(height: 16.0),
+          GestureDetector(
+            onTap: () {
+              signInWithGoogle();
+            },
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Image(
+                  image: AssetImage("assets/images/google_logo.png"),
+                  height: 35.0,
+                ),
+                Padding(
+                  padding: EdgeInsets.only(left: 10),
+                  child: Text(
+                    'Sign in with Google',
+                    style: TextStyle(
+                      fontSize: 20,
+                      color: Colors.black54,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                )
+              ],
+            ),
+          )
         ],
       ),
     );
@@ -87,6 +115,36 @@ class _SignInFormState extends State<SignInForm> {
     return null;
   }
 
+  Future<void> signInWithGoogle() async {
+    final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+
+    if (googleUser != null) {
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      try {
+        UserCredential userCredential =
+            await FirebaseAuth.instance.signInWithCredential(credential);
+        print(userCredential.user); // Print the authenticated user
+        final context = this.context;
+        return _pop(context, userCredential);
+      } on FirebaseAuthException catch (e) {
+        // Handle Firebase authentication error
+        print(e);
+      } catch (e) {
+        // Handle other errors
+        print(e);
+      }
+    }
+
+    return;
+  }
+
   String? validateEmail(String? value) {
     if (value == null || value.isEmpty) {
       return 'Please enter some text';
@@ -105,6 +163,12 @@ class _SignInFormState extends State<SignInForm> {
     setState(() {
       errorMessage = '';
     });
+  }
+
+  void _pop(BuildContext context, UserCredential? user) {
+    if (user != null) {
+      Navigator.of(context).pop();
+    }
   }
 
   void _setErrorMessage(String message) {
@@ -130,9 +194,8 @@ class _SignInFormState extends State<SignInForm> {
         return;
       }
 
-      if (user != null) {
-        Navigator.of(context).pop();
-      }
+      final context = this.context;
+      return _pop(context, user);
     }
   }
 }
