@@ -1,7 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
-import 'package:fueoni_ver2/screens/map_screen/map_screen.dart';
+import 'package:fueoni_ver2/color_schemes.dart';
+import 'package:fueoni_ver2/screens/startup_screen/startup_screen.dart';
 
 import 'firebase_options.dart';
 
@@ -10,7 +10,6 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  FirebaseDatabase database = FirebaseDatabase.instance;
   runApp(const MyApp());
 }
 
@@ -21,12 +20,10 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: const MapScreen(),
+      title: 'Fueoni ver2',
+      theme: ThemeData(useMaterial3: true, colorScheme: lightColorScheme),
+      darkTheme: ThemeData(useMaterial3: true, colorScheme: darkColorScheme),
+      home: const StartupScreen(),
     );
   }
 }
