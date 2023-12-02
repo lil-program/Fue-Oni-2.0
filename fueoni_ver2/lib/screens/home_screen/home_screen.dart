@@ -80,10 +80,10 @@ class _HomeScreenState extends State<HomeScreen> {
     // 名前付きルートに基づいてナビゲートします
     switch (index) {
       case 0:
-        Navigator.pushNamed(context, '/room_settings');
+        Navigator.pushNamed(context, '/home/room_settings');
         break;
       case 1:
-        Navigator.pushNamed(context, '/account_settings');
+        Navigator.pushNamed(context, '/home/account_settings');
         break;
       // 他のインデックスに対するケースを追加
     }
