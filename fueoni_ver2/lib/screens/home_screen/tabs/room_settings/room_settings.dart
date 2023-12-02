@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:fueoni_ver2/screens/home_screen/tabs/room_settings/pages/create_room.dart';
-import 'package:fueoni_ver2/screens/home_screen/tabs/room_settings/pages/search_room.dart';
 
 class RoomSettingsScreen extends StatelessWidget {
   const RoomSettingsScreen({Key? key}) : super(key: key);
@@ -17,13 +15,8 @@ class RoomSettingsScreen extends StatelessWidget {
           children: <Widget>[
             Card(
               child: InkWell(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const CreateRoomPage()),
-                  );
-                },
+                onTap: () => Navigator.pushNamed(
+                    context, '/home/room_settings/create_room'),
                 child: const SizedBox(
                   width: 300,
                   height: 100,
@@ -34,13 +27,8 @@ class RoomSettingsScreen extends StatelessWidget {
             const SizedBox(height: 16),
             Card(
               child: InkWell(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const SearchRoomPage()),
-                  );
-                },
+                onTap: () => Navigator.pushNamed(
+                    context, '/home/room_settings/search_room'),
                 child: const SizedBox(
                   width: 300,
                   height: 100,
