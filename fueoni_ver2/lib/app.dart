@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (BuildContext context) => const StartupScreen(),
         '/home': (BuildContext context) => const HomeScreen(),
-        '/home/map': (BuildContext context) => const MapScreen(),
+        '/map': (BuildContext context) => const MapScreen(),
         '/home/account_settings': (BuildContext context) =>
             const AccountSettingsScreen(),
         '/home/room_settings': (BuildContext context) =>
