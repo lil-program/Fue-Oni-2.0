@@ -49,7 +49,6 @@ class _HomeScreenState extends State<HomeScreen> {
         setState(() {
           _selectedIndex = index;
         });
-        _navigateToSelectedScreen(index);
       },
       destinations: const [
         NavigationDestination(
@@ -73,19 +72,6 @@ class _HomeScreenState extends State<HomeScreen> {
         return const AccountSettingsScreen();
       default:
         return const RoomSettingsScreen(); // デフォルトの画面
-    }
-  }
-
-  void _navigateToSelectedScreen(int index) {
-    // 名前付きルートに基づいてナビゲートします
-    switch (index) {
-      case 0:
-        Navigator.pushNamed(context, '/home/room_settings');
-        break;
-      case 1:
-        Navigator.pushNamed(context, '/home/account_settings');
-        break;
-      // 他のインデックスに対するケースを追加
     }
   }
 }

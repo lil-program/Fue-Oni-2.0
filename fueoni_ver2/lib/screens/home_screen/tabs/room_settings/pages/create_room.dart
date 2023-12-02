@@ -1,6 +1,5 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
+import 'package:fueoni_ver2/screens/map_screen/map_screen.dart';
 
 class CreateRoomPage extends StatefulWidget {
   const CreateRoomPage({Key? key}) : super(key: key);
@@ -29,6 +28,7 @@ class CreateRoomPageState extends State<CreateRoomPage> {
     );
   }
 
+/*
   Future<void> initMapScreen() async {
     // 位置情報の許可をリクエストする
     LocationPermission permission = await Geolocator.checkPermission();
@@ -44,4 +44,5 @@ class CreateRoomPageState extends State<CreateRoomPage> {
 
     // 他に必要な初期化処理があればここに記述
   }
+  */
 }
