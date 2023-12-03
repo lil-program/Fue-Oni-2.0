@@ -1,7 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fueoni_ver2/components/auth_modal/auth_modal.dart';
-import 'package:fueoni_ver2/screens/home_screen/home_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class StartupScreen extends StatelessWidget {
@@ -85,12 +84,7 @@ class StartupScreen extends StatelessWidget {
   Future<void> navigateBasedOnAuth(BuildContext context) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const HomeScreen(),
-        ),
-      );
+      Navigator.pushReplacementNamed(context, '/home');
     } else {
       showDialog(
         context: context,

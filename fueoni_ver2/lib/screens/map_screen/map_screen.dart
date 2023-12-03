@@ -69,18 +69,18 @@ class _MapScreenState extends State<MapScreen> {
       floatingActionButton: Stack(
         children: <Widget>[
           Positioned(
-            left: 0.0,
-            bottom: 0.0,
-            child: FloatingActionButton(
-              onPressed: () async {
-                await _moveToCurrentLocation();
-              },
-              child: Icon(
-                Icons.my_location,
-                color: Theme.of(context).iconTheme.color,
-              ),
-            ),
-          ),
+              left: 0.0,
+              bottom: 0.0,
+              child: FloatingActionButton(
+                heroTag: "uniqueTag1", // 一意のタグを設定
+                onPressed: () async {
+                  await _moveToCurrentLocation();
+                },
+                child: Icon(
+                  Icons.my_location,
+                  color: Theme.of(context).iconTheme.color,
+                ),
+              )),
           Align(
             alignment: Alignment.bottomCenter,
             child: !isSignedIn
