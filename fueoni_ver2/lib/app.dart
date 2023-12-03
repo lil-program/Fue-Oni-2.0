@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:fueoni_ver2/color_schemes.dart';
 import 'package:fueoni_ver2/screens/home_screen/home_screen.dart';
 import 'package:fueoni_ver2/screens/home_screen/tabs/profile_settings/account_settings.dart';
-import 'package:fueoni_ver2/screens/home_screen/tabs/room_settings/pages/create_room.dart';
 import 'package:fueoni_ver2/screens/home_screen/tabs/room_settings/pages/search_room.dart';
 import 'package:fueoni_ver2/screens/home_screen/tabs/room_settings/room_settings.dart';
 import 'package:fueoni_ver2/screens/map_screen/map_screen.dart';
+import 'package:fueoni_ver2/screens/room_creation/room_creation_screen.dart';
+import 'package:fueoni_ver2/screens/room_creation/room_creation_settings_screen.dart';
+import 'package:fueoni_ver2/screens/room_creation/room_creation_waiting_screen.dart';
 import 'package:fueoni_ver2/screens/startup_screen/startup_screen.dart';
 
 class MyApp extends StatelessWidget {
@@ -26,7 +28,11 @@ class MyApp extends StatelessWidget {
         '/home/room_settings': (BuildContext context) =>
             const RoomSettingsScreen(),
         '/home/room_settings/create_room': (BuildContext context) =>
-            const CreateRoomPage(),
+            const CreateRoomScreen(),
+        '/home/room_settings/create_room/room_creation_waiting':
+            (BuildContext context) => const RoomCreationWaitingScreen(),
+        '/home/room_settings/create_room/room_creation_settings':
+            (BuildContext context) => const RoomCreationSettingsScreen(),
         '/home/room_settings/search_room': (BuildContext context) =>
             const SearchRoomPage()
       },
