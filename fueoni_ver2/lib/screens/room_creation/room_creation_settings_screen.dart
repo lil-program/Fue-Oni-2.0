@@ -21,7 +21,7 @@ class RoomCreationmSettingScreenState
             const Padding(
               padding: EdgeInsets.all(16.0),
               child: Text(
-                'ルームID: 12345', // ルームIDを表示
+                'ルームID: ', // ルームIDを表示
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
               ),
@@ -71,7 +71,8 @@ class RoomCreationmSettingScreenState
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                Navigator.pushNamed(context, '/');
+                Navigator.pushReplacementNamed(context,
+                    '/home/room_settings/create_room/room_creation_waiting');
               },
               child: const Text('設定完了'),
             ),
