@@ -90,7 +90,21 @@ class CreateRoomScreenState extends State<CreateRoomScreen> {
               displayWidget: OniDisplay(oniCount: _numberOfDemons),
             ),
             ElevatedButton(
-              onPressed: _createRoom,
+              onPressed: () async {
+                // 非同期操作を含むため async を追加
+                try {
+                  bool success = await _createRoom();
+                  if (success) {
+                    // ルーム作成が成功した場合、別の画面に遷移
+                    Navigator.pushNamed(context,
+                        '/home/room_settings/create_room/room_creation_waiting',
+                        arguments: _roomId);
+                  }
+                } catch (e) {
+                  // エラー発生時はダイアログを表示
+                  showErrorDialog(context, 'ルームの作成に失敗しました: $e');
+                }
+              },
               child: const Text('ルーム作成'),
             ),
           ],
@@ -113,25 +127,25 @@ class CreateRoomScreenState extends State<CreateRoomScreen> {
     generateRoomId();
   }
 
-  Future<void> _createRoom() async {
+  Future<bool> _createRoom() async {
     if (_roomId == null) {
       showErrorDialog(context, 'ルームIDが生成されていません。');
-      return;
+      return false;
     }
     if (_passcode.isEmpty || _passcode == '') {
       showErrorDialog(context, 'パスコードが設定されていません。');
-      return;
+      return false;
     }
     if (_selectedDuration == null || _selectedDuration!.inSeconds == 0) {
       showErrorDialog(context, 'タイマーが設定されていません。');
-      return;
+      return false;
     }
 
     try {
       User? currentUser = FirebaseAuth.instance.currentUser;
       if (currentUser == null) {
         showErrorDialog(context, 'ユーザーがログインしていません。');
-        return;
+        return false;
       }
       String ownerId = currentUser.uid;
 
@@ -147,10 +161,10 @@ class CreateRoomScreenState extends State<CreateRoomScreen> {
 
       await _firebaseService.createRoom(_roomId.toString(), ownerId, settings);
 
-      Navigator.pushNamed(
-          context, '/home/room_settings/create_room/room_creation_waiting');
+      return true;
     } catch (e) {
       showErrorDialog(context, 'ルームの作成に失敗しました: $e');
+      return false;
     }
   }
 }
