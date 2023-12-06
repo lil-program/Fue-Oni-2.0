@@ -22,6 +22,16 @@ export const helloWorld = onRequest((request, response) => {
   response.send("Hello from Firebase!");
 });
 
+export const onNewRoomCreated = functions.database
+  .ref('/games/{roomId}')
+  .onCreate((snapshot, context) => {
+    const roomId = context.params.roomId;
+    
+    // allroomIdに新しいルームIDを追加
+    const allRoomIdRef = admin.database().ref(`allroomId/${roomId}`);
+    return allRoomIdRef.set(true);
+  });
+
 export const onUserAdded = functions.database
   .ref("/users/{userId}")
   .onCreate((snapshot, context) => {
