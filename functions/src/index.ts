@@ -23,18 +23,16 @@ export const helloWorld = onRequest((request, response) => {
 });
 
 export const onNewRoomCreated = functions.database
-  .ref('/games/{roomId}')
+  .ref("/games/{roomId}")
   .onCreate((snapshot, context) => {
     const roomId = context.params.roomId;
-    
-    // allroomIdに新しいルームIDを追加
     const allRoomIdRef = admin.database().ref(`allroomId/${roomId}`);
     return allRoomIdRef.set(true);
   });
 
 export const onUserAdded = functions.database
   .ref("/users/{userId}")
-  .onCreate((snapshot, context) => {
+  .onCreate((snapshot) => {
     const userData = snapshot.val();
     logger.info("User data:", userData);
     return null;
@@ -48,7 +46,7 @@ export const getUser = functions.https.onRequest((req, res) => {
   }
   return admin
     .database()
-    .ref(`/users/${userId}`)
+    .ref("/users/${userId}")
     .once("value")
     .then((snapshot) => {
       res.status(200).send(snapshot.val());
@@ -62,7 +60,7 @@ export const getUser = functions.https.onRequest((req, res) => {
 
 exports.scheduledFunction = functions.pubsub
   .schedule("every 10 minutes")
-  .onRun((context) => {
+  .onRun(() => {
     console.log("This will be run every 10 minutes!");
     return null;
   });
