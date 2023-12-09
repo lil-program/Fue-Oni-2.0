@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fueoni_ver2/color_schemes.dart';
 import 'package:fueoni_ver2/screens/home_screen/home_screen.dart';
-import 'package:fueoni_ver2/screens/home_screen/tabs/profile_settings/account_settings.dart';
+import 'package:fueoni_ver2/screens/home_screen/tabs/profile_settings/account_settings_screen.dart';
 import 'package:fueoni_ver2/screens/home_screen/tabs/room_settings/pages/create_room.dart';
 import 'package:fueoni_ver2/screens/home_screen/tabs/room_settings/pages/search_room.dart';
 import 'package:fueoni_ver2/screens/home_screen/tabs/room_settings/room_settings.dart';
