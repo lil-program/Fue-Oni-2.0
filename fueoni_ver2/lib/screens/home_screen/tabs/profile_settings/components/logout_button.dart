@@ -1,4 +1,3 @@
-// logout_button.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:fueoni_ver2/components/app_loading.dart';

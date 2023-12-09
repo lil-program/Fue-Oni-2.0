@@ -1,4 +1,3 @@
-// account_settings_screen.dart
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -19,10 +18,9 @@ class AccountSettingsScreen extends HookWidget {
 
     final User? user = FirebaseAuth.instance.currentUser;
     final String? photoURL = user?.photoURL;
-    final userService = useState<UserService?>(null);
-    if (user != null && userService.value == null) {
-      userService.value = UserService(user.uid);
-    }
+
+    final userService =
+        useMemoized(() => user != null ? UserService(user.uid) : null, [user]);
 
     final signOut = useCallback(() async {
       isLoading.value = true;
@@ -35,13 +33,11 @@ class AccountSettingsScreen extends HookWidget {
 
     useEffect(() {
       void fetchName() async {
-        if (userService.value != null) {
-          final fetchedName = await userService.value!.fetchName();
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            Provider.of<UserNameProvider>(context, listen: false)
-                .setUserName(fetchedName);
-          });
-        }
+        final fetchedName = await userService!.fetchName();
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          Provider.of<UserNameProvider>(context, listen: false)
+              .setUserName(fetchedName);
+        });
       }
 
       if (Provider.of<UserNameProvider>(context, listen: false).userName ==
@@ -59,11 +55,12 @@ class AccountSettingsScreen extends HookWidget {
       body: ListView(
         padding: const EdgeInsets.all(8),
         children: <Widget>[
-          AccountInfoCard(
-            userService: userService,
-            isExpanded: isExpanded,
-            photoURL: photoURL,
-          ),
+          if (userService != null)
+            AccountInfoCard(
+              userService: ValueNotifier(userService),
+              isExpanded: isExpanded,
+              photoURL: photoURL,
+            ),
           LogoutButton(
             isLoading: isLoading,
             signOut: signOut,

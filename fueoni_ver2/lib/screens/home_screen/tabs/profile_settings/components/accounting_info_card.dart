@@ -1,4 +1,3 @@
-// account_info_card.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:fueoni_ver2/main.dart';
@@ -6,7 +5,7 @@ import 'package:fueoni_ver2/services/database/user.dart';
 import 'package:provider/provider.dart';
 
 class AccountInfoCard extends HookWidget {
-  final ValueNotifier<UserService?> userService;
+  final ValueNotifier<UserService> userService;
   final ValueNotifier<bool> isExpanded;
   final String? photoURL;
 
@@ -72,14 +71,12 @@ class AccountInfoCard extends HookWidget {
                               TextButton(
                                 child: const Text('保存'),
                                 onPressed: () {
-                                  if (userService.value != null) {
-                                    userService.value!
-                                        .updateName(nameController.text);
-                                    Provider.of<UserNameProvider>(context,
-                                            listen: false)
-                                        .setUserName(nameController.text);
-                                    Navigator.of(context).pop();
-                                  }
+                                  userService.value
+                                      .updateName(nameController.text);
+                                  Provider.of<UserNameProvider>(context,
+                                          listen: false)
+                                      .setUserName(nameController.text);
+                                  Navigator.of(context).pop();
                                 },
                               ),
                             ],
