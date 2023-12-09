@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthService {
@@ -40,5 +41,37 @@ class AuthService {
       }
     }
     throw 'Google sign in failed';
+  }
+
+  Future<UserCredential> signUp({
+    required String email,
+    required String password,
+    required String name,
+  }) async {
+    try {
+      UserCredential userCredential =
+          await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      // Realtime Databaseにユーザー情報を保存
+      DatabaseReference usersRef =
+          FirebaseDatabase.instance.ref().child('users');
+      usersRef.child(userCredential.user!.uid).set({
+        'name': name,
+        'email': email,
+      });
+
+      return userCredential;
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'weak-password') {
+        throw 'The password provided is too weak.';
+      } else if (e.code == 'email-already-in-use') {
+        throw 'The account already exists for that email.';
+      } else {
+        throw 'Unidentified error occurred while signing up.';
+      }
+    }
   }
 }
