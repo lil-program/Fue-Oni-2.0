@@ -1,23 +1,54 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:fueoni_ver2/screens/startup_screen/startup_screen.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:fueoni_ver2/components/app_loading.dart';
+import 'package:fueoni_ver2/main.dart';
 import 'package:fueoni_ver2/services/database/user.dart';
+import 'package:provider/provider.dart';
 
-class AccountSettingsScreen extends StatefulWidget {
+class AccountSettingsScreen extends HookWidget {
   const AccountSettingsScreen({Key? key}) : super(key: key);
 
   @override
-  State<AccountSettingsScreen> createState() => _AccountSettingsScreenState();
-}
-
-class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
-  bool _isExpanded = false;
-  final _nameController = TextEditingController();
-
-  @override
   Widget build(BuildContext context) {
+    final isExpanded = useState(false);
+    final nameController = useTextEditingController();
+    final isLoading = useState(false);
+
     final User? user = FirebaseAuth.instance.currentUser;
     final String? photoURL = user?.photoURL;
+    final userService = useState<UserService?>(null);
+    if (user != null && userService.value == null) {
+      userService.value = UserService(user.uid);
+    }
+
+    final signOut = useCallback(() async {
+      isLoading.value = true;
+      await FirebaseAuth.instance.signOut();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        isLoading.value = false;
+        Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+      });
+    }, const []);
+
+    useEffect(() {
+      void fetchName() async {
+        if (userService.value != null) {
+          final fetchedName = await userService.value!.fetchName();
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            Provider.of<UserNameProvider>(context, listen: false)
+                .setUserName(fetchedName);
+          });
+        }
+      }
+
+      if (Provider.of<UserNameProvider>(context, listen: false).userName ==
+          null) {
+        fetchName();
+      }
+
+      return () {}; // cleanup function
+    }, []);
 
     return Scaffold(
       appBar: AppBar(
@@ -31,10 +62,8 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
               borderRadius: BorderRadius.circular(15.0),
             ),
             child: ExpansionPanelList(
-              expansionCallback: (int index, bool isExpanded) {
-                setState(() {
-                  _isExpanded = !_isExpanded;
-                });
+              expansionCallback: (int index, bool isCurrentlyExpanded) {
+                isExpanded.value = !isExpanded.value;
               },
               children: [
                 ExpansionPanel(
@@ -53,7 +82,9 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
                   body: Column(
                     children: <Widget>[
                       ListTile(
-                        title: Text(user?.displayName ?? 'No name'),
+                        title: Text(
+                            Provider.of<UserNameProvider>(context).userName ??
+                                'No name'),
                         subtitle: const Text('ゲームで使用される名前です'),
                         trailing: IconButton(
                           icon: const Icon(Icons.edit),
@@ -64,7 +95,7 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
                                 return AlertDialog(
                                   title: const Text('名前を編集'),
                                   content: TextField(
-                                    controller: _nameController,
+                                    controller: nameController,
                                     decoration: const InputDecoration(
                                       labelText: '新しい名前',
                                       border: OutlineInputBorder(),
@@ -80,11 +111,14 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
                                     TextButton(
                                       child: const Text('保存'),
                                       onPressed: () {
-                                        final userService =
-                                            UserService(user!.uid);
-                                        userService
-                                            .updateName(_nameController.text);
-                                        Navigator.of(context).pop();
+                                        if (userService.value != null) {
+                                          userService.value!
+                                              .updateName(nameController.text);
+                                          Provider.of<UserNameProvider>(context,
+                                                  listen: false)
+                                              .setUserName(nameController.text);
+                                          Navigator.of(context).pop();
+                                        }
                                       },
                                     ),
                                   ],
@@ -96,7 +130,7 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
                       ),
                     ],
                   ),
-                  isExpanded: _isExpanded,
+                  isExpanded: isExpanded.value,
                 ),
               ],
             ),
@@ -104,11 +138,11 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
             child: ElevatedButton.icon(
-              icon: const Icon(Icons.exit_to_app),
+              icon: isLoading.value
+                  ? const AppLoading()
+                  : const Icon(Icons.exit_to_app),
               label: const Text('Logout'),
-              onPressed: () {
-                _signOut().then((_) => _navigateToHomeScreen(context));
-              },
+              onPressed: signOut,
               style: ElevatedButton.styleFrom(
                 foregroundColor: Colors.white,
                 backgroundColor: Colors.red,
@@ -118,17 +152,5 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
         ],
       ),
     );
-  }
-
-  void _navigateToHomeScreen(BuildContext context) {
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (context) => const StartupScreen()),
-      (route) => false,
-    );
-  }
-
-  Future<void> _signOut() async {
-    await FirebaseAuth.instance.signOut();
   }
 }

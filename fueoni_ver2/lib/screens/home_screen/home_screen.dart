@@ -37,7 +37,7 @@ class _HomeScreenState extends State<HomeScreen> {
         FirebaseAuth.instance.authStateChanges().listen((User? user) {
       if (user == null) {
         Navigator.of(context)
-            .pushNamedAndRemoveUntil('/startup', (route) => false);
+            .pushNamedAndRemoveUntil('/', (route) => false);
       }
     });
   }
