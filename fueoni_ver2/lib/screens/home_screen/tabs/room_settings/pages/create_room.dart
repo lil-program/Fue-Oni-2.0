@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fueoni_ver2/screens/map_screen/map_screen.dart';
+import 'package:fueoni_ver2/screens/map_screen/oni_map_screen.dart';
 
 class CreateRoomPage extends StatefulWidget {
   const CreateRoomPage({Key? key}) : super(key: key);
@@ -18,9 +18,9 @@ class CreateRoomPageState extends State<CreateRoomPage> {
       body: Center(
         child: ElevatedButton(
           onPressed: () async {
-            await initMapScreen();
+            await initOniMapScreen();
             if (!mounted) return; // ここでmountedをチェック
-            Navigator.pushReplacementNamed(context, '/map');
+            Navigator.pushReplacementNamed(context, '/map/oni');
           },
           child: const Text('マップを開く'),
         ),
