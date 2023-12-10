@@ -16,7 +16,7 @@ class FirebaseService {
         'initialOniCount': settings.initialOniCount,
         'timeLimit': settings.timeLimit,
       },
-      'passwordHash': settings.passwordHash, // パスワードハッシュを保存
+      'passwordHash': settings.passwordHash,
     });
   }
 }

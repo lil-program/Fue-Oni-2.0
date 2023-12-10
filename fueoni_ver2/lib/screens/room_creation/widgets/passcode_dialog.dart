@@ -25,7 +25,7 @@ class _PasscodeDialogState extends State<PasscodeDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('パスコード設定'),
+      title: const Text('パスコード'),
       content: TextField(
         controller: _passcodeController,
         decoration: const InputDecoration(labelText: 'パスコードを入力してください'),
@@ -38,7 +38,7 @@ class _PasscodeDialogState extends State<PasscodeDialog> {
           },
         ),
         ElevatedButton(
-          child: const Text('設定'),
+          child: const Text('OK'),
           onPressed: () {
             Navigator.pop<String>(context, _passcodeController.text);
           },

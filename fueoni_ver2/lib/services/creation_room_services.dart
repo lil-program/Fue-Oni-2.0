@@ -11,9 +11,9 @@ class CreationRoomArguments {
 class CreationRoomServices {
   final DatabaseReference _allRoomIdRef =
       FirebaseDatabase.instance.ref('allroomId');
+  final DatabaseReference _gamesRef = FirebaseDatabase.instance.ref('games');
   final Random _random = Random();
 
-  // ユニークなroomIdを生成するメソッド
   Future<int> generateUniqueRoomId() async {
     int roomId;
     bool exists;
@@ -56,12 +56,36 @@ class CreationRoomServices {
     }
   }
 
-  // 6桁の数字を生成するメソッド
+  Future<bool> removeRoomIdFromGames(int? roomid) async {
+    try {
+      await _gamesRef.child(roomid.toString()).remove();
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<bool> updateSettings(
+      int? roomId, Duration? selectedDuration, int numberOfDemons) async {
+    if (roomId == null || selectedDuration == null) {
+      return false;
+    }
+
+    try {
+      await _gamesRef.child(roomId.toString()).child('settings').update({
+        'timeLimit': selectedDuration.inSeconds,
+        'initialOniCount': numberOfDemons,
+      });
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
   int _generateSixDigitNumber() {
     return _random.nextInt(900000) + 100000;
   }
 
-// 生成されたroomIdがallroomIdに存在するかどうかを確認するメソッド
   Future<bool> _roomIdExistsInAll(
       int roomId, Future<List<int>> allroomIdsFuture) async {
     List<int> allroomIds = await allroomIdsFuture;

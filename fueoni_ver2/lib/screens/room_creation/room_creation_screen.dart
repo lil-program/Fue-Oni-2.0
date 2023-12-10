@@ -8,7 +8,6 @@ import 'package:fueoni_ver2/screens/room_creation/widgets/oni_dialog.dart';
 import 'package:fueoni_ver2/screens/room_creation/widgets/oni_display.dart';
 import 'package:fueoni_ver2/screens/room_creation/widgets/passcode_dialog.dart';
 import 'package:fueoni_ver2/screens/room_creation/widgets/passcode_display.dart';
-import 'package:fueoni_ver2/screens/room_creation/widgets/room_creation_back_button.dart';
 import 'package:fueoni_ver2/screens/room_creation/widgets/timer_dialog.dart';
 import 'package:fueoni_ver2/screens/room_creation/widgets/timer_display.dart';
 import 'package:fueoni_ver2/services/creation_room_services.dart';
@@ -101,7 +100,7 @@ class CreateRoomScreenState extends State<CreateRoomScreen> {
                   bool success = await _createRoom();
                   if (success) {
                     // ルーム作成が成功した場合、別の画面に遷移
-                    Navigator.pushNamed(context,
+                    Navigator.pushReplacementNamed(context,
                         '/home/room_settings/create_room/room_creation_waiting',
                         arguments: CreationRoomArguments(roomId: roomId));
                   }
@@ -130,6 +129,20 @@ class CreateRoomScreenState extends State<CreateRoomScreen> {
   void initState() {
     super.initState();
     generateRoomId();
+  }
+
+  Widget roomCreationBackButton({
+    required BuildContext context,
+    required int? roomId,
+  }) {
+    final roomIdGenerator = CreationRoomServices();
+    return IconButton(
+      icon: const Icon(Icons.arrow_back, color: Colors.black),
+      onPressed: () {
+        roomIdGenerator.removeRoomIdFromAllRoomId(roomId);
+        Navigator.pushReplacementNamed(context, '/home/room_settings');
+      },
+    );
   }
 
   Future<bool> _createRoom() async {

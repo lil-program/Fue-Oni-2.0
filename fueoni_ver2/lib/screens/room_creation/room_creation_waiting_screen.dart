@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:fueoni_ver2/components/room_waiting/waiting.dart';
-import 'package:fueoni_ver2/screens/room_creation/widgets/room_creation_back_button.dart';
 import 'package:fueoni_ver2/services/creation_room_services.dart';
 
 List<Widget> _buildAppBarActionButton(BuildContext context, roomId) {
@@ -34,13 +33,28 @@ class RoomCreationWaitingScreen extends StatelessWidget {
         actions: _buildAppBarActionButton(context, args.roomId),
         leading: roomCreationBackButton(context: context, roomId: args.roomId),
       ),
-      body: const Column(
+      body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          RoomIdDisplay(),
-          UserList(),
+          roomIdDisplay(context: context, roomId: args.roomId),
+          const UserList(),
         ],
       ),
+    );
+  }
+
+  Widget roomCreationBackButton({
+    required BuildContext context,
+    required int? roomId,
+  }) {
+    final roomIdGenerator = CreationRoomServices();
+    return IconButton(
+      icon: const Icon(Icons.arrow_back, color: Colors.black),
+      onPressed: () {
+        roomIdGenerator.removeRoomIdFromAllRoomId(roomId);
+        roomIdGenerator.removeRoomIdFromGames(roomId);
+        Navigator.pushReplacementNamed(context, '/home/room_settings');
+      },
     );
   }
 }
