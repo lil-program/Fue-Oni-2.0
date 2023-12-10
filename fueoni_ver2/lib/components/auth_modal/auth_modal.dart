@@ -1,28 +1,35 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:fueoni_ver2/components/auth_modal/components/close_modal_button.dart';
 import 'package:fueoni_ver2/components/auth_modal/components/sign_in_form.dart';
 import 'package:fueoni_ver2/components/auth_modal/components/sign_up_form.dart';
 
-class AuthModal extends StatefulWidget {
+class AuthModal extends HookWidget {
   const AuthModal({
     Key? key,
   }) : super(key: key);
 
   @override
-  State<AuthModal> createState() => _AuthModalState();
-}
-
-enum AuthModalType {
-  singIn,
-  signUp,
-}
-
-class _AuthModalState extends State<AuthModal> {
-  AuthModalType _authModalType = AuthModalType.singIn;
-  String buttonLabel = '新規登録へ';
-
-  @override
   Widget build(BuildContext context) {
+    final authModalType = useState(AuthModalType.singIn);
+    final buttonLabel = useState('新規登録へ');
+
+    void toggleAuthModalType() {
+      authModalType.value = authModalType.value == AuthModalType.singIn
+          ? AuthModalType.signUp
+          : AuthModalType.singIn;
+
+      buttonLabel.value =
+          authModalType.value == AuthModalType.singIn ? '新規登録へ' : 'ログインへ';
+    }
+
+    void unFocus(BuildContext context) {
+      final FocusScopeNode currentScope = FocusScope.of(context);
+      if (!currentScope.hasPrimaryFocus && currentScope.hasFocus) {
+        FocusManager.instance.primaryFocus!.unfocus();
+      }
+    }
+
     return GestureDetector(
       onTap: () => unFocus(context),
       child: SizedBox(
@@ -38,11 +45,12 @@ class _AuthModalState extends State<AuthModal> {
                     Navigator.of(context).pop();
                   },
                 ),
-                _authModalType == AuthModalType.singIn
+                authModalType.value == AuthModalType.singIn
                     ? const SignInForm()
                     : const SignUpForm(),
                 TextButton(
-                    onPressed: _toggleAuthModalType, child: Text(buttonLabel)),
+                    onPressed: toggleAuthModalType,
+                    child: Text(buttonLabel.value)),
                 const SizedBox(height: 300)
               ],
             ),
@@ -51,21 +59,9 @@ class _AuthModalState extends State<AuthModal> {
       ),
     );
   }
+}
 
-  void unFocus(BuildContext context) {
-    final FocusScopeNode currentScope = FocusScope.of(context);
-    if (!currentScope.hasPrimaryFocus && currentScope.hasFocus) {
-      FocusManager.instance.primaryFocus!.unfocus();
-    }
-  }
-
-  void _toggleAuthModalType() {
-    setState(() {
-      _authModalType = _authModalType == AuthModalType.singIn
-          ? AuthModalType.signUp
-          : AuthModalType.singIn;
-    });
-
-    buttonLabel = _authModalType == AuthModalType.singIn ? '新規登録へ' : 'ログインへ';
-  }
+enum AuthModalType {
+  singIn,
+  signUp,
 }

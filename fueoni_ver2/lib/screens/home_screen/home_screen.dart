@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:fueoni_ver2/screens/home_screen/tabs/profile_settings/account_settings.dart';
+import 'package:fueoni_ver2/screens/home_screen/tabs/profile_settings/account_settings_screen.dart';
 import 'package:fueoni_ver2/screens/home_screen/tabs/room_settings/room_settings.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -36,8 +36,7 @@ class _HomeScreenState extends State<HomeScreen> {
     _authSubscription =
         FirebaseAuth.instance.authStateChanges().listen((User? user) {
       if (user == null) {
-        Navigator.of(context)
-            .pushNamedAndRemoveUntil('/startup', (route) => false);
+        Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
       }
     });
   }

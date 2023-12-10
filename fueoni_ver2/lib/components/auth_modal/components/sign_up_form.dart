@@ -1,29 +1,62 @@
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
-import 'package:fueoni_ver2/components/auth_modal/components/animated_error_message.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:fueoni_ver2/components/auth_modal/components/auth_text_form_field.dart';
 import 'package:fueoni_ver2/components/auth_modal/components/submit_button.dart';
+import 'package:fueoni_ver2/services/auth/auth.dart';
 
-class SignUpForm extends StatefulWidget {
-  const SignUpForm({super.key});
+import 'animated_error_message.dart';
 
-  @override
-  State<SignUpForm> createState() => _SignUpFormState();
-}
-
-class _SignUpFormState extends State<SignUpForm> {
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _nameController = TextEditingController();
-  final _formKey = GlobalKey<FormState>();
-  String errorMessage = '';
-  bool _isLoading = false;
+class SignUpForm extends HookWidget {
+  const SignUpForm({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final emailController = useTextEditingController();
+    final passwordController = useTextEditingController();
+    final confirmPasswordController = useTextEditingController();
+    final nameController = useTextEditingController();
+    final formKey = GlobalKey<FormState>();
+    final isLoading = useState(false);
+    final errorMessage = useState('');
+
+    final authService = AuthService();
+
+    String? validatePassword(String? value) {
+      if (value == null || value.isEmpty) {
+        return 'Please enter some text';
+      }
+      if (value.length < 6) {
+        return 'Password must be at least 6 characters';
+      }
+      if (value.length > 20) {
+        return 'Password must be less than 20 characters';
+      }
+      if (value != passwordController.text) {
+        return 'Password does not match';
+      }
+      return null;
+    }
+
+    Future<void> submit() async {
+      if (formKey.currentState!.validate()) {
+        isLoading.value = true;
+        try {
+          await authService.signUp(
+            email: emailController.text,
+            password: passwordController.text,
+            name: nameController.text,
+          );
+          Future.microtask(() => Navigator.of(context).pop());
+        } catch (e) {
+          errorMessage.value = e.toString();
+        } finally {
+          isLoading.value = false;
+        }
+      }
+    }
+
     return Form(
-      key: _formKey,
+      key: formKey,
       child: Column(
         children: <Widget>[
           const Text(
@@ -33,141 +66,57 @@ class _SignUpFormState extends State<SignUpForm> {
               fontWeight: FontWeight.bold,
             ),
           ),
+          const SizedBox(height: 16.0),
           AnimatedErrorMessage(
-            errorMessage: errorMessage,
+            errorMessage: errorMessage.value,
           ),
           const SizedBox(height: 16.0),
           AuthTextFormField(
-            controller: _nameController, // ユーザー名用のコントローラを指定
-            labelText: 'Name', // ラベルを設定
-            validator: validateName, // バリデーション関数を設定
+            controller: nameController,
+            labelText: 'Name',
+            validator: validateNotEmpty,
             obscureText: false,
+            onChanged: (value) => errorMessage.value = '',
           ),
           const SizedBox(height: 16.0),
           AuthTextFormField(
-            controller: _emailController,
+            controller: emailController,
             labelText: 'Email',
-            validator: validateEmail,
+            validator: validateNotEmpty,
             obscureText: false,
+            onChanged: (value) => errorMessage.value = '',
           ),
           const SizedBox(height: 16.0),
           AuthTextFormField(
-            controller: _passwordController,
+            controller: passwordController,
             labelText: 'Password',
             validator: validatePassword,
             obscureText: true,
+            onChanged: (value) => errorMessage.value = '',
           ),
           const SizedBox(height: 16.0),
           AuthTextFormField(
+            controller: confirmPasswordController,
             labelText: 'Confirm Password',
             validator: validatePassword,
             obscureText: true,
+            onChanged: (value) => errorMessage.value = '',
           ),
           const SizedBox(height: 16.0),
           SubmitButton(
             labelName: 'Sign Up',
-            isLoading: _isLoading,
-            onTap: () => _submit(context),
+            isLoading: isLoading.value,
+            onTap: submit,
           ),
         ],
       ),
     );
   }
 
-  Future<UserCredential?> signUp({
-    required String email,
-    required String password,
-    required String name,
-  }) async {
-    try {
-      _setIsLoading(true);
-      UserCredential userCredential =
-          await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-
-      // Realtime Databaseにユーザー情報を保存
-      DatabaseReference usersRef =
-          FirebaseDatabase.instance.ref().child('users');
-      usersRef.child(userCredential.user!.uid).set({
-        'name': name,
-        'email': email,
-      });
-
-      return userCredential;
-    } on FirebaseAuthException catch (e) {
-      if (e.code == 'weak-password') {
-        _setErrorMessage('The password provided is too weak.');
-      } else if (e.code == 'email-already-in-use') {
-        _setErrorMessage('The account already exists for that email.');
-      } else {
-        _setErrorMessage('Unidentified error occurred while signing up.');
-      }
-    } finally {
-      _setIsLoading(false);
-    }
-    return null;
-  }
-
-  String? validateEmail(String? value) {
+  String? validateNotEmpty(String? value) {
     if (value == null || value.isEmpty) {
       return 'Please enter some text';
     }
     return null;
-  }
-
-  String? validateName(String? value) {
-    // ユーザー名のバリデーション関数を追加
-    if (value == null || value.isEmpty) {
-      return 'Please enter your name';
-    }
-    return null;
-  }
-
-  String? validatePassword(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Please enter some text';
-    }
-    if (value.length < 6) {
-      return 'Password must be at least 6 characters';
-    }
-    if (value.length > 20) {
-      return 'Password must be less than 20 characters';
-    }
-    if (value != _passwordController.text) {
-      return 'Password does not match';
-    }
-    return null;
-  }
-
-  void _setErrorMessage(String message) {
-    setState(() {
-      errorMessage = message;
-    });
-  }
-
-  void _setIsLoading(bool value) {
-    setState(() {
-      _isLoading = value;
-    });
-  }
-
-  Future<void> _submit(BuildContext context) async {
-    if (_formKey.currentState!.validate()) {
-      final UserCredential? user = await signUp(
-        email: _emailController.text,
-        password: _passwordController.text,
-        name: _nameController.text,
-      );
-
-      if (!mounted) {
-        return;
-      }
-
-      if (user != null) {
-        Navigator.of(context).pop();
-      }
-    }
   }
 }

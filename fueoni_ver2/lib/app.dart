@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:fueoni_ver2/color_schemes.dart';
 import 'package:fueoni_ver2/screens/home_screen/home_screen.dart';
-import 'package:fueoni_ver2/screens/home_screen/tabs/profile_settings/account_settings.dart';
+import 'package:fueoni_ver2/screens/home_screen/tabs/profile_settings/account_settings_screen.dart';
 import 'package:fueoni_ver2/screens/home_screen/tabs/room_settings/pages/search_room.dart';
 import 'package:fueoni_ver2/screens/home_screen/tabs/room_settings/room_settings.dart';
-import 'package:fueoni_ver2/screens/map_screen/map_screen.dart';
+import 'package:fueoni_ver2/screens/map_screen/oni_map_screen.dart';
+import 'package:fueoni_ver2/screens/map_screen/runner_map_screen.dart';
 import 'package:fueoni_ver2/screens/room_creation/room_creation_screen.dart';
 import 'package:fueoni_ver2/screens/room_creation/room_creation_settings_screen.dart';
 import 'package:fueoni_ver2/screens/room_creation/room_creation_waiting_screen.dart';
@@ -22,7 +23,8 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (BuildContext context) => const StartupScreen(),
         '/home': (BuildContext context) => const HomeScreen(),
-        '/map': (BuildContext context) => const MapScreen(),
+        '/map/oni': (BuildContext context) => const OniMapScreen(),
+        '/map/runner': (BuildContext context) => const RunnerMapScreen(),
         '/home/account_settings': (BuildContext context) =>
             const AccountSettingsScreen(),
         '/home/room_settings': (BuildContext context) =>
