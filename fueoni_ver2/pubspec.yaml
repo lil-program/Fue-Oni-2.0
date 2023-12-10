@@ -43,6 +43,7 @@ dependencies:
   google_fonts: ^6.1.0
   google_sign_in: ^6.1.6
   firebase_crashlytics: ^3.4.5
+  qr_flutter: ^4.1.0
 
 dev_dependencies:
   flutter_test:

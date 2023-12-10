@@ -20,7 +20,7 @@ class CreateRoomPageState extends State<CreateRoomPage> {
           onPressed: () async {
             await initMapScreen();
             if (!mounted) return; // ここでmountedをチェック
-            Navigator.pushReplacementNamed(context, '/map');
+            Navigator.pushReplacementNamed(context, '/map/oni');
           },
           child: const Text('マップを開く'),
         ),
