@@ -8,10 +8,11 @@ import 'package:fueoni_ver2/screens/room_creation/widgets/oni_dialog.dart';
 import 'package:fueoni_ver2/screens/room_creation/widgets/oni_display.dart';
 import 'package:fueoni_ver2/screens/room_creation/widgets/passcode_dialog.dart';
 import 'package:fueoni_ver2/screens/room_creation/widgets/passcode_display.dart';
+import 'package:fueoni_ver2/screens/room_creation/widgets/room_creation_back_button.dart';
 import 'package:fueoni_ver2/screens/room_creation/widgets/timer_dialog.dart';
 import 'package:fueoni_ver2/screens/room_creation/widgets/timer_display.dart';
+import 'package:fueoni_ver2/services/creation_room_services.dart';
 import 'package:fueoni_ver2/services/database/room.dart';
-import 'package:fueoni_ver2/services/database/roomid_generator.dart';
 import 'package:fueoni_ver2/utils/error_handling.dart';
 
 class CreateRoomScreen extends StatefulWidget {
@@ -25,14 +26,18 @@ class CreateRoomScreenState extends State<CreateRoomScreen> {
   Duration? _selectedDuration;
   int _numberOfDemons = 0;
   String _passcode = '';
-  int? _roomId;
+  int? roomId;
   final _passwordController = TextEditingController();
   final _firebaseService = FirebaseService();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('ルーム設定')),
+      appBar: AppBar(
+        title: const Text('ルーム設定'),
+        automaticallyImplyLeading: false,
+        leading: roomCreationBackButton(context: context, roomId: roomId),
+      ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -40,7 +45,7 @@ class CreateRoomScreenState extends State<CreateRoomScreen> {
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Text(
-                'ルームID: ${_roomId ?? '生成中...'}',
+                'ルームID: ${roomId ?? '生成中...'}',
                 style:
                     const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
@@ -98,7 +103,7 @@ class CreateRoomScreenState extends State<CreateRoomScreen> {
                     // ルーム作成が成功した場合、別の画面に遷移
                     Navigator.pushNamed(context,
                         '/home/room_settings/create_room/room_creation_waiting',
-                        arguments: _roomId);
+                        arguments: CreationRoomArguments(roomId: roomId));
                   }
                 } catch (e) {
                   // エラー発生時はダイアログを表示
@@ -114,10 +119,10 @@ class CreateRoomScreenState extends State<CreateRoomScreen> {
   }
 
   Future<void> generateRoomId() async {
-    final roomIdGenerator = RoomIdGenerator();
+    final roomIdGenerator = CreationRoomServices();
     final uniqueRoomId = await roomIdGenerator.generateUniqueRoomId();
     setState(() {
-      _roomId = uniqueRoomId;
+      roomId = uniqueRoomId;
     });
   }
 
@@ -128,7 +133,7 @@ class CreateRoomScreenState extends State<CreateRoomScreen> {
   }
 
   Future<bool> _createRoom() async {
-    if (_roomId == null) {
+    if (roomId == null) {
       showErrorDialog(context, 'ルームIDが生成されていません。');
       return false;
     }
@@ -159,7 +164,7 @@ class CreateRoomScreenState extends State<CreateRoomScreen> {
         digest.toString(),
       );
 
-      await _firebaseService.createRoom(_roomId.toString(), ownerId, settings);
+      await _firebaseService.createRoom(roomId.toString(), ownerId, settings);
 
       return true;
     } catch (e) {

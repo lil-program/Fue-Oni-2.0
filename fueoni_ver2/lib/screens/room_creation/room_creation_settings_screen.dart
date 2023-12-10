@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
-
-import './widgets/oni_dialog.dart';
-import './widgets/oni_display.dart';
-import './widgets/timer_dialog.dart';
-import './widgets/timer_display.dart';
+import 'package:fueoni_ver2/screens/room_creation/widgets/oni_dialog.dart';
+import 'package:fueoni_ver2/screens/room_creation/widgets/oni_display.dart';
+import 'package:fueoni_ver2/screens/room_creation/widgets/timer_dialog.dart';
+import 'package:fueoni_ver2/screens/room_creation/widgets/timer_display.dart';
+import 'package:fueoni_ver2/services/creation_room_services.dart';
 
 class RoomCreationmSettingScreenState
     extends State<RoomCreationSettingsScreen> {
   Duration? _selectedDuration;
   int _numberOfDemons = 0;
+  int? roomId;
 
   @override
   Widget build(BuildContext context) {
@@ -72,7 +73,8 @@ class RoomCreationmSettingScreenState
             ElevatedButton(
               onPressed: () {
                 Navigator.pushReplacementNamed(context,
-                    '/home/room_settings/create_room/room_creation_waiting');
+                    '/home/room_settings/create_room/room_creation_waiting',
+                    arguments: CreationRoomArguments(roomId: roomId));
               },
               child: const Text('設定完了'),
             ),

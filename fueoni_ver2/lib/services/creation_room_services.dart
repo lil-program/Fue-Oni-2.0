@@ -2,7 +2,13 @@ import 'dart:math';
 
 import 'package:firebase_database/firebase_database.dart';
 
-class RoomIdGenerator {
+class CreationRoomArguments {
+  int? roomId;
+
+  CreationRoomArguments({required this.roomId});
+}
+
+class CreationRoomServices {
   final DatabaseReference _allRoomIdRef =
       FirebaseDatabase.instance.ref('allroomId');
   final Random _random = Random();
@@ -18,6 +24,8 @@ class RoomIdGenerator {
 
       exists = await _roomIdExistsInAll(roomId, allroomIds);
     } while (exists);
+
+    await _allRoomIdRef.child(roomId.toString()).set(true);
 
     return roomId;
   }
@@ -39,12 +47,21 @@ class RoomIdGenerator {
     return roomIds;
   }
 
-// 6桁の数字を生成するメソッド
+  Future<bool> removeRoomIdFromAllRoomId(int? roomid) async {
+    try {
+      await _allRoomIdRef.child(roomid.toString()).remove();
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  // 6桁の数字を生成するメソッド
   int _generateSixDigitNumber() {
     return _random.nextInt(900000) + 100000;
   }
 
-  // 生成されたroomIdがallroomIdに存在するかどうかを確認するメソッド
+// 生成されたroomIdがallroomIdに存在するかどうかを確認するメソッド
   Future<bool> _roomIdExistsInAll(
       int roomId, Future<List<int>> allroomIdsFuture) async {
     List<int> allroomIds = await allroomIdsFuture;
