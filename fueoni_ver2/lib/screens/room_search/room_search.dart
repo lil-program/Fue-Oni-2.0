@@ -3,8 +3,8 @@ import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fueoni_ver2/components/room/error_handling.dart';
 import 'package:fueoni_ver2/services/search_room_services.dart';
-import 'package:fueoni_ver2/utils/error_handling.dart';
 
 class RoomSearchPage extends StatefulWidget {
   const RoomSearchPage({super.key});

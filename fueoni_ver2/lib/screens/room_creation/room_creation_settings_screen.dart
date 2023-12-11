@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:fueoni_ver2/components/room_waiting/waiting.dart';
+import 'package:fueoni_ver2/components/room/room.dart';
 import 'package:fueoni_ver2/screens/room_creation/widgets/oni_dialog.dart';
-import 'package:fueoni_ver2/screens/room_creation/widgets/oni_display.dart';
+import 'package:fueoni_ver2/screens/room_creation/widgets/room_creation_widgets.dart';
 import 'package:fueoni_ver2/screens/room_creation/widgets/timer_dialog.dart';
-import 'package:fueoni_ver2/screens/room_creation/widgets/timer_display.dart';
 import 'package:fueoni_ver2/services/creation_room_services.dart';
 
 class RoomCreationmSettingScreenState
@@ -24,48 +23,35 @@ class RoomCreationmSettingScreenState
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            roomIdDisplay(context: context, roomId: args.roomId),
-            Card(
-              child: ListTile(
-                leading: const Icon(Icons.timer),
-                title: const Text('タイマー設定'),
-                subtitle: selectedDuration != null
-                    ? TimerDisplay(duration: selectedDuration!)
-                    : const Text('時間を設定してください'),
-                trailing: IconButton(
-                  icon: const Icon(Icons.edit),
-                  onPressed: () {
-                    showTimerDialog(context: context).then((duration) {
-                      if (duration != null) {
-                        setState(() {
-                          selectedDuration = duration;
-                        });
-                      }
-                    });
-                  },
-                ),
-              ),
+            RoomWidgets.displayRoomId(roomId: roomId),
+            RoomCreationWidgets.settingDialogCard(
+              title: 'タイマー設定',
+              icon: Icons.timer,
+              showDialogCallback: () async {
+                final Duration? result =
+                    await showTimerDialog(context: context);
+                if (result != null) {
+                  setState(() {
+                    selectedDuration = result;
+                  });
+                }
+              },
+              displayWidget:
+                  TimerDisplay(duration: selectedDuration ?? Duration.zero),
             ),
-            Card(
-              child: ListTile(
-                leading: const Icon(Icons.person_outline),
-                title: const Text('鬼の数'),
-                subtitle: OniDisplay(oniCount: numberOfDemons),
-                trailing: IconButton(
-                  icon: const Icon(Icons.edit),
-                  onPressed: () async {
-                    int? selectedCount = await showOniDialog(
-                      context: context,
-                      initialOniCount: numberOfDemons,
-                    );
-                    if (selectedCount != null) {
-                      setState(() {
-                        numberOfDemons = selectedCount;
-                      });
-                    }
-                  },
-                ),
-              ),
+            RoomCreationWidgets.settingDialogCard(
+              title: '鬼の数',
+              icon: Icons.person_outline,
+              showDialogCallback: () async {
+                final int? result = await showOniDialog(
+                    context: context, initialOniCount: numberOfDemons);
+                if (result != null) {
+                  setState(() {
+                    numberOfDemons = result;
+                  });
+                }
+              },
+              displayWidget: OniDisplay(oniCount: numberOfDemons),
             ),
             const SizedBox(height: 20),
             ElevatedButton(

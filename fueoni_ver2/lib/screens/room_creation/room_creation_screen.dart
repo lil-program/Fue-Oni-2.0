@@ -3,16 +3,14 @@ import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:fueoni_ver2/screens/room_creation/widgets/build_setting_card.dart';
+import 'package:fueoni_ver2/components/room/error_handling.dart';
+import 'package:fueoni_ver2/components/room/room.dart';
 import 'package:fueoni_ver2/screens/room_creation/widgets/oni_dialog.dart';
-import 'package:fueoni_ver2/screens/room_creation/widgets/oni_display.dart';
 import 'package:fueoni_ver2/screens/room_creation/widgets/passcode_dialog.dart';
-import 'package:fueoni_ver2/screens/room_creation/widgets/passcode_display.dart';
+import 'package:fueoni_ver2/screens/room_creation/widgets/room_creation_widgets.dart';
 import 'package:fueoni_ver2/screens/room_creation/widgets/timer_dialog.dart';
-import 'package:fueoni_ver2/screens/room_creation/widgets/timer_display.dart';
 import 'package:fueoni_ver2/services/creation_room_services.dart';
 import 'package:fueoni_ver2/services/database/room.dart';
-import 'package:fueoni_ver2/utils/error_handling.dart';
 
 class CreateRoomScreen extends StatefulWidget {
   const CreateRoomScreen({Key? key}) : super(key: key);
@@ -32,25 +30,18 @@ class CreateRoomScreenState extends State<CreateRoomScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('ルーム設定'),
-        automaticallyImplyLeading: false,
-        leading: roomCreationBackButton(context: context, roomId: roomId),
+      appBar: RoomWidgets.roomAppbar(
+        context: context,
+        roomId: roomId,
+        backButton: roomCreationBackButton(context: context, roomId: roomId),
+        title: "ルーム設定",
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Text(
-                'ルームID: ${roomId ?? '生成中...'}',
-                style:
-                    const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                textAlign: TextAlign.center,
-              ),
-            ),
-            buildSettingCard(
+            RoomWidgets.displayRoomId(roomId: roomId),
+            RoomCreationWidgets.settingDialogCard(
               title: 'パスコード設定',
               icon: Icons.vpn_key,
               showDialogCallback: () async {
@@ -64,7 +55,7 @@ class CreateRoomScreenState extends State<CreateRoomScreen> {
               },
               displayWidget: PasscodeDisplay(passcode: _passcode),
             ),
-            buildSettingCard(
+            RoomCreationWidgets.settingDialogCard(
               title: 'タイマー設定',
               icon: Icons.timer,
               showDialogCallback: () async {
@@ -79,7 +70,7 @@ class CreateRoomScreenState extends State<CreateRoomScreen> {
               displayWidget:
                   TimerDisplay(duration: _selectedDuration ?? Duration.zero),
             ),
-            buildSettingCard(
+            RoomCreationWidgets.settingDialogCard(
               title: '鬼の数',
               icon: Icons.person_outline,
               showDialogCallback: () async {

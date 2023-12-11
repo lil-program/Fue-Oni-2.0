@@ -19,6 +19,17 @@ class PasscodeDialog extends StatefulWidget {
   _PasscodeDialogState createState() => _PasscodeDialogState();
 }
 
+class PasscodeDisplay extends StatelessWidget {
+  final String passcode;
+
+  const PasscodeDisplay({super.key, required this.passcode});
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(passcode.isNotEmpty ? '設定済み: $passcode' : 'パスコードを設定してください');
+  }
+}
+
 class _PasscodeDialogState extends State<PasscodeDialog> {
   final _passcodeController = TextEditingController();
 

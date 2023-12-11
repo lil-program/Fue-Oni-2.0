@@ -24,6 +24,17 @@ class OniDialog extends StatefulWidget {
   _OniDialogState createState() => _OniDialogState();
 }
 
+class OniDisplay extends StatelessWidget {
+  final int oniCount;
+
+  const OniDisplay({super.key, required this.oniCount});
+
+  @override
+  Widget build(BuildContext context) {
+    return Text('鬼の数: $oniCount');
+  }
+}
+
 class _OniDialogState extends State<OniDialog> {
   late int tempOniCount;
   final List<int> oniCounts = List.generate(11, (index) => index);
@@ -39,9 +50,9 @@ class _OniDialogState extends State<OniDialog> {
           diameterRatio: 1.1,
           onSelectedItemChanged: (int value) =>
               setState(() => tempOniCount = value),
-          children: oniCounts.map((count) => Text(count.toString())).toList(),
           scrollController:
               FixedExtentScrollController(initialItem: tempOniCount),
+          children: oniCounts.map((count) => Text(count.toString())).toList(),
         ),
       ),
       actions: <Widget>[

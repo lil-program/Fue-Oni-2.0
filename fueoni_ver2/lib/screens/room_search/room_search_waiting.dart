@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fueoni_ver2/components/room/room.dart';
 import 'package:fueoni_ver2/components/room_waiting/waiting.dart';
 import 'package:fueoni_ver2/services/search_room_services.dart';
 
@@ -15,7 +16,7 @@ class RoomSearchWaitingScreen extends StatelessWidget {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          roomIdDisplay(context: context, roomId: args.roomId),
+          RoomWidgets.displayRoomId(roomId: args.roomId),
           const UserList(),
         ],
       ),
