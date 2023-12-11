@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class SearchRoomPage extends StatelessWidget {
-  const SearchRoomPage({Key? key}) : super(key: key);
+class SearchRoomScreen extends StatelessWidget {
+  const SearchRoomScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
