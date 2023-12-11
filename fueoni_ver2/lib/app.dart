@@ -37,7 +37,7 @@ class MyApp extends StatelessWidget {
         '/home/room_settings/create_room/room_creation_settings':
             (BuildContext context) => const RoomCreationSettingsScreen(),
         '/home/room_settings/search_room': (BuildContext context) =>
-            RoomSearchPage(),
+            const RoomSearchPage(),
         '/home/room_settings/search_room/room_search_waiting':
             (BuildContext context) => const RoomSearchWaitingScreen(),
       },
