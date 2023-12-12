@@ -1,7 +1,20 @@
 import 'package:flutter/material.dart';
 
-Widget passcodeDisplay({
+Widget foundDisplay(Map<String, dynamic> gameInfo) {
+  String gameInfoText = _formatGameInfo(gameInfo);
+  return Column(
+    children: <Widget>[
+      ListTile(
+        title: const Text('ゲーム情報'),
+        subtitle: Text(gameInfoText),
+      ),
+    ],
+  );
+}
+
+Widget passcodeSettingDisplay({
   required String passcode,
+  required String hintText,
   String title = 'パスコード設定',
   IconData icon = Icons.vpn_key,
 }) {
@@ -12,7 +25,7 @@ Widget passcodeDisplay({
       const SizedBox(width: 8),
       Text(title),
       const SizedBox(width: 8),
-      Text(passcode.isNotEmpty ? '' : 'パスコードを設定してください'),
+      Text(passcode.isNotEmpty ? '' : hintText),
     ],
   );
 }
@@ -25,6 +38,18 @@ Future<String?> showPasscodeDialog({
     context: context,
     builder: (BuildContext context) => PasscodeDialog(passcode: passcode),
   );
+}
+
+String _formatGameInfo(Map<String, dynamic> info) {
+  String ownerName = info['owner']['name'] ?? '未知';
+  int timeLimit = info['settings']['timeLimit'] ?? 0;
+  int participantCount = info['settings']['participantCount'] ?? 0;
+  int initialOniCount = info['settings']['initialOniCount'] ?? 0;
+
+  return 'オーナー: $ownerName\n'
+      '時間制限: $timeLimit分\n'
+      '参加者数: $participantCount\n'
+      '初期鬼の数: $initialOniCount';
 }
 
 class PasscodeDialog extends StatefulWidget {

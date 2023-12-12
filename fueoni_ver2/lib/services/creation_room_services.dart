@@ -14,6 +14,22 @@ class CreationRoomServices {
   final DatabaseReference _gamesRef = FirebaseDatabase.instance.ref('games');
   final Random _random = Random();
 
+  Future<void> assignOniRandomly(int? roomId) async {
+    List<String> playerIds = await getPlayersList(roomId);
+    int oniCount = await getOniCount(roomId);
+
+    Random random = Random();
+    for (int i = 0; i < min(oniCount, playerIds.length); i++) {
+      int randomIndex = random.nextInt(playerIds.length);
+      String selectedPlayerId = playerIds[randomIndex];
+      playerIds.removeAt(randomIndex);
+
+      DatabaseReference playerRef = FirebaseDatabase.instance
+          .ref('games/$roomId/players/$selectedPlayerId');
+      playerRef.child('oni').set(true);
+    }
+  }
+
   Future<void> createRoom(
       String roomId, String ownerId, RoomSettings settings) {
     return _gamesRef.child(roomId).set({
@@ -63,6 +79,32 @@ class CreationRoomServices {
     return roomIds;
   }
 
+  Future<int> getOniCount(int? roomId) async {
+    DatabaseReference settingsRef =
+        FirebaseDatabase.instance.ref('games/$roomId/settings');
+
+    final snapshot = await settingsRef.child('initialOniCount').once();
+
+    if (snapshot.snapshot.exists && snapshot.snapshot.value != null) {
+      return int.tryParse(snapshot.snapshot.value.toString()) ?? 0;
+    }
+    return 0;
+  }
+
+  Future<List<String>> getPlayersList(int? roomId) async {
+    DatabaseReference playersRef =
+        FirebaseDatabase.instance.ref('games/$roomId/players');
+    final snapshot = await playersRef.once();
+
+    if (!snapshot.snapshot.exists || snapshot.snapshot.value == null) {
+      return [];
+    }
+
+    Map<dynamic, dynamic> playersData =
+        snapshot.snapshot.value as Map<dynamic, dynamic>;
+    return playersData.keys.cast<String>().toList();
+  }
+
   Future<bool> removeRoomIdFromAllRoomId(int? roomid) async {
     try {
       await _allRoomIdRef.child(roomid.toString()).remove();
@@ -79,6 +121,13 @@ class CreationRoomServices {
     } catch (e) {
       return false;
     }
+  }
+
+  Future<void> setGameStart(int? roomId, bool gameStart) async {
+    DatabaseReference gameStartRef =
+        FirebaseDatabase.instance.ref('games/$roomId/settings/gameStart');
+
+    await gameStartRef.set(gameStart);
   }
 
   Future<bool> updateSettings(

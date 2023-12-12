@@ -4,6 +4,7 @@ import 'package:crypto/crypto.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fueoni_ver2/components/room/error_handling.dart';
+import 'package:fueoni_ver2/components/room/passcode_dialog.dart';
 import 'package:fueoni_ver2/components/room/room.dart';
 import 'package:fueoni_ver2/screens/room_creation/widgets/room_creation_widgets.dart';
 import 'package:fueoni_ver2/services/creation_room_services.dart';
@@ -20,7 +21,6 @@ class CreateRoomScreenState extends State<CreateRoomScreen> {
   int _oniCount = 0;
   String _passcode = '';
   int? roomId;
-  final _passwordController = TextEditingController();
   final _creationRoomServices = CreationRoomServices();
 
   @override
@@ -29,8 +29,11 @@ class CreateRoomScreenState extends State<CreateRoomScreen> {
       appBar: RoomWidgets.roomAppbar(
         context: context,
         roomId: roomId,
-        backButton: roomCreationBackButton(context: context, roomId: roomId),
         title: "ルーム設定",
+        onBackButtonPressed: (int? roomId) {
+          _creationRoomServices.removeRoomIdFromAllRoomId(roomId);
+          Navigator.pushReplacementNamed(context, '/home/room_settings');
+        },
       ),
       body: Center(
         child: Column(
@@ -38,13 +41,18 @@ class CreateRoomScreenState extends State<CreateRoomScreen> {
           children: <Widget>[
             RoomWidgets.displayRoomId(roomId: roomId),
             RoomWidgets.passcodeDialogCard(
-                context: context,
-                passcode: _passcode,
-                onSelected: (selectedPasscode) {
-                  setState(() {
-                    _passcode = selectedPasscode;
-                  });
-                }),
+              context: context,
+              passcode: _passcode,
+              displayWidgetFactory: (passcode) => passcodeSettingDisplay(
+                passcode: passcode,
+                hintText: 'パスコードを設定してください',
+              ),
+              onSelected: (selectedPasscode) {
+                setState(() {
+                  _passcode = selectedPasscode;
+                });
+              },
+            ),
             RoomCreationWidgets.timerDialogCard(
                 context: context,
                 gameTimeLimit: _gameTimeLimit,
@@ -97,19 +105,6 @@ class CreateRoomScreenState extends State<CreateRoomScreen> {
     generateRoomId();
   }
 
-  Widget roomCreationBackButton({
-    required BuildContext context,
-    required int? roomId,
-  }) {
-    return IconButton(
-      icon: const Icon(Icons.arrow_back, color: Colors.black),
-      onPressed: () {
-        _creationRoomServices.removeRoomIdFromAllRoomId(roomId);
-        Navigator.pushReplacementNamed(context, '/home/room_settings');
-      },
-    );
-  }
-
   Future<bool> _createRoom() async {
     if (roomId == null) {
       showErrorDialog(context, 'ルームIDが生成されていません。');
@@ -132,7 +127,7 @@ class CreateRoomScreenState extends State<CreateRoomScreen> {
       }
       String ownerId = currentUser.uid;
 
-      var bytes = utf8.encode(_passwordController.text);
+      var bytes = utf8.encode(_passcode);
       var digest = sha256.convert(bytes);
 
       final settings = RoomSettings(

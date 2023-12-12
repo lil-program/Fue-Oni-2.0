@@ -1,26 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:fueoni_ver2/components/room/room.dart';
-import 'package:fueoni_ver2/components/room_waiting/waiting.dart';
 import 'package:fueoni_ver2/services/creation_room_services.dart';
+import 'package:fueoni_ver2/services/room_services.dart';
 
-List<Widget> _buildAppBarActionButton(BuildContext context, roomId) {
-  return <Widget>[
-    MaterialButton(
-        onPressed: () {
-          Navigator.pushNamed(
-              context, '/home/room_settings/create_room/room_creation_settings',
-              arguments: CreationRoomArguments(roomId: roomId));
-        },
-        child: const Icon(
-          Icons.settings,
-          color: Colors.black,
-          size: 30.0,
-        ))
-  ];
+class RoomCreationWaitingScreen extends StatefulWidget {
+  const RoomCreationWaitingScreen({super.key});
+
+  @override
+  RoomCreationWaitingScreenState createState() =>
+      RoomCreationWaitingScreenState();
 }
 
-class RoomCreationWaitingScreen extends StatelessWidget {
-  const RoomCreationWaitingScreen({Key? key}) : super(key: key);
+class RoomCreationWaitingScreenState extends State<RoomCreationWaitingScreen> {
+  final RoomServices _roomServices = RoomServices();
+  final CreationRoomServices _creationRoomServices = CreationRoomServices();
+  List<String> users = [];
+  String? ownerName;
+  int? roomId;
 
   @override
   Widget build(BuildContext context) {
@@ -38,10 +34,38 @@ class RoomCreationWaitingScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           RoomWidgets.displayRoomId(roomId: args.roomId),
-          const UserList(),
+          RoomWidgets.userList(users),
+          ElevatedButton(
+            onPressed: () async {
+              RoomServices().registerPlayer(roomId);
+              _creationRoomServices.assignOniRandomly(roomId);
+              _creationRoomServices.setGameStart(roomId, true);
+              //ここにゲーム画面への遷移を書く
+              Navigator.pushReplacementNamed(context, '/home/room_settings');
+            },
+            child: const Text('スタート'),
+          ),
         ],
       ),
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final args =
+          ModalRoute.of(context)!.settings.arguments as CreationRoomArguments;
+      roomId = args.roomId;
+      ownerName = await _roomServices.getRoomOwnerName(roomId);
+
+      _roomServices.updatePlayersList(roomId, (updatedUsers) {
+        setState(() {
+          users = updatedUsers;
+          users.insert(0, ownerName ?? "RoomOwner");
+        });
+      });
+    });
   }
 
   Widget roomCreationBackButton({
@@ -57,5 +81,21 @@ class RoomCreationWaitingScreen extends StatelessWidget {
         Navigator.pushReplacementNamed(context, '/home/room_settings');
       },
     );
+  }
+
+  List<Widget> _buildAppBarActionButton(BuildContext context, roomId) {
+    return <Widget>[
+      MaterialButton(
+          onPressed: () {
+            Navigator.pushNamed(context,
+                '/home/room_settings/create_room/room_creation_settings',
+                arguments: CreationRoomArguments(roomId: roomId));
+          },
+          child: const Icon(
+            Icons.settings,
+            color: Colors.black,
+            size: 30.0,
+          ))
+    ];
   }
 }

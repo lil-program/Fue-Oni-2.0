@@ -20,6 +20,7 @@ class RoomWidgets {
   static Widget passcodeDialogCard({
     required BuildContext context,
     required String passcode,
+    required Widget Function(String passcode) displayWidgetFactory,
     required Function(String) onSelected,
   }) {
     return settingDialogCard(
@@ -31,20 +32,23 @@ class RoomWidgets {
           onSelected(result);
         }
       },
-      displayWidget: passcodeDisplay(passcode: passcode),
+      displayWidget: displayWidgetFactory(passcode),
     );
   }
 
   static AppBar roomAppbar({
     required BuildContext context,
     required int? roomId,
-    required Widget? backButton,
     required String title,
+    required Function(int?) onBackButtonPressed,
   }) {
     return AppBar(
       title: Text(title),
       automaticallyImplyLeading: false,
-      leading: backButton,
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back, color: Colors.black),
+        onPressed: () => onBackButtonPressed(roomId),
+      ),
     );
   }
 
@@ -61,6 +65,26 @@ class RoomWidgets {
         child: Column(children: [
           displayWidget,
         ]),
+      ),
+    );
+  }
+
+  static Widget userList(List<String> users) {
+    return Expanded(
+      child: ListView.builder(
+        itemCount: users.length,
+        itemBuilder: (context, index) {
+          return Card(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            child: ListTile(
+              title: Text(users[index]),
+              leading: const Icon(Icons.person),
+            ),
+          );
+        },
       ),
     );
   }
