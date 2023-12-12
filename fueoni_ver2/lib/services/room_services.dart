@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:geolocator/geolocator.dart';
 
 class RoomServices {
   Future<String?> getRoomOwnerName(int? roomId) async {
@@ -63,6 +64,21 @@ class RoomServices {
     }
   }
 
+  Future<void> updatePlayerLocation(
+      int? roomId, double latitude, double longitude) async {
+    User? currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser == null) return;
+
+    String playerId = currentUser.uid;
+    DatabaseReference locationRef = FirebaseDatabase.instance
+        .ref('games/$roomId/players/$playerId/location');
+
+    await locationRef.set({
+      'latitude': latitude,
+      'longitude': longitude,
+    });
+  }
+
   void updatePlayersList(int? roomId, Function(List<String>) onUpdated) {
     monitorPlayersNames(roomId, (names) {
       onUpdated(names);
@@ -94,6 +110,20 @@ class RoomServices {
       }
     } catch (e) {
       return null;
+    }
+  }
+
+  static Future<void> updateCurrentLocation(
+      RoomServices roomServices, int? roomId) async {
+    try {
+      final Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+
+      await roomServices.updatePlayerLocation(
+          roomId, position.latitude, position.longitude);
+    } catch (e) {
+      print('位置情報の取得に失敗しました: $e');
     }
   }
 }

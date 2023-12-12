@@ -57,10 +57,9 @@ class RoomSearchWaitingScreenState extends State<RoomSearchWaitingScreen> {
         });
       });
 
-      _searchRoomServices.monitorGameStart(roomId, (gameStarted) {
+      _searchRoomServices.monitorGameStart(roomId, (gameStarted) async {
         if (gameStarted) {
-          //ここにゲーム画面への遷移を書く
-          Navigator.pushReplacementNamed(context, '/home/room_settings');
+          await RoomServices.updateCurrentLocation(_roomServices, roomId);
         }
       });
     });

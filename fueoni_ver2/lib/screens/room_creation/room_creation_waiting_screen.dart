@@ -37,9 +37,11 @@ class RoomCreationWaitingScreenState extends State<RoomCreationWaitingScreen> {
           RoomWidgets.userList(users),
           ElevatedButton(
             onPressed: () async {
-              RoomServices().registerPlayer(roomId);
+              _roomServices.registerPlayer(roomId);
               _creationRoomServices.assignOniRandomly(roomId);
               _creationRoomServices.setGameStart(roomId, true);
+              await RoomServices.updateCurrentLocation(_roomServices, roomId);
+
               //ここにゲーム画面への遷移を書く
               Navigator.pushReplacementNamed(context, '/home/room_settings');
             },
