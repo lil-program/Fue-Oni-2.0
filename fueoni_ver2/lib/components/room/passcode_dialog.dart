@@ -1,5 +1,22 @@
 import 'package:flutter/material.dart';
 
+Widget passcodeDisplay({
+  required String passcode,
+  String title = 'パスコード設定',
+  IconData icon = Icons.vpn_key,
+}) {
+  return Row(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Icon(icon),
+      const SizedBox(width: 8),
+      Text(title),
+      const SizedBox(width: 8),
+      Text(passcode.isNotEmpty ? '' : 'パスコードを設定してください'),
+    ],
+  );
+}
+
 Future<String?> showPasscodeDialog({
   required BuildContext context,
   String passcode = '',
@@ -16,21 +33,10 @@ class PasscodeDialog extends StatefulWidget {
   const PasscodeDialog({Key? key, this.passcode = ''}) : super(key: key);
 
   @override
-  _PasscodeDialogState createState() => _PasscodeDialogState();
+  PasscodeDialogState createState() => PasscodeDialogState();
 }
 
-class PasscodeDisplay extends StatelessWidget {
-  final String passcode;
-
-  const PasscodeDisplay({super.key, required this.passcode});
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(passcode.isNotEmpty ? '設定済み: $passcode' : 'パスコードを設定してください');
-  }
-}
-
-class _PasscodeDialogState extends State<PasscodeDialog> {
+class PasscodeDialogState extends State<PasscodeDialog> {
   final _passcodeController = TextEditingController();
 
   @override

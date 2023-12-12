@@ -15,19 +15,25 @@ Future<Duration?> showTimerDialog({
   );
 }
 
-class TimerDisplay extends StatelessWidget {
-  final Duration duration;
+Widget timerDisplay({
+  required Duration duration,
+  String title = 'タイマー',
+  IconData icon = Icons.timer,
+}) {
+  String hours = duration.inHours.toString().padLeft(2, '0');
+  String minutes = (duration.inMinutes % 60).toString().padLeft(2, '0');
+  String seconds = (duration.inSeconds % 60).toString().padLeft(2, '0');
 
-  const TimerDisplay({super.key, required this.duration});
-
-  @override
-  Widget build(BuildContext context) {
-    String hours = duration.inHours.toString().padLeft(2, '0');
-    String minutes = (duration.inMinutes % 60).toString().padLeft(2, '0');
-    String seconds = (duration.inSeconds % 60).toString().padLeft(2, '0');
-
-    return Text('$hours:$minutes:$seconds');
-  }
+  return Row(
+    mainAxisSize: MainAxisSize.max,
+    children: [
+      Icon(icon),
+      const SizedBox(width: 8),
+      Text(title),
+      const SizedBox(width: 8),
+      Text('$hours:$minutes:$seconds'),
+    ],
+  );
 }
 
 class _TimerDialog extends StatefulWidget {

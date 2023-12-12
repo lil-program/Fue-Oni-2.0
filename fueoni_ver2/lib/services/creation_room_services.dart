@@ -14,6 +14,22 @@ class CreationRoomServices {
   final DatabaseReference _gamesRef = FirebaseDatabase.instance.ref('games');
   final Random _random = Random();
 
+  Future<void> createRoom(
+      String roomId, String ownerId, RoomSettings settings) {
+    return _gamesRef.child(roomId).set({
+      'owner': {
+        'id': ownerId,
+        'name': "owner",
+      },
+      'settings': {
+        'participantCount': settings.participantCount,
+        'initialOniCount': settings.initialOniCount,
+        'timeLimit': settings.timeLimit,
+      },
+      'passwordHash': settings.passwordHash,
+    });
+  }
+
   Future<int> generateUniqueRoomId() async {
     int roomId;
     bool exists;
@@ -91,4 +107,14 @@ class CreationRoomServices {
     List<int> allroomIds = await allroomIdsFuture;
     return allroomIds.any((element) => element == roomId);
   }
+}
+
+class RoomSettings {
+  final int participantCount;
+  final int initialOniCount;
+  final int timeLimit;
+  final String? passwordHash;
+
+  RoomSettings(this.participantCount, this.initialOniCount, this.timeLimit,
+      this.passwordHash);
 }

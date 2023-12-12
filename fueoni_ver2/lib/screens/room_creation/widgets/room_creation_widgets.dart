@@ -1,26 +1,43 @@
 import 'package:flutter/material.dart';
+import 'package:fueoni_ver2/components/room/room.dart';
+import 'package:fueoni_ver2/screens/room_creation/widgets/oni_dialog.dart';
+import 'package:fueoni_ver2/screens/room_creation/widgets/timer_dialog.dart';
 
 typedef DialogCallback = Future<void> Function();
 
 class RoomCreationWidgets {
-  static settingDialogCard({
-    required String title,
-    required IconData icon,
-    required DialogCallback showDialogCallback,
-    required Widget displayWidget,
+  static Widget oniDialogCard({
+    required BuildContext context,
+    required int oniCount,
+    required Function(int) onSelected,
   }) {
-    return Card(
-      child: ListTile(
-        leading: Icon(icon),
-        title: Text(title),
-        subtitle: displayWidget,
-        trailing: IconButton(
-          icon: const Icon(Icons.edit),
-          onPressed: () async {
-            await showDialogCallback();
-          },
-        ),
-      ),
+    return RoomWidgets.settingDialogCard(
+      context: context,
+      showDialogCallback: () async {
+        final int? result =
+            await showOniDialog(context: context, initialOniCount: oniCount);
+        if (result != null) {
+          onSelected(result);
+        }
+      },
+      displayWidget: oniDisplay(oniCount: oniCount),
+    );
+  }
+
+  static Widget timerDialogCard({
+    required BuildContext context,
+    required Duration gameTimeLimit,
+    required Function(Duration) onSelected,
+  }) {
+    return RoomWidgets.settingDialogCard(
+      context: context,
+      showDialogCallback: () async {
+        final Duration? result = await showTimerDialog(context: context);
+        if (result != null) {
+          onSelected(result);
+        }
+      },
+      displayWidget: timerDisplay(duration: gameTimeLimit),
     );
   }
 }

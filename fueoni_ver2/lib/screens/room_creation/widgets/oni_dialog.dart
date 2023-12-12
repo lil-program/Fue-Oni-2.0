@@ -1,6 +1,23 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+Widget oniDisplay({
+  required int oniCount,
+  String title = '鬼の数',
+  IconData icon = Icons.person_outline,
+}) {
+  return Row(
+    mainAxisSize: MainAxisSize.max,
+    children: <Widget>[
+      Icon(icon),
+      const SizedBox(width: 8),
+      Text(title),
+      const SizedBox(width: 8),
+      Text('$oniCount'),
+    ],
+  );
+}
+
 Future<int?> showOniDialog({
   required BuildContext context,
   TransitionBuilder? builder,
@@ -21,21 +38,10 @@ class OniDialog extends StatefulWidget {
   const OniDialog({Key? key, required this.initialOniCount}) : super(key: key);
 
   @override
-  _OniDialogState createState() => _OniDialogState();
+  OniDialogState createState() => OniDialogState();
 }
 
-class OniDisplay extends StatelessWidget {
-  final int oniCount;
-
-  const OniDisplay({super.key, required this.oniCount});
-
-  @override
-  Widget build(BuildContext context) {
-    return Text('鬼の数: $oniCount');
-  }
-}
-
-class _OniDialogState extends State<OniDialog> {
+class OniDialogState extends State<OniDialog> {
   late int tempOniCount;
   final List<int> oniCounts = List.generate(11, (index) => index);
 

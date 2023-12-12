@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:fueoni_ver2/components/room/room.dart';
-import 'package:fueoni_ver2/screens/room_creation/widgets/oni_dialog.dart';
 import 'package:fueoni_ver2/screens/room_creation/widgets/room_creation_widgets.dart';
-import 'package:fueoni_ver2/screens/room_creation/widgets/timer_dialog.dart';
 import 'package:fueoni_ver2/services/creation_room_services.dart';
 
 class RoomCreationmSettingScreenState
     extends State<RoomCreationSettingsScreen> {
-  Duration? selectedDuration;
-  int numberOfDemons = 0;
+  Duration gameTimeLimit = Duration.zero;
+  int oniCount = 0;
   int? roomId;
 
   @override
@@ -24,42 +22,32 @@ class RoomCreationmSettingScreenState
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             RoomWidgets.displayRoomId(roomId: roomId),
-            RoomCreationWidgets.settingDialogCard(
-              title: 'タイマー設定',
-              icon: Icons.timer,
-              showDialogCallback: () async {
-                final Duration? result =
-                    await showTimerDialog(context: context);
-                if (result != null) {
+            RoomCreationWidgets.timerDialogCard(
+                context: context,
+                gameTimeLimit: gameTimeLimit,
+                onSelected: (selectedTimeLimit) {
                   setState(() {
-                    selectedDuration = result;
+                    gameTimeLimit = selectedTimeLimit;
                   });
-                }
-              },
-              displayWidget:
-                  TimerDisplay(duration: selectedDuration ?? Duration.zero),
-            ),
-            RoomCreationWidgets.settingDialogCard(
-              title: '鬼の数',
-              icon: Icons.person_outline,
-              showDialogCallback: () async {
-                final int? result = await showOniDialog(
-                    context: context, initialOniCount: numberOfDemons);
-                if (result != null) {
+                }),
+            RoomCreationWidgets.oniDialogCard(
+                context: context,
+                oniCount: oniCount,
+                onSelected: (selectedOni) {
                   setState(() {
-                    numberOfDemons = result;
+                    oniCount = selectedOni;
                   });
-                }
-              },
-              displayWidget: OniDisplay(oniCount: numberOfDemons),
-            ),
+                }),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () async {
                 await updateSettings();
-                Navigator.pushReplacementNamed(context,
-                    '/home/room_settings/create_room/room_creation_waiting',
-                    arguments: CreationRoomArguments(roomId: roomId));
+
+                if (mounted) {
+                  Navigator.pushReplacementNamed(context,
+                      '/home/room_settings/create_room/room_creation_waiting',
+                      arguments: CreationRoomArguments(roomId: roomId));
+                }
               },
               child: const Text('設定完了'),
             ),
@@ -71,7 +59,7 @@ class RoomCreationmSettingScreenState
 
   Future<void> updateSettings() async {
     await CreationRoomServices()
-        .updateSettings(roomId, selectedDuration, numberOfDemons);
+        .updateSettings(roomId, gameTimeLimit, oniCount);
   }
 }
 
