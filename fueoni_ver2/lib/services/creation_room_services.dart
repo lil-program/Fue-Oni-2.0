@@ -11,8 +11,41 @@ class CreationRoomArguments {
 class CreationRoomServices {
   final DatabaseReference _allRoomIdRef =
       FirebaseDatabase.instance.ref('allroomId');
+
   final DatabaseReference _gamesRef = FirebaseDatabase.instance.ref('games');
+
   final Random _random = Random();
+  Future<void> assignOniRandomly(int? roomId) async {
+    List<String> playerIds = await getPlayersList(roomId);
+    int oniCount = await getOniCount(roomId);
+
+    Random random = Random();
+    for (int i = 0; i < min(oniCount, playerIds.length); i++) {
+      int randomIndex = random.nextInt(playerIds.length);
+      String selectedPlayerId = playerIds[randomIndex];
+      playerIds.removeAt(randomIndex);
+
+      DatabaseReference playerRef = FirebaseDatabase.instance
+          .ref('games/$roomId/players/$selectedPlayerId');
+      playerRef.child('oni').set(true);
+    }
+  }
+
+  Future<void> createRoom(
+      String roomId, String ownerId, RoomSettings settings) {
+    return _gamesRef.child(roomId).set({
+      'owner': {
+        'id': ownerId,
+        'name': "owner",
+      },
+      'settings': {
+        'participantCount': settings.participantCount,
+        'initialOniCount': settings.initialOniCount,
+        'timeLimit': settings.timeLimit,
+      },
+      'passwordHash': settings.passwordHash,
+    });
+  }
 
   Future<int> generateUniqueRoomId() async {
     int roomId;
@@ -47,6 +80,55 @@ class CreationRoomServices {
     return roomIds;
   }
 
+  Future<int> getInitialOniCount(int? roomId) async {
+    DatabaseReference oniCountRef =
+        FirebaseDatabase.instance.ref('games/$roomId/settings/initialOniCount');
+
+    final snapshot = await oniCountRef.once();
+    if (snapshot.snapshot.exists) {
+      return int.tryParse(snapshot.snapshot.value.toString()) ?? 0;
+    }
+    return 0;
+  }
+
+  Future<int> getOniCount(int? roomId) async {
+    DatabaseReference settingsRef =
+        FirebaseDatabase.instance.ref('games/$roomId/settings');
+
+    final snapshot = await settingsRef.child('initialOniCount').once();
+
+    if (snapshot.snapshot.exists && snapshot.snapshot.value != null) {
+      return int.tryParse(snapshot.snapshot.value.toString()) ?? 0;
+    }
+    return 0;
+  }
+
+  Future<List<String>> getPlayersList(int? roomId) async {
+    DatabaseReference playersRef =
+        FirebaseDatabase.instance.ref('games/$roomId/players');
+    final snapshot = await playersRef.once();
+
+    if (!snapshot.snapshot.exists || snapshot.snapshot.value == null) {
+      return [];
+    }
+
+    Map<dynamic, dynamic> playersData =
+        snapshot.snapshot.value as Map<dynamic, dynamic>;
+    return playersData.keys.cast<String>().toList();
+  }
+
+  Future<Duration> getTimeLimit(int? roomId) async {
+    DatabaseReference timeLimitRef =
+        FirebaseDatabase.instance.ref('games/$roomId/settings/timeLimit');
+
+    final snapshot = await timeLimitRef.once();
+    if (snapshot.snapshot.exists) {
+      int seconds = int.tryParse(snapshot.snapshot.value.toString()) ?? 0;
+      return Duration(seconds: seconds);
+    }
+    return Duration.zero;
+  }
+
   Future<bool> removeRoomIdFromAllRoomId(int? roomid) async {
     try {
       await _allRoomIdRef.child(roomid.toString()).remove();
@@ -63,6 +145,13 @@ class CreationRoomServices {
     } catch (e) {
       return false;
     }
+  }
+
+  Future<void> setGameStart(int? roomId, bool gameStart) async {
+    DatabaseReference gameStartRef =
+        FirebaseDatabase.instance.ref('games/$roomId/settings/gameStart');
+
+    await gameStartRef.set(gameStart);
   }
 
   Future<bool> updateSettings(
@@ -91,4 +180,14 @@ class CreationRoomServices {
     List<int> allroomIds = await allroomIdsFuture;
     return allroomIds.any((element) => element == roomId);
   }
+}
+
+class RoomSettings {
+  final int participantCount;
+  final int initialOniCount;
+  final int timeLimit;
+  final String? passwordHash;
+
+  RoomSettings(this.participantCount, this.initialOniCount, this.timeLimit,
+      this.passwordHash);
 }

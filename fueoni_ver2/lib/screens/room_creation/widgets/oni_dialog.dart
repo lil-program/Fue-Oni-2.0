@@ -1,5 +1,35 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:fueoni_ver2/components/room/room.dart';
+
+Widget oniDisplay({
+  required BuildContext context,
+  required int oniCount,
+  String title = '鬼の数を設定してください',
+  IconData icon = CustomIcons.oni,
+}) {
+  ColorScheme colorScheme = Theme.of(context).colorScheme;
+
+  return ListTile(
+    leading: Icon(
+      icon,
+      size: 56.0,
+      color: colorScheme.secondary,
+    ),
+    title: Text(
+      title,
+      style: TextStyle(
+        fontSize: 15,
+        fontWeight: FontWeight.bold,
+        color: colorScheme.onSurface,
+      ),
+    ),
+    subtitle: Text(
+      '鬼の数：$oniCount',
+      style: Theme.of(context).textTheme.titleLarge,
+    ),
+  );
+}
 
 Future<int?> showOniDialog({
   required BuildContext context,
@@ -21,10 +51,10 @@ class OniDialog extends StatefulWidget {
   const OniDialog({Key? key, required this.initialOniCount}) : super(key: key);
 
   @override
-  _OniDialogState createState() => _OniDialogState();
+  OniDialogState createState() => OniDialogState();
 }
 
-class _OniDialogState extends State<OniDialog> {
+class OniDialogState extends State<OniDialog> {
   late int tempOniCount;
   final List<int> oniCounts = List.generate(11, (index) => index);
 
@@ -39,9 +69,9 @@ class _OniDialogState extends State<OniDialog> {
           diameterRatio: 1.1,
           onSelectedItemChanged: (int value) =>
               setState(() => tempOniCount = value),
-          children: oniCounts.map((count) => Text(count.toString())).toList(),
           scrollController:
               FixedExtentScrollController(initialItem: tempOniCount),
+          children: oniCounts.map((count) => Text(count.toString())).toList(),
         ),
       ),
       actions: <Widget>[
