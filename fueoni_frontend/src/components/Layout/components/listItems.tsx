@@ -9,34 +9,35 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import ListSubheader from "@mui/material/ListSubheader";
 import * as React from "react";
+import { Link } from "react-router-dom";
 
 export const mainListItems = (
   <React.Fragment>
-    <ListItemButton>
+    <ListItemButton component={Link} to="/">
       <ListItemIcon>
         <DashboardIcon />
       </ListItemIcon>
       <ListItemText primary="Dashboard" />
     </ListItemButton>
-    <ListItemButton>
+    <ListItemButton component={Link} to="/missions">
       <ListItemIcon>
         <QuizIcon />
       </ListItemIcon>
       <ListItemText primary="Missions" />
     </ListItemButton>
-    <ListItemButton>
+    <ListItemButton component={Link} to="/games">
       <ListItemIcon>
         <GamesIcon />
       </ListItemIcon>
       <ListItemText primary="Games" />
     </ListItemButton>
-    <ListItemButton>
+    <ListItemButton component={Link} to="/users">
       <ListItemIcon>
         <PeopleIcon />
       </ListItemIcon>
       <ListItemText primary="Users" />
     </ListItemButton>
-    <ListItemButton>
+    <ListItemButton component={Link} to="/reports">
       <ListItemIcon>
         <BarChartIcon />
       </ListItemIcon>
