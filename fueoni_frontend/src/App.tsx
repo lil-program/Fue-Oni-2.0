@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Route, Routes } from "react-router-dom";
-import Dashboard from "./pages/Dashboard";
 import Layout from "./components/Layout/Layout";
+import Dashboard from "./pages/Dashboard";
 
 function App() {
   const [open, setOpen] = useState(false);
