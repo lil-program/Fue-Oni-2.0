@@ -1,6 +1,8 @@
 from fastapi import HTTPException
 from firebase_admin import db
 
+from app import schemas
+
 
 def get_mission(mission_id: str):
     ref_mission = db.reference(f"missions/{mission_id}")
@@ -28,7 +30,7 @@ def get_new_mission_id():
     return new_mission_id
 
 
-def update_mission(mission_id: str, mission):
+def update_mission(mission_id: str, mission: schemas.Mission):
     ref_mission = db.reference(f"missions/{mission_id}")
     ref_mission.update(mission.model_dump())
 
@@ -46,7 +48,7 @@ def delete_mission(mission_id: str):
     ref_deleted_missions_count.transaction(lambda count: (count or 0) + 1)
 
 
-def get_missions(limit: int = 10, start_after: int = 0):
+def get_missions(limit: int = 10, start_after: int = 0) -> schemas.MissionsResponse:
     missions = {}
     total_missions = db.reference("missionsCount").get() or 0
     deleted_missions_count = db.reference("deletedMissionsCount").get() or 0
@@ -70,7 +72,7 @@ def get_missions(limit: int = 10, start_after: int = 0):
     return {"missions": missions, "paging_info": paging_info}
 
 
-def get_all_missions():
+def get_all_missions() -> schemas.AllMissionsResponse:
     ref_missions = db.reference("missions")
     mission_ids = ref_missions.get(shallow=True)
 
@@ -81,6 +83,6 @@ def get_all_missions():
     for mission_id in mission_ids.keys():
         mission = db.reference(f"missions/{mission_id}").get()
         if mission is not None:
-            missions[mission_id] = mission
+            missions[mission_id] = schemas.Mission(**mission)
 
-    return missions
+    return schemas.AllMissionsResponse(missions=missions)

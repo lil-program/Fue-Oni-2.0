@@ -40,11 +40,11 @@ async def delete_mission(mission_id: str):
     return {"status": "Mission deleted"}
 
 
-@router.get("/missions")
+@router.get("/missions", response_model=schemas.MissionsResponse)
 async def get_missions(limit: int = 10, start_after: int = 0):
     return crud.get_missions(limit, start_after)
 
 
-@router.get("/all_missions")
+@router.get("/all_missions", response_model=schemas.AllMissionsResponse)
 async def get_all_missions():
     return crud.get_all_missions()
