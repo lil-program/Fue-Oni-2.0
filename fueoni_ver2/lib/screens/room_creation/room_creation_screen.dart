@@ -9,6 +9,7 @@ import 'package:fueoni_ver2/components/room/passcode_dialog.dart';
 import 'package:fueoni_ver2/components/room/room.dart';
 import 'package:fueoni_ver2/screens/room_creation/widgets/room_creation_widgets.dart';
 import 'package:fueoni_ver2/services/creation_room_services.dart';
+import 'package:fueoni_ver2/services/room_services.dart';
 
 class CreateRoomScreen extends StatefulWidget {
   const CreateRoomScreen({Key? key}) : super(key: key);
@@ -23,6 +24,7 @@ class CreateRoomScreenState extends State<CreateRoomScreen> {
   String _passcode = '';
   int? roomId;
   final _creationRoomServices = CreationRoomServices();
+  final _roomServices = RoomServices();
 
   @override
   Widget build(BuildContext context) {
@@ -40,6 +42,7 @@ class CreateRoomScreenState extends State<CreateRoomScreen> {
         onPressed: () async {
           try {
             bool success = await _createRoom();
+            _roomServices.registerPlayer(roomId);
             if (success && mounted) {
               Navigator.pushReplacementNamed(context,
                   '/home/room_settings/create_room/room_creation_waiting',
@@ -141,6 +144,7 @@ class CreateRoomScreenState extends State<CreateRoomScreen> {
         return false;
       }
       String ownerId = currentUser.uid;
+      String? ownerName = await _roomServices.getPlayerName();
 
       var bytes = utf8.encode(_passcode);
       var digest = sha256.convert(bytes);
@@ -153,7 +157,7 @@ class CreateRoomScreenState extends State<CreateRoomScreen> {
       );
 
       await _creationRoomServices.createRoom(
-          roomId.toString(), ownerId, settings);
+          roomId.toString(), ownerId, ownerName ?? "RoomOwner", settings);
 
       return true;
     } catch (e) {

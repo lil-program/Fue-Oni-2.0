@@ -32,11 +32,11 @@ class CreationRoomServices {
   }
 
   Future<void> createRoom(
-      String roomId, String ownerId, RoomSettings settings) {
+      String roomId, String ownerId, String ownerName, RoomSettings settings) {
     return _gamesRef.child(roomId).set({
       'owner': {
         'id': ownerId,
-        'name': "owner",
+        'name': ownerName,
       },
       'settings': {
         'participantCount': settings.participantCount,

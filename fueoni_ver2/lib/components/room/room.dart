@@ -12,6 +12,19 @@ class CustomIcons {
 }
 
 class RoomWidgets {
+  static Widget displayOwnerName(String? ownerName) {
+    return Container(
+      padding: const EdgeInsets.all(10),
+      child: Text(
+        ownerName != null ? "オーナー: $ownerName" : "オーナー: 不明",
+        style: const TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+
   static Widget displayRoomId({
     required BuildContext context,
     required int? roomId,
@@ -104,6 +117,34 @@ class RoomWidgets {
           ]),
         ),
       ),
+    );
+  }
+
+  static Future<void> showPermissionErrorDialog(
+      BuildContext context, Function onRetry) async {
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("位置情報のアクセス許可が必要"),
+          content: const Text("位置情報のアクセスを許可してください。"),
+          actions: <Widget>[
+            ElevatedButton(
+              child: const Text("再試行"),
+              onPressed: () {
+                Navigator.of(context).pop();
+                onRetry();
+              },
+            ),
+            ElevatedButton(
+              child: const Text("キャンセル"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 

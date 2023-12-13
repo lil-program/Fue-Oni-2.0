@@ -3,6 +3,30 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:geolocator/geolocator.dart';
 
 class RoomServices {
+  Future<String?> getPlayerName() async {
+    User? currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser == null) {
+      return null;
+    }
+
+    try {
+      String playerId = currentUser.uid;
+      DatabaseReference playerInfoRef =
+          FirebaseDatabase.instance.ref('users/$playerId');
+
+      final snapshot = await playerInfoRef.once();
+      if (snapshot.snapshot.exists) {
+        Map<dynamic, dynamic> userData =
+            snapshot.snapshot.value as Map<dynamic, dynamic>;
+        return userData['name'];
+      } else {
+        return null;
+      }
+    } catch (e) {
+      return null;
+    }
+  }
+
   Future<String?> getRoomOwnerName(int? roomId) async {
     DatabaseReference ownerRef =
         FirebaseDatabase.instance.ref('games/$roomId/owner');
@@ -46,7 +70,7 @@ class RoomServices {
     try {
       String playerId = currentUser.uid;
 
-      String? playerName = await _getPlayerName();
+      String? playerName = await getPlayerName();
 
       if (playerName == null || playerName.isEmpty) {
         playerName = await _generateAlternateName();
@@ -90,37 +114,21 @@ class RoomServices {
     return 'User${DateTime.now().millisecondsSinceEpoch}';
   }
 
-  Future<String?> _getPlayerName() async {
-    User? currentUser = FirebaseAuth.instance.currentUser;
-    if (currentUser == null) {
-      return null;
+  static Future<bool> requestLocationPermission() async {
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
     }
 
-    try {
-      String playerId = currentUser.uid;
-      DatabaseReference playerInfoRef =
-          FirebaseDatabase.instance.ref('users/$playerId');
-
-      final snapshot = await playerInfoRef.once();
-      if (snapshot.snapshot.exists) {
-        Map<dynamic, dynamic> userData =
-            snapshot.snapshot.value as Map<dynamic, dynamic>;
-        return userData['name'];
-      } else {
-        return null;
-      }
-    } catch (e) {
-      return null;
-    }
+    return permission == LocationPermission.whileInUse ||
+        permission == LocationPermission.always;
   }
 
   static Future<void> updateCurrentLocation(
       RoomServices roomServices, int? roomId) async {
     try {
       final Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-      );
-
+          desiredAccuracy: LocationAccuracy.high);
       await roomServices.updatePlayerLocation(
           roomId, position.latitude, position.longitude);
     } catch (e) {
