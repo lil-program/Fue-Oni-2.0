@@ -45,6 +45,7 @@ class RoomServices {
 
     try {
       String playerId = currentUser.uid;
+
       String? playerName = await _getPlayerName();
 
       if (playerName == null || playerName.isEmpty) {
@@ -102,8 +103,8 @@ class RoomServices {
 
       final snapshot = await playerInfoRef.once();
       if (snapshot.snapshot.exists) {
-        Map<String, dynamic> userData =
-            snapshot.snapshot.value as Map<String, dynamic>;
+        Map<dynamic, dynamic> userData =
+            snapshot.snapshot.value as Map<dynamic, dynamic>;
         return userData['name'];
       } else {
         return null;
