@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:fueoni_ver2/color_schemes.dart';
 import 'package:fueoni_ver2/components/room/error_handling.dart';
 import 'package:fueoni_ver2/components/room/passcode_dialog.dart';
 import 'package:fueoni_ver2/components/room/room.dart';
@@ -32,63 +33,77 @@ class CreateRoomScreenState extends State<CreateRoomScreen> {
         title: "ルーム設定",
         onBackButtonPressed: (int? roomId) {
           _creationRoomServices.removeRoomIdFromAllRoomId(roomId);
-          Navigator.pushReplacementNamed(context, '/home/room_settings');
+          Navigator.pushReplacementNamed(context, '/home');
         },
       ),
-      body: Center(
-        child: Column(
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          try {
+            bool success = await _createRoom();
+            if (success && mounted) {
+              Navigator.pushReplacementNamed(context,
+                  '/home/room_settings/create_room/room_creation_waiting',
+                  arguments: CreationRoomArguments(roomId: roomId));
+            }
+          } catch (e) {
+            if (mounted) {
+              showErrorDialog(context, 'ルームの作成に失敗しました: $e');
+            }
+          }
+        },
+        backgroundColor: lightColorScheme.primary,
+        child: Icon(Icons.check, color: lightColorScheme.onPrimary),
+      ),
+      body: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            RoomWidgets.displayRoomId(roomId: roomId),
-            RoomWidgets.passcodeDialogCard(
-              context: context,
-              passcode: _passcode,
-              displayWidgetFactory: (passcode) => passcodeSettingDisplay(
-                passcode: passcode,
-                hintText: 'パスコードを設定してください',
+            Expanded(
+              child: SingleChildScrollView(
+                child: Column(
+                  children: <Widget>[
+                    RoomWidgets.displayRoomId(context: context, roomId: roomId),
+                    Column(
+                      children: <Widget>[
+                        RoomWidgets.passcodeDialogCard(
+                          context: context,
+                          passcode: _passcode,
+                          displayWidgetFactory: (passcode) =>
+                              passcodeSettingDisplay(
+                            context: context,
+                            passcode: passcode,
+                            hintText: 'パスコードなし',
+                          ),
+                          onSelected: (selectedPasscode) {
+                            setState(() {
+                              _passcode = selectedPasscode;
+                            });
+                          },
+                        ),
+                        RoomCreationWidgets.timerDialogCard(
+                          context: context,
+                          gameTimeLimit: _gameTimeLimit,
+                          onSelected: (selectedTimeLimit) {
+                            setState(() {
+                              _gameTimeLimit = selectedTimeLimit;
+                            });
+                          },
+                        ),
+                        RoomCreationWidgets.oniDialogCard(
+                          context: context,
+                          oniCount: _oniCount,
+                          onSelected: (selectedOni) {
+                            setState(() {
+                              _oniCount = selectedOni;
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-              onSelected: (selectedPasscode) {
-                setState(() {
-                  _passcode = selectedPasscode;
-                });
-              },
             ),
-            RoomCreationWidgets.timerDialogCard(
-                context: context,
-                gameTimeLimit: _gameTimeLimit,
-                onSelected: (selectedTimeLimit) {
-                  setState(() {
-                    _gameTimeLimit = selectedTimeLimit;
-                  });
-                }),
-            RoomCreationWidgets.oniDialogCard(
-                context: context,
-                oniCount: _oniCount,
-                onSelected: (selectedOni) {
-                  setState(() {
-                    _oniCount = selectedOni;
-                  });
-                }),
-            ElevatedButton(
-              onPressed: () async {
-                try {
-                  bool success = await _createRoom();
-                  if (success && mounted) {
-                    Navigator.pushReplacementNamed(context,
-                        '/home/room_settings/create_room/room_creation_waiting',
-                        arguments: CreationRoomArguments(roomId: roomId));
-                  }
-                } catch (e) {
-                  if (mounted) {
-                    showErrorDialog(context, 'ルームの作成に失敗しました: $e');
-                  }
-                }
-              },
-              child: const Text('ルーム作成'),
-            ),
-          ],
-        ),
-      ),
+          ]),
     );
   }
 

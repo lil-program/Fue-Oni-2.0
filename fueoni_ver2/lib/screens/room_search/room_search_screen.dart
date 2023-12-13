@@ -25,13 +25,13 @@ class RoomSearchPageState extends State<RoomSearchPage> {
     return Scaffold(
       appBar: RoomWidgets.roomAppbar(
         context: context,
-        roomId: roomId, // ユーザーが入力した値をAppBarに渡す
+        roomId: roomId,
         title: "ルーム設定",
         onBackButtonPressed: (int? roomId) {
           if (roomId != null) {
-            Navigator.pushReplacementNamed(context, '/home/room_settings');
+            Navigator.pushReplacementNamed(context, '/home');
           }
-          Navigator.pushReplacementNamed(context, '/home/room_settings');
+          Navigator.pushReplacementNamed(context, '/home');
         },
       ),
       body: Padding(

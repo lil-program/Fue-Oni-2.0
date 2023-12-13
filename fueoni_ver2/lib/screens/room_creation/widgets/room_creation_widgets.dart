@@ -20,7 +20,7 @@ class RoomCreationWidgets {
           onSelected(result);
         }
       },
-      displayWidget: oniDisplay(oniCount: oniCount),
+      displayWidget: oniDisplay(context: context, oniCount: oniCount),
     );
   }
 
@@ -37,7 +37,7 @@ class RoomCreationWidgets {
           onSelected(result);
         }
       },
-      displayWidget: timerDisplay(duration: gameTimeLimit),
+      displayWidget: timerDisplay(context: context, duration: gameTimeLimit),
     );
   }
 }

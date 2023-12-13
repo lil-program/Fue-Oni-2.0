@@ -67,6 +67,11 @@ flutter:
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
+  fonts:
+    - family: CustomIcons
+      fonts:
+        - asset: assets/fonts/OniIcon.ttf
+
   uses-material-design: true
   assets:
     - assets/images/

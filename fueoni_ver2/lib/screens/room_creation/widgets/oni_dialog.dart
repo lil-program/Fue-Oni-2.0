@@ -1,20 +1,33 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:fueoni_ver2/components/room/room.dart';
 
 Widget oniDisplay({
+  required BuildContext context,
   required int oniCount,
-  String title = '鬼の数',
-  IconData icon = Icons.person_outline,
+  String title = '鬼の数を設定してください',
+  IconData icon = CustomIcons.oni,
 }) {
-  return Row(
-    mainAxisSize: MainAxisSize.max,
-    children: <Widget>[
-      Icon(icon),
-      const SizedBox(width: 8),
-      Text(title),
-      const SizedBox(width: 8),
-      Text('$oniCount'),
-    ],
+  ColorScheme colorScheme = Theme.of(context).colorScheme;
+
+  return ListTile(
+    leading: Icon(
+      icon,
+      size: 56.0,
+      color: colorScheme.secondary,
+    ),
+    title: Text(
+      title,
+      style: TextStyle(
+        fontSize: 15,
+        fontWeight: FontWeight.bold,
+        color: colorScheme.onSurface,
+      ),
+    ),
+    subtitle: Text(
+      '鬼の数：$oniCount',
+      style: Theme.of(context).textTheme.titleLarge,
+    ),
   );
 }
 

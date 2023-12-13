@@ -28,13 +28,13 @@ class RoomSearchWaitingScreenState extends State<RoomSearchWaitingScreen> {
         title: "ルーム待機",
         onBackButtonPressed: (int? roomId) {
           _searchRoomServices.removePlayerId(roomId);
-          Navigator.pushReplacementNamed(context, '/home/room_settings');
+          Navigator.pushReplacementNamed(context, '/home');
         },
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          RoomWidgets.displayRoomId(roomId: args.roomId),
+          RoomWidgets.displayRoomId(context: context, roomId: args.roomId),
           RoomWidgets.userList(users),
         ],
       ),

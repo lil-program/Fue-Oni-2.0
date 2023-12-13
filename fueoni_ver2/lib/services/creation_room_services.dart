@@ -11,9 +11,10 @@ class CreationRoomArguments {
 class CreationRoomServices {
   final DatabaseReference _allRoomIdRef =
       FirebaseDatabase.instance.ref('allroomId');
-  final DatabaseReference _gamesRef = FirebaseDatabase.instance.ref('games');
-  final Random _random = Random();
 
+  final DatabaseReference _gamesRef = FirebaseDatabase.instance.ref('games');
+
+  final Random _random = Random();
   Future<void> assignOniRandomly(int? roomId) async {
     List<String> playerIds = await getPlayersList(roomId);
     int oniCount = await getOniCount(roomId);
@@ -79,6 +80,17 @@ class CreationRoomServices {
     return roomIds;
   }
 
+  Future<int> getInitialOniCount(int? roomId) async {
+    DatabaseReference oniCountRef =
+        FirebaseDatabase.instance.ref('games/$roomId/settings/initialOniCount');
+
+    final snapshot = await oniCountRef.once();
+    if (snapshot.snapshot.exists) {
+      return int.tryParse(snapshot.snapshot.value.toString()) ?? 0;
+    }
+    return 0;
+  }
+
   Future<int> getOniCount(int? roomId) async {
     DatabaseReference settingsRef =
         FirebaseDatabase.instance.ref('games/$roomId/settings');
@@ -103,6 +115,18 @@ class CreationRoomServices {
     Map<dynamic, dynamic> playersData =
         snapshot.snapshot.value as Map<dynamic, dynamic>;
     return playersData.keys.cast<String>().toList();
+  }
+
+  Future<Duration> getTimeLimit(int? roomId) async {
+    DatabaseReference timeLimitRef =
+        FirebaseDatabase.instance.ref('games/$roomId/settings/timeLimit');
+
+    final snapshot = await timeLimitRef.once();
+    if (snapshot.snapshot.exists) {
+      int seconds = int.tryParse(snapshot.snapshot.value.toString()) ?? 0;
+      return Duration(seconds: seconds);
+    }
+    return Duration.zero;
   }
 
   Future<bool> removeRoomIdFromAllRoomId(int? roomid) async {

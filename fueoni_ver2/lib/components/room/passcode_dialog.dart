@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 Widget foundDisplay(Map<String, dynamic> gameInfo) {
@@ -13,30 +14,45 @@ Widget foundDisplay(Map<String, dynamic> gameInfo) {
 }
 
 Widget passcodeSettingDisplay({
+  required BuildContext context,
   required String passcode,
   required String hintText,
-  String title = 'パスコード設定',
+  String title = 'パスコードを設定してください',
   IconData icon = Icons.vpn_key,
 }) {
-  return Row(
-    mainAxisSize: MainAxisSize.min,
-    children: [
-      Icon(icon),
-      const SizedBox(width: 8),
-      Text(title),
-      const SizedBox(width: 8),
-      Text(passcode.isNotEmpty ? '' : hintText),
-    ],
+  ColorScheme colorScheme = Theme.of(context).colorScheme;
+  return ListTile(
+    leading: Icon(
+      icon,
+      size: 56.0,
+      color: colorScheme.secondary,
+    ),
+    title: Text(
+      title,
+      style: TextStyle(
+        fontSize: 15,
+        fontWeight: FontWeight.bold,
+        color: colorScheme.onSurface,
+      ),
+    ),
+    subtitle: Text(
+      passcode.isNotEmpty ? 'パスコード設定済み' : hintText,
+      style: Theme.of(context).textTheme.titleLarge,
+    ),
   );
 }
 
 Future<String?> showPasscodeDialog({
   required BuildContext context,
+  TransitionBuilder? builder,
+  bool useRootNavigator = true,
   String passcode = '',
 }) {
-  return showDialog<String>(
+  final Widget dialog = PasscodeDialog(passcode: passcode);
+  return showCupertinoModalPopup<String>(
     context: context,
-    builder: (BuildContext context) => PasscodeDialog(passcode: passcode),
+    useRootNavigator: useRootNavigator,
+    builder: (BuildContext context) => builder?.call(context, dialog) ?? dialog,
   );
 }
 

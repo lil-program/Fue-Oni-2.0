@@ -11,17 +11,13 @@ class RoomCreationmSettingScreenState
 
   @override
   Widget build(BuildContext context) {
-    final args =
-        ModalRoute.of(context)!.settings.arguments as CreationRoomArguments;
-    roomId = args.roomId;
-
     return Scaffold(
       appBar: AppBar(title: const Text('ルーム設定')),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            RoomWidgets.displayRoomId(roomId: roomId),
+            RoomWidgets.displayRoomId(context: context, roomId: roomId),
             RoomCreationWidgets.timerDialogCard(
                 context: context,
                 gameTimeLimit: gameTimeLimit,
@@ -55,6 +51,25 @@ class RoomCreationmSettingScreenState
         ),
       ),
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final args =
+          ModalRoute.of(context)!.settings.arguments as CreationRoomArguments;
+      roomId = args.roomId;
+
+      final gameTimeLimit = await CreationRoomServices().getTimeLimit(roomId);
+      final oniCount = await CreationRoomServices().getInitialOniCount(roomId);
+
+      setState(() {
+        this.gameTimeLimit = gameTimeLimit;
+        this.oniCount = oniCount;
+      });
+    });
   }
 
   Future<void> updateSettings() async {

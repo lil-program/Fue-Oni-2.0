@@ -33,7 +33,7 @@ class RoomCreationWaitingScreenState extends State<RoomCreationWaitingScreen> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          RoomWidgets.displayRoomId(roomId: args.roomId),
+          RoomWidgets.displayRoomId(context: context, roomId: args.roomId),
           RoomWidgets.userList(users),
           ElevatedButton(
             onPressed: () async {
