@@ -1,15 +1,11 @@
-import 'dart:convert';
-
-import 'package:crypto/crypto.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+//import 'package:fueoni_ver2/services/database/room_services.dart';
 import 'package:fueoni_ver2/color_schemes.dart';
-import 'package:fueoni_ver2/components/room/error_handling.dart';
-import 'package:fueoni_ver2/components/room/passcode_dialog.dart';
-import 'package:fueoni_ver2/components/room/room.dart';
-import 'package:fueoni_ver2/screens/room_creation/widgets/room_creation_widgets.dart';
+////import 'package:fueoni_ver2/components/room/error_handling.dart';
+//import 'package:fueoni_ver2/components/room/passcode_dialog.dart';
+//import 'package:fueoni_ver2/components/room/room.dart';
+//import 'package:fueoni_ver2/screens/room_creation/widgets/room_creation_widgets.dart';
 import 'package:fueoni_ver2/services/database/creation_room_services.dart';
-import 'package:fueoni_ver2/services/database/room_services.dart';
 
 class CreateRoomScreen extends StatefulWidget {
   const CreateRoomScreen({Key? key}) : super(key: key);
@@ -19,13 +15,13 @@ class CreateRoomScreen extends StatefulWidget {
 }
 
 class CreateRoomScreenState extends State<CreateRoomScreen> {
-  Duration _gameTimeLimit = Duration.zero;
-  int _oniCount = 0;
-  String _passcode = '';
+  //final Duration _gameTimeLimit = Duration.zero;
+  //final int _oniCount = 0;
+  //final String _passcode = '';
   int? roomId;
   final _creationRoomServices = CreationRoomServices();
-  final _roomServices = RoomServices();
-
+  //final _roomServices = RoomServices();
+/*
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -154,60 +150,119 @@ class CreateRoomScreenState extends State<CreateRoomScreen> {
           ]),
     );
   }
-
-  Future<void> generateRoomId() async {
-    final uniqueRoomId = await _creationRoomServices.generateUniqueRoomId();
-    setState(() {
-      roomId = uniqueRoomId;
-    });
-  }
+  */
 
   @override
-  void initState() {
-    super.initState();
-    generateRoomId();
+  Widget build(BuildContext context) {
+    double screenHeight = MediaQuery.of(context).size.height;
+    double screenWidth = MediaQuery.of(context).size.width;
+
+    double headerHeight = screenHeight * 0.20;
+    double footerHeight = screenHeight * 0.10;
+
+    return Scaffold(
+      backgroundColor: lightColorScheme.primary,
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          //ヘッダー
+          buildHeader(headerHeight, screenWidth),
+          //フォーム
+          Expanded(
+            child: buildFormSection(screenWidth),
+          ),
+          //フッター
+          buildFooter(footerHeight, screenWidth, context),
+        ],
+      ),
+    );
   }
 
-  Future<bool> _createRoom() async {
-    if (roomId == null) {
-      showErrorDialog(context, 'ルームIDが生成されていません。');
-      return false;
-    }
-    if (_passcode.isEmpty || _passcode == '') {
-      showErrorDialog(context, 'パスコードが設定されていません。');
-      return false;
-    }
-    if (_gameTimeLimit.inSeconds == 0) {
-      showErrorDialog(context, 'タイマーが設定されていません。');
-      return false;
-    }
+  Widget buildFooter(double height, double width, BuildContext context) {
+    return Container(
+      height: height,
+      width: width,
+      color: Theme.of(context).colorScheme.primary,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            // Back button
+            IconButton(
+              icon: const Icon(Icons.arrow_back, color: Colors.white),
+              onPressed: () {},
+            ),
+            // Check button
+            IconButton(
+              icon: const Icon(Icons.check, color: Colors.white),
+              onPressed: () {},
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
-    try {
-      User? currentUser = FirebaseAuth.instance.currentUser;
-      if (currentUser == null) {
-        showErrorDialog(context, 'ユーザーがログインしていません。');
-        return false;
-      }
-      String ownerId = currentUser.uid;
-      String? ownerName = await _roomServices.getPlayerName();
+  Widget buildFormSection(double width) {
+    return SizedBox(
+      width: width,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: Card(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(25.0),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              children: buildListTiles(),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 
-      var bytes = utf8.encode(_passcode);
-      var digest = sha256.convert(bytes);
+  Widget buildHeader(double height, double width) {
+    return Container(
+      height: height,
+      width: width,
+      color: lightColorScheme.primary,
+      child: const Center(
+        child: Text(
+          'Choose your camera equipment',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+      ),
+    );
+  }
 
-      final settings = RoomSettings(
-        1,
-        _oniCount,
-        _gameTimeLimit.inSeconds,
-        digest.toString(),
-      );
+  ListTile buildListTile(
+      IconData leadingIcon, String title, IconData trailingIcon) {
+    return ListTile(
+      leading: Icon(leadingIcon),
+      title: Text(title),
+      trailing: Icon(trailingIcon),
+    );
+  }
 
-      await _creationRoomServices.createRoom(
-          roomId.toString(), ownerId, ownerName ?? "RoomOwner", settings);
+  List<Widget> buildListTiles() {
+    return [
+      buildListTile(Icons.camera_alt, 'Crop sensor', Icons.close),
+      buildListTile(Icons.camera_roll, 'Film', Icons.add),
+      buildListTile(Icons.camera, 'Full frame', Icons.close),
+      buildListTile(Icons.camera_rear, 'Mirrorless', Icons.add),
+    ];
+  }
 
-      return true;
-    } catch (e) {
-      showErrorDialog(context, 'ルームの作成に失敗しました: $e');
-      return false;
-    }
+  void _navigateToGameScreen() {
+    _creationRoomServices.removeRoomIdFromAllRoomId(roomId);
+    Navigator.pushReplacementNamed(context, '/home');
   }
 }
