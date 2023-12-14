@@ -3,8 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:fueoni_ver2/components/room/error_handling.dart';
 import 'package:fueoni_ver2/components/room/passcode_dialog.dart';
 import 'package:fueoni_ver2/components/room/room.dart';
-import 'package:fueoni_ver2/services/room_services.dart';
-import 'package:fueoni_ver2/services/search_room_services.dart';
+import 'package:fueoni_ver2/services/database/room_services.dart';
+import 'package:fueoni_ver2/services/database/search_room_services.dart';
 
 class RoomSearchPage extends StatefulWidget {
   const RoomSearchPage({super.key});

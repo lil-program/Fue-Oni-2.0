@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fueoni_ver2/components/room/room.dart';
 import 'package:fueoni_ver2/screens/room_creation/widgets/room_creation_widgets.dart';
-import 'package:fueoni_ver2/services/creation_room_services.dart';
+import 'package:fueoni_ver2/services/database/creation_room_services.dart';
 
 class RoomCreationmSettingScreenState
     extends State<RoomCreationSettingsScreen> {

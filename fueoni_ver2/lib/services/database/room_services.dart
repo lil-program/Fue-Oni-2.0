@@ -3,6 +3,38 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:geolocator/geolocator.dart';
 
 class RoomServices {
+  Future<bool> areAllPlayersLocationsSet(int? roomId) async {
+    DatabaseReference playersRef =
+        FirebaseDatabase.instance.ref('games/$roomId/players');
+
+    final snapshot = await playersRef.once();
+    print("AAAAAAAAAAAAAAAAAa");
+    print("$roomId");
+
+    print(snapshot.snapshot.exists);
+    if (snapshot.snapshot.exists) {
+      Map<dynamic, dynamic> playersData =
+          snapshot.snapshot.value as Map<dynamic, dynamic>;
+      for (var playerData in playersData.values) {
+        print(playerData['location']);
+        print(playerData['location']['latitude']);
+        print(playerData['location']['longitude']);
+
+        if (playerData['location'] == null ||
+            playerData['location']['latitude'] == null ||
+            playerData['location']['longitude'] == null) {
+          // 少なくとも1人のプレイヤーの位置情報が設定されていない
+          return false;
+        }
+      }
+      // すべてのプレイヤーの位置情報が設定されている
+      return true;
+    }
+
+    // プレイヤーデータが存在しない
+    return false;
+  }
+
   Future<String?> getPlayerName() async {
     User? currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser == null) {

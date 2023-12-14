@@ -8,6 +8,7 @@ import 'package:fueoni_ver2/screens/map_screen/runner_map_screen.dart';
 import 'package:fueoni_ver2/screens/room_creation/room_creation_screen.dart';
 import 'package:fueoni_ver2/screens/room_creation/room_creation_settings_screen.dart';
 import 'package:fueoni_ver2/screens/room_creation/room_creation_waiting_screen.dart';
+import 'package:fueoni_ver2/screens/room_loading/room_loading.dart';
 import 'package:fueoni_ver2/screens/room_search/room_search_screen.dart';
 import 'package:fueoni_ver2/screens/room_search/room_search_waiting_screen.dart';
 import 'package:fueoni_ver2/screens/startup_screen/startup_screen.dart';
@@ -40,6 +41,8 @@ class MyApp extends StatelessWidget {
             const RoomSearchPage(),
         '/home/room_settings/search_room/room_search_waiting':
             (BuildContext context) => const RoomSearchWaitingScreen(),
+        '/home/room_settings/loading_room': (BuildContext context) =>
+            const RoomLoadingScreen(),
       },
       theme: ThemeData(useMaterial3: true, colorScheme: lightColorScheme),
       darkTheme: ThemeData(useMaterial3: true, colorScheme: darkColorScheme),

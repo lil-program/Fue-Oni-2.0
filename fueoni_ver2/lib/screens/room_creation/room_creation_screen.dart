@@ -8,8 +8,8 @@ import 'package:fueoni_ver2/components/room/error_handling.dart';
 import 'package:fueoni_ver2/components/room/passcode_dialog.dart';
 import 'package:fueoni_ver2/components/room/room.dart';
 import 'package:fueoni_ver2/screens/room_creation/widgets/room_creation_widgets.dart';
-import 'package:fueoni_ver2/services/creation_room_services.dart';
-import 'package:fueoni_ver2/services/room_services.dart';
+import 'package:fueoni_ver2/services/database/creation_room_services.dart';
+import 'package:fueoni_ver2/services/database/room_services.dart';
 
 class CreateRoomScreen extends StatefulWidget {
   const CreateRoomScreen({Key? key}) : super(key: key);
@@ -38,24 +38,69 @@ class CreateRoomScreenState extends State<CreateRoomScreen> {
           Navigator.pushReplacementNamed(context, '/home');
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          try {
-            bool success = await _createRoom();
-            _roomServices.registerPlayer(roomId);
-            if (success && mounted) {
-              Navigator.pushReplacementNamed(context,
-                  '/home/room_settings/create_room/room_creation_waiting',
-                  arguments: CreationRoomArguments(roomId: roomId));
-            }
-          } catch (e) {
-            if (mounted) {
-              showErrorDialog(context, 'ルームの作成に失敗しました: $e');
-            }
-          }
+      floatingActionButton: LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+          final double width = MediaQuery.of(context).size.width;
+          final double height = MediaQuery.of(context).size.height;
+
+          //const double floatingActionButtonwidth = 56.0;
+          //final double rightButtonwidthOffset = width * (1 - 0.1);
+          //final double leftButtonwidthOffset = width * 0.15;
+          final double screenWidth = MediaQuery.of(context).size.width;
+          print("AAAAAAAAAAAAAAAAAAAaa");
+          print(screenWidth);
+          const double buttonWidth = 56.0;
+          const double offsetFromCenter = 40.0;
+
+          final double heightOffset = height * 0.01;
+
+          return Stack(children: <Widget>[
+            Positioned(
+              //left: leftButtonwidthOffset - (floatingActionButtonwidth / 2),
+              //left: (screenWidth / 2) - buttonWidth - offsetFromCenter,
+              left:
+                  1.0, //(screenWidth / 2) - buttonWidth / 2 - offsetFromCenter,
+              bottom: heightOffset,
+              child: FloatingActionButton(
+                onPressed: () {
+                  _creationRoomServices.removeRoomIdFromAllRoomId(roomId);
+                  Navigator.pushReplacementNamed(context, '/home');
+                },
+                heroTag: 'leftButton',
+                backgroundColor: lightColorScheme.primary,
+                child:
+                    Icon(Icons.arrow_back, color: lightColorScheme.onPrimary),
+              ),
+            ),
+            Positioned(
+              //left: rightButtonwidthOffset - (floatingActionButtonwidth / 2),
+              //left: (screenWidth / 2) + buttonWidth - offsetFromCenter,
+              //left: (screenWidth / 2) + offsetFromCenter - buttonWidth / 2,
+              right: 0,
+              bottom: heightOffset,
+              child: FloatingActionButton(
+                onPressed: () async {
+                  try {
+                    bool success = await _createRoom();
+                    _roomServices.registerPlayer(roomId);
+                    if (success && mounted) {
+                      Navigator.pushReplacementNamed(context,
+                          '/home/room_settings/create_room/room_creation_waiting',
+                          arguments: CreationRoomArguments(roomId: roomId));
+                    }
+                  } catch (e) {
+                    if (mounted) {
+                      showErrorDialog(context, 'ルームの作成に失敗しました: $e');
+                    }
+                  }
+                },
+                heroTag: 'rightButton',
+                backgroundColor: lightColorScheme.primary,
+                child: Icon(Icons.check, color: lightColorScheme.onPrimary),
+              ),
+            ),
+          ]);
         },
-        backgroundColor: lightColorScheme.primary,
-        child: Icon(Icons.check, color: lightColorScheme.onPrimary),
       ),
       body: Column(
           mainAxisAlignment: MainAxisAlignment.center,

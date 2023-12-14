@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:fueoni_ver2/components/room/error_handling.dart';
 import 'package:fueoni_ver2/components/room/room.dart';
-import 'package:fueoni_ver2/services/creation_room_services.dart';
-import 'package:fueoni_ver2/services/room_services.dart';
+import 'package:fueoni_ver2/services/database/creation_room_services.dart';
+import 'package:fueoni_ver2/services/database/loading_room_services.dart';
+import 'package:fueoni_ver2/services/database/room_services.dart';
 
 class RoomCreationWaitingScreen extends StatefulWidget {
   const RoomCreationWaitingScreen({super.key});
@@ -38,23 +40,27 @@ class RoomCreationWaitingScreenState extends State<RoomCreationWaitingScreen> {
           RoomWidgets.userList(users),
           ElevatedButton(
             onPressed: () async {
-              _creationRoomServices.assignOniRandomly(roomId);
-              _creationRoomServices.setGameStart(roomId, true);
-              bool hasPermission =
-                  await RoomServices.requestLocationPermission();
-              if (hasPermission) {
-                await RoomServices.updateCurrentLocation(_roomServices, roomId);
-                //ここにゲーム画面への遷移を書く
-                Navigator.pushReplacementNamed(context, '/home/room_settings');
-              } else {
-                print("パーミッションが拒否されました");
-              }
+              await handleStartButtonPressed();
             },
             child: const Text('スタート'),
           ),
         ],
       ),
     );
+  }
+
+  Future<void> handleStartButtonPressed() async {
+    bool hasPermission = await RoomServices.requestLocationPermission();
+    if (hasPermission) {
+      await RoomServices.updateCurrentLocation(_roomServices, roomId);
+      _creationRoomServices.assignOniRandomly(roomId);
+      _creationRoomServices.setGameStart(roomId, true);
+      _navigateToGameScreen();
+    } else {
+      if (mounted) {
+        showPermissionDeniedDialog(context);
+      }
+    }
   }
 
   @override
@@ -103,5 +109,16 @@ class RoomCreationWaitingScreenState extends State<RoomCreationWaitingScreen> {
             size: 30.0,
           ))
     ];
+  }
+
+  void _navigateToGameScreen() {
+    final args =
+        ModalRoute.of(context)!.settings.arguments as CreationRoomArguments;
+
+    if (mounted) {
+      Navigator.pushReplacementNamed(
+          context, '/home/room_settings/loading_room',
+          arguments: LoadingRoomArguments(roomId: args.roomId));
+    }
   }
 }

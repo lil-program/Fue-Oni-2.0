@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:fueoni_ver2/components/room/error_handling.dart';
 import 'package:fueoni_ver2/components/room/room.dart';
-import 'package:fueoni_ver2/services/room_services.dart';
-import 'package:fueoni_ver2/services/search_room_services.dart';
+import 'package:fueoni_ver2/services/database/loading_room_services.dart';
+import 'package:fueoni_ver2/services/database/room_services.dart';
+import 'package:fueoni_ver2/services/database/search_room_services.dart';
 
 class RoomSearchWaitingScreen extends StatefulWidget {
   const RoomSearchWaitingScreen({super.key});
@@ -62,13 +64,27 @@ class RoomSearchWaitingScreenState extends State<RoomSearchWaitingScreen> {
           bool hasPermission = await RoomServices.requestLocationPermission();
           if (hasPermission) {
             await RoomServices.updateCurrentLocation(_roomServices, roomId);
-            //ここにゲーム画面への遷移を書く
-            Navigator.pushReplacementNamed(context, '/home/room_settings');
+            _navigateToGameScreen();
           } else {
-            print("パーミッションが拒否されました");
+            if (mounted) {
+              showPermissionDeniedDialog(context);
+            }
           }
         }
       });
     });
+  }
+
+  void _navigateToGameScreen() {
+    int? roomId;
+    final args =
+        ModalRoute.of(context)!.settings.arguments as SearchRoomArguments;
+    roomId = args.roomId;
+
+    if (mounted) {
+      Navigator.pushReplacementNamed(
+          context, '/home/room_settings/loading_room',
+          arguments: LoadingRoomArguments(roomId: roomId));
+    }
   }
 }
