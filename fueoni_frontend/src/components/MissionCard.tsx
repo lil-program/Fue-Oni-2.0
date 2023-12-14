@@ -7,6 +7,7 @@ import {
   Grid,
   Typography,
 } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 import { Difficulty } from "../api";
 import apiClient from "../apiClient";
 import { MissionWithId } from "../types";
@@ -27,6 +28,11 @@ export default function MissionCard({ mission }: MissionCardProps) {
       default:
         return "default";
     }
+  };
+
+  const navigate = useNavigate();
+  const handleEdit = () => {
+    navigate(`/missions/edit/${mission.id}`, { state: { mission } });
   };
 
   const handleDelete = async () => {
@@ -79,7 +85,9 @@ export default function MissionCard({ mission }: MissionCardProps) {
           </Grid>
         </CardContent>
         <CardActions>
-          <Button size="small">編集</Button>
+          <Button size="small" onClick={handleEdit}>
+            編集
+          </Button>
           <Button size="small" onClick={handleDelete}>
             削除
           </Button>

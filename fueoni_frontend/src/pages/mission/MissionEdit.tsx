@@ -7,7 +7,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import apiClient from "../../apiClient";
 import { MissionWithId } from "../../types";
 
@@ -17,18 +17,27 @@ interface RouteParams {
 
 export default function MissionEdit() {
   const { id } = useParams<RouteParams>();
-  const [mission, setMission] = useState<MissionWithId | null>(null);
+  const location = useLocation();
+  const missionFromState = location.state as
+    | { mission: MissionWithId }
+    | undefined;
+  const [mission, setMission] = useState<MissionWithId | null>(
+    missionFromState?.mission || null
+  );
 
   useEffect(() => {
     const fetchMission = async () => {
-      if (!id) {
-        console.error("Mission ID is undefined");
+      if (!id || mission) {
+        console.error(
+          "Mission ID is undefined or mission data is already available"
+        );
         return;
       }
 
       try {
         const response =
           await apiClient.getMissionApiV1MissionsMissionMissionIdGet(id);
+        console.log(response.data);
         const missionWithId: MissionWithId = {
           ...response.data,
           id: id,
@@ -40,7 +49,7 @@ export default function MissionEdit() {
     };
 
     fetchMission();
-  }, [id]);
+  }, [id, mission]);
 
   if (!mission) {
     return <div>Loading...</div>;
