@@ -2,11 +2,11 @@ import Container from "@mui/material/Container";
 import Grid from "@mui/material/Grid";
 import Pagination from "@mui/material/Pagination";
 import { useEffect, useState } from "react";
-import apiClient from "../apiClient";
-import MissionCard from "../components/MissionCard";
-import { MissionWithId } from "../types";
+import apiClient from "../../apiClient";
+import MissionCard from "../../components/MissionCard";
+import { MissionWithId } from "../../types";
 
-export default function MissionBoard() {
+export default function MissionList() {
   const [missions, setMissions] = useState<MissionWithId[]>([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);

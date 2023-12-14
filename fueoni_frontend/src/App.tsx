@@ -2,8 +2,9 @@ import { useState } from "react";
 import { Route, Routes } from "react-router-dom";
 import Layout from "./components/Layout/Layout";
 import Dashboard from "./pages/Dashboard";
-import MissionBoard from "./pages/MissionBoard";
-import MissionEdit from "./pages/MissionEdit";
+import MissionBoard from "./pages/mission/MissionBoard";
+import MissionEdit from "./pages/mission/MissionEdit";
+import MissionList from "./pages/mission/MissionList";
 
 function App() {
   const [open, setOpen] = useState(false);
@@ -25,7 +26,8 @@ function App() {
       <Routes>
         <Route path="/" element={<Dashboard />} />
         <Route path="/missions" element={<MissionBoard />}>
-          <Route path="/edit/:id" element={<MissionEdit />} />
+          <Route index element={<MissionList />} />
+          <Route path="edit/:id" element={<MissionEdit />} />
         </Route>
         <Route path="/games" element={<Dashboard />} />
         <Route path="/users" element={<Dashboard />} />
