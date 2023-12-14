@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fueoni_ver2/components/room/room.dart';
 import 'package:fueoni_ver2/models/arguments.dart';
-import 'package:fueoni_ver2/screens/room_creation/widgets/room_creation_widgets.dart';
+import 'package:fueoni_ver2/screens/room_creation_screen/widgets/room_creation_widgets.dart';
 import 'package:fueoni_ver2/services/room_creation/oni_assignment_service.dart';
 import 'package:fueoni_ver2/services/room_management/game_service.dart';
 

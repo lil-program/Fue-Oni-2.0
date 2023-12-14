@@ -8,8 +8,8 @@ import 'package:fueoni_ver2/components/room/error_handling.dart';
 import 'package:fueoni_ver2/components/room/passcode_dialog.dart';
 import 'package:fueoni_ver2/components/room/room.dart';
 import 'package:fueoni_ver2/models/arguments.dart';
-import 'package:fueoni_ver2/screens/room_creation/widgets/oni_dialog.dart';
-import 'package:fueoni_ver2/screens/room_creation/widgets/timer_dialog.dart';
+import 'package:fueoni_ver2/screens/room_creation_screen/widgets/oni_dialog.dart';
+import 'package:fueoni_ver2/screens/room_creation_screen/widgets/timer_dialog.dart';
 import 'package:fueoni_ver2/services/room_creation/creation_service.dart';
 import 'package:fueoni_ver2/services/room_management/player_service.dart';
 
