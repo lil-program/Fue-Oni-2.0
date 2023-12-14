@@ -32,20 +32,24 @@ class AccountSettingsScreen extends HookWidget {
     }, const []);
 
     useEffect(() {
+      bool isActive = true;
+
       void fetchName() async {
         final fetchedName = await userService!.fetchName();
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          Provider.of<UserNameProvider>(context, listen: false)
-              .setUserName(fetchedName);
-        });
+        if (isActive) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            context.read<UserNameProvider>().setUserName(fetchedName);
+          });
+        }
       }
 
-      if (Provider.of<UserNameProvider>(context, listen: false).userName ==
-          null) {
+      if (context.read<UserNameProvider>().userName == null) {
         fetchName();
       }
 
-      return () {}; // cleanup function
+      return () {
+        isActive = false; // クリーンアップ関数でisActiveをfalseに設定
+      };
     }, []);
 
     return Scaffold(
