@@ -1,16 +1,11 @@
 import Container from "@mui/material/Container";
 import Grid from "@mui/material/Grid";
 import Paper from "@mui/material/Paper";
-import api from "../apiClient";
 import Chart from "./Chart";
 import Deposits from "./Deposits";
 import Orders from "./Orders";
 
 export default function Dashboard() {
-  api.getAllMissionsApiV1MissionsAllMissionsGet().then((res) => {
-    console.log(res.data);
-  });
-
   return (
     <div>
       <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
