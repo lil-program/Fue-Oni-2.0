@@ -1,11 +1,17 @@
+import 'dart:convert';
+
+import 'package:crypto/crypto.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-//import 'package:fueoni_ver2/services/database/room_services.dart';
 import 'package:fueoni_ver2/color_schemes.dart';
-////import 'package:fueoni_ver2/components/room/error_handling.dart';
-//import 'package:fueoni_ver2/components/room/passcode_dialog.dart';
-//import 'package:fueoni_ver2/components/room/room.dart';
-//import 'package:fueoni_ver2/screens/room_creation/widgets/room_creation_widgets.dart';
-import 'package:fueoni_ver2/services/database/creation_room_services.dart';
+import 'package:fueoni_ver2/components/room/error_handling.dart';
+import 'package:fueoni_ver2/components/room/passcode_dialog.dart';
+import 'package:fueoni_ver2/components/room/room.dart';
+import 'package:fueoni_ver2/models/arguments.dart';
+import 'package:fueoni_ver2/screens/room_creation/widgets/oni_dialog.dart';
+import 'package:fueoni_ver2/screens/room_creation/widgets/timer_dialog.dart';
+import 'package:fueoni_ver2/services/room_creation/creation_service.dart';
+import 'package:fueoni_ver2/services/room_management/player_service.dart';
 
 class CreateRoomScreen extends StatefulWidget {
   const CreateRoomScreen({Key? key}) : super(key: key);
@@ -15,142 +21,10 @@ class CreateRoomScreen extends StatefulWidget {
 }
 
 class CreateRoomScreenState extends State<CreateRoomScreen> {
-  //final Duration _gameTimeLimit = Duration.zero;
-  //final int _oniCount = 0;
-  //final String _passcode = '';
+  Duration _gameTimeLimit = Duration.zero;
+  int _oniCount = 0;
+  String _passcode = '';
   int? roomId;
-  final _creationRoomServices = CreationRoomServices();
-  //final _roomServices = RoomServices();
-/*
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: RoomWidgets.roomAppbar(
-        context: context,
-        roomId: roomId,
-        title: "ルーム設定",
-        onBackButtonPressed: (int? roomId) {
-          _creationRoomServices.removeRoomIdFromAllRoomId(roomId);
-          Navigator.pushReplacementNamed(context, '/home');
-        },
-      ),
-      floatingActionButton: LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints constraints) {
-          final double width = MediaQuery.of(context).size.width;
-          final double height = MediaQuery.of(context).size.height;
-
-          //const double floatingActionButtonwidth = 56.0;
-          //final double rightButtonwidthOffset = width * (1 - 0.1);
-          //final double leftButtonwidthOffset = width * 0.15;
-          final double screenWidth = MediaQuery.of(context).size.width;
-          print("AAAAAAAAAAAAAAAAAAAaa");
-          print(screenWidth);
-          const double buttonWidth = 56.0;
-          const double offsetFromCenter = 40.0;
-
-          final double heightOffset = height * 0.01;
-
-          return Stack(children: <Widget>[
-            Positioned(
-              //left: leftButtonwidthOffset - (floatingActionButtonwidth / 2),
-              //left: (screenWidth / 2) - buttonWidth - offsetFromCenter,
-              left:
-                  1.0, //(screenWidth / 2) - buttonWidth / 2 - offsetFromCenter,
-              bottom: heightOffset,
-              child: FloatingActionButton(
-                onPressed: () {
-                  _creationRoomServices.removeRoomIdFromAllRoomId(roomId);
-                  Navigator.pushReplacementNamed(context, '/home');
-                },
-                heroTag: 'leftButton',
-                backgroundColor: lightColorScheme.primary,
-                child:
-                    Icon(Icons.arrow_back, color: lightColorScheme.onPrimary),
-              ),
-            ),
-            Positioned(
-              //left: rightButtonwidthOffset - (floatingActionButtonwidth / 2),
-              //left: (screenWidth / 2) + buttonWidth - offsetFromCenter,
-              //left: (screenWidth / 2) + offsetFromCenter - buttonWidth / 2,
-              right: 0,
-              bottom: heightOffset,
-              child: FloatingActionButton(
-                onPressed: () async {
-                  try {
-                    bool success = await _createRoom();
-                    _roomServices.registerPlayer(roomId);
-                    if (success && mounted) {
-                      Navigator.pushReplacementNamed(context,
-                          '/home/room_settings/create_room/room_creation_waiting',
-                          arguments: CreationRoomArguments(roomId: roomId));
-                    }
-                  } catch (e) {
-                    if (mounted) {
-                      showErrorDialog(context, 'ルームの作成に失敗しました: $e');
-                    }
-                  }
-                },
-                heroTag: 'rightButton',
-                backgroundColor: lightColorScheme.primary,
-                child: Icon(Icons.check, color: lightColorScheme.onPrimary),
-              ),
-            ),
-          ]);
-        },
-      ),
-      body: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Expanded(
-              child: SingleChildScrollView(
-                child: Column(
-                  children: <Widget>[
-                    RoomWidgets.displayRoomId(context: context, roomId: roomId),
-                    Column(
-                      children: <Widget>[
-                        RoomWidgets.passcodeDialogCard(
-                          context: context,
-                          passcode: _passcode,
-                          displayWidgetFactory: (passcode) =>
-                              passcodeSettingDisplay(
-                            context: context,
-                            passcode: passcode,
-                            hintText: 'パスコードなし',
-                          ),
-                          onSelected: (selectedPasscode) {
-                            setState(() {
-                              _passcode = selectedPasscode;
-                            });
-                          },
-                        ),
-                        RoomCreationWidgets.timerDialogCard(
-                          context: context,
-                          gameTimeLimit: _gameTimeLimit,
-                          onSelected: (selectedTimeLimit) {
-                            setState(() {
-                              _gameTimeLimit = selectedTimeLimit;
-                            });
-                          },
-                        ),
-                        RoomCreationWidgets.oniDialogCard(
-                          context: context,
-                          oniCount: _oniCount,
-                          onSelected: (selectedOni) {
-                            setState(() {
-                              _oniCount = selectedOni;
-                            });
-                          },
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ]),
-    );
-  }
-  */
 
   @override
   Widget build(BuildContext context) {
@@ -161,6 +35,7 @@ class CreateRoomScreenState extends State<CreateRoomScreen> {
     double footerHeight = screenHeight * 0.10;
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       backgroundColor: lightColorScheme.primary,
       body: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -190,13 +65,25 @@ class CreateRoomScreenState extends State<CreateRoomScreen> {
           children: [
             // Back button
             IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.white),
-              onPressed: () {},
+              icon: const Icon(
+                Icons.arrow_circle_left_outlined,
+                color: Colors.white,
+                size: 50,
+              ),
+              onPressed: () {
+                _navigateToHomeScreen();
+              },
             ),
             // Check button
             IconButton(
-              icon: const Icon(Icons.check, color: Colors.white),
-              onPressed: () {},
+              icon: const Icon(
+                Icons.check_circle,
+                color: Colors.white,
+                size: 50,
+              ),
+              onPressed: () {
+                _navigateToRoomCreationWaitingScreen();
+              },
             ),
           ],
         ),
@@ -217,6 +104,7 @@ class CreateRoomScreenState extends State<CreateRoomScreen> {
             padding: const EdgeInsets.all(16.0),
             child: Column(
               children: buildListTiles(),
+              //buildListDialogCard(),
             ),
           ),
         ),
@@ -254,15 +142,174 @@ class CreateRoomScreenState extends State<CreateRoomScreen> {
 
   List<Widget> buildListTiles() {
     return [
-      buildListTile(Icons.camera_alt, 'Crop sensor', Icons.close),
-      buildListTile(Icons.camera_roll, 'Film', Icons.add),
-      buildListTile(Icons.camera, 'Full frame', Icons.close),
-      buildListTile(Icons.camera_rear, 'Mirrorless', Icons.add),
+      buildRoomIDDisplay("Room ID", "${roomId ?? "Generating Room ID"}"),
+      const Divider(),
+      buildSettingTile(Icons.vpn_key, "Passcode", _formatPasscode(_passcode),
+          () async {
+        String? result = await showPasscodeDialog(context: context);
+        setState(() {
+          if (result != null) {
+            _passcode = result;
+          }
+        });
+      }),
+      buildSettingTile(
+          Icons.timer, "Time Limit", _formatDuration(_gameTimeLimit).join(),
+          () async {
+        Duration? result = await showTimerDialog(context: context);
+        setState(() {
+          if (result != null) {
+            _gameTimeLimit = result;
+          }
+        });
+      }),
+      buildSettingTile(
+          CustomIcons.oni, "Oni Setting", _formatOniCount(_oniCount), () async {
+        int? result = await showOniDialog(context: context);
+        setState(() {
+          if (result != null) {
+            _oniCount = result;
+          }
+        });
+      }),
     ];
   }
 
-  void _navigateToGameScreen() {
-    _creationRoomServices.removeRoomIdFromAllRoomId(roomId);
+  Widget buildRoomIDDisplay(String title, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Column(
+        children: [
+          Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+          Text(value,
+              style:
+                  const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+        ],
+      ),
+    );
+  }
+
+  Widget buildSettingTile(
+      IconData icon, String title, String value, VoidCallback onTap) {
+    return ListTile(
+      leading: Icon(icon),
+      title: Text(title),
+      subtitle: Text(value),
+      trailing: IconButton(
+        icon: const Icon(Icons.edit),
+        onPressed: onTap,
+      ),
+    );
+  }
+
+  Future<void> generateRoomId() async {
+    final uniqueRoomId = await CreationService().generateUniqueRoomId();
+    setState(() {
+      roomId = uniqueRoomId;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    generateRoomId();
+  }
+
+  Future<bool> _createRoom() async {
+    if (roomId == null) {
+      showErrorDialog(context, 'ルームIDが生成されていません。');
+      return false;
+    }
+    if (_passcode.isEmpty || _passcode == '') {
+      showErrorDialog(context, 'パスコードが設定されていません。');
+      return false;
+    }
+    if (_gameTimeLimit.inSeconds == 0) {
+      showErrorDialog(context, 'タイマーが設定されていません。');
+      return false;
+    }
+
+    try {
+      User? currentUser = FirebaseAuth.instance.currentUser;
+      if (currentUser == null) {
+        showErrorDialog(context, 'ユーザーがログインしていません。');
+        return false;
+      }
+      String ownerId = currentUser.uid;
+      String? ownerName = await PlayerService().getPlayerName();
+
+      var bytes = utf8.encode(_passcode);
+      var digest = sha256.convert(bytes);
+
+      final settings = RoomSettings(
+        1,
+        _oniCount,
+        _gameTimeLimit.inSeconds,
+        digest.toString(),
+      );
+
+      await CreationService().createRoom(
+          roomId.toString(), ownerId, ownerName ?? "RoomOwner", settings);
+
+      return true;
+    } catch (e) {
+      if (mounted) {
+        showErrorDialog(context, 'ルームの作成に失敗しました: $e');
+      }
+      return false;
+    }
+  }
+
+  List<String> _formatDuration(Duration duration) {
+    if (duration == Duration.zero) {
+      return ["Set Time"];
+    }
+
+    String hours = duration.inHours > 0 ? "${duration.inHours} hours " : "";
+    String minutes =
+        (duration.inMinutes % 60) > 0 ? "${duration.inMinutes % 60} mins " : "";
+    String seconds =
+        (duration.inSeconds % 60) > 0 ? "${duration.inSeconds % 60} secs" : "";
+
+    return [hours, minutes, seconds]
+        .where((element) => element.isNotEmpty)
+        .toList();
+  }
+
+  String _formatOniCount(int oniCount) {
+    if (oniCount == 0) {
+      return "Set Oni Number";
+    }
+
+    return "$oniCount";
+  }
+
+  String _formatPasscode(String passcode) {
+    if (passcode.isEmpty) {
+      return "Set Passcode";
+    }
+
+    return "*" * passcode.length;
+  }
+
+  void _navigateToHomeScreen() {
+    CreationService().removeRoomIdFromAllRoomId(roomId);
     Navigator.pushReplacementNamed(context, '/home');
+  }
+
+  void _navigateToRoomCreationWaitingScreen() async {
+    try {
+      bool success = await _createRoom();
+      PlayerService().registerPlayer(roomId);
+      if (success && mounted) {
+        Navigator.pushReplacementNamed(
+            context, '/home/room_settings/create_room/room_creation_waiting',
+            arguments: CreationRoomArguments(roomId: roomId));
+      }
+    } catch (e) {
+      if (mounted) {
+        showErrorDialog(context, 'ルームの作成に失敗しました: $e');
+      }
+    }
   }
 }

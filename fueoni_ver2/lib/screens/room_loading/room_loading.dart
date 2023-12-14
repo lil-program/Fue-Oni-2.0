@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:fueoni_ver2/services/database/loading_room_services.dart';
-import 'package:fueoni_ver2/services/database/room_services.dart';
+import 'package:fueoni_ver2/models/arguments.dart';
+import 'package:fueoni_ver2/services/room_management/room_service.dart';
+//import 'package:fueoni_ver2/services/database/loading_room_services.dart';
+//import 'package:fueoni_ver2/services/database/room_services.dart';
 
 class RoomLoadingScreen extends StatefulWidget {
   const RoomLoadingScreen({Key? key}) : super(key: key);
@@ -10,7 +12,7 @@ class RoomLoadingScreen extends StatefulWidget {
 }
 
 class RoomLoadingScreenState extends State<RoomLoadingScreen> {
-  final RoomServices _roomServices = RoomServices();
+  final RoomService _roomServices = RoomService();
   int? roomId;
   bool _isLoading = true;
 

@@ -3,8 +3,10 @@ import 'package:flutter/services.dart';
 import 'package:fueoni_ver2/components/room/error_handling.dart';
 import 'package:fueoni_ver2/components/room/passcode_dialog.dart';
 import 'package:fueoni_ver2/components/room/room.dart';
-import 'package:fueoni_ver2/services/database/room_services.dart';
-import 'package:fueoni_ver2/services/database/search_room_services.dart';
+import 'package:fueoni_ver2/models/arguments.dart';
+import 'package:fueoni_ver2/services/room_management/game_service.dart';
+import 'package:fueoni_ver2/services/room_management/player_service.dart';
+import 'package:fueoni_ver2/services/room_search/passcode_service.dart';
 
 class RoomSearchPage extends StatefulWidget {
   const RoomSearchPage({super.key});
@@ -80,7 +82,7 @@ class RoomSearchPageState extends State<RoomSearchPage> {
         passcode: inputPasscode,
         displayWidgetFactory: (_) => foundDisplay(gameInfo!),
         onSelected: (selectedPasscode) async {
-          bool isCorrect = await SearchRoomServices().isPasscodeCorrect(
+          bool isCorrect = await PasscodeService().isPasscodeCorrect(
             roomId!,
             selectedPasscode,
           );
@@ -106,7 +108,7 @@ class RoomSearchPageState extends State<RoomSearchPage> {
       return;
     }
 
-    bool success = await RoomServices().registerPlayer(roomId!);
+    bool success = await PlayerService().registerPlayer(roomId!);
 
     if (!mounted) return;
 
@@ -123,7 +125,7 @@ class RoomSearchPageState extends State<RoomSearchPage> {
 
   void _searchRoom() async {
     if (roomId != null) {
-      final gameInfo = await SearchRoomServices().getGameInfo(roomId!);
+      final gameInfo = await GameService().getGameInfo(roomId!);
       setState(() {
         this.gameInfo = gameInfo;
         _isSearchDone = true;

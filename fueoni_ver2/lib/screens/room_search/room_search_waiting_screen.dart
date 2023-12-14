@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:fueoni_ver2/components/room/error_handling.dart';
 import 'package:fueoni_ver2/components/room/room.dart';
-import 'package:fueoni_ver2/services/database/loading_room_services.dart';
-import 'package:fueoni_ver2/services/database/room_services.dart';
-import 'package:fueoni_ver2/services/database/search_room_services.dart';
+import 'package:fueoni_ver2/models/arguments.dart';
+import 'package:fueoni_ver2/services/room_management/location_service.dart';
+import 'package:fueoni_ver2/services/room_management/room_service.dart';
+import 'package:fueoni_ver2/services/room_search/game_monitor_service.dart';
 
 class RoomSearchWaitingScreen extends StatefulWidget {
   const RoomSearchWaitingScreen({super.key});
@@ -13,8 +14,6 @@ class RoomSearchWaitingScreen extends StatefulWidget {
 }
 
 class RoomSearchWaitingScreenState extends State<RoomSearchWaitingScreen> {
-  final RoomServices _roomServices = RoomServices();
-  final SearchRoomServices _searchRoomServices = SearchRoomServices();
   List<String> users = [];
   String? ownerName;
 
@@ -29,7 +28,7 @@ class RoomSearchWaitingScreenState extends State<RoomSearchWaitingScreen> {
         roomId: args.roomId,
         title: "ルーム待機",
         onBackButtonPressed: (int? roomId) {
-          _searchRoomServices.removePlayerId(roomId);
+          RoomService().removePlayerId(roomId);
           Navigator.pushReplacementNamed(context, '/home');
         },
       ),
@@ -50,20 +49,22 @@ class RoomSearchWaitingScreenState extends State<RoomSearchWaitingScreen> {
       final args =
           ModalRoute.of(context)!.settings.arguments as SearchRoomArguments;
       final roomId = args.roomId;
-      ownerName = await _roomServices.getRoomOwnerName(roomId);
+      ownerName = await RoomService().getRoomOwnerName(roomId);
 
-      _roomServices.updatePlayersList(roomId, (updatedUsers) {
+      RoomService().updatePlayersList(roomId, (updatedUsers) {
         setState(() {
           users = updatedUsers;
           users.insert(0, ownerName ?? "RoomOwner");
         });
       });
 
-      _searchRoomServices.monitorGameStart(roomId, (gameStarted) async {
+      GameMonitorService().monitorGameStart(roomId, (gameStarted) async {
         if (gameStarted) {
-          bool hasPermission = await RoomServices.requestLocationPermission();
+          bool hasPermission =
+              await LocationService.requestLocationPermission();
           if (hasPermission) {
-            await RoomServices.updateCurrentLocation(_roomServices, roomId);
+            await LocationService.updateCurrentLocation(
+                LocationService(), roomId);
             _navigateToGameScreen();
           } else {
             if (mounted) {

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:fueoni_ver2/components/room/room.dart';
+import 'package:fueoni_ver2/models/arguments.dart';
 import 'package:fueoni_ver2/screens/room_creation/widgets/room_creation_widgets.dart';
-import 'package:fueoni_ver2/services/database/creation_room_services.dart';
+import 'package:fueoni_ver2/services/room_creation/oni_assignment_service.dart';
+import 'package:fueoni_ver2/services/room_management/game_service.dart';
 
 class RoomCreationmSettingScreenState
     extends State<RoomCreationSettingsScreen> {
@@ -62,8 +64,8 @@ class RoomCreationmSettingScreenState
           ModalRoute.of(context)!.settings.arguments as CreationRoomArguments;
       roomId = args.roomId;
 
-      final gameTimeLimit = await CreationRoomServices().getTimeLimit(roomId);
-      final oniCount = await CreationRoomServices().getInitialOniCount(roomId);
+      final gameTimeLimit = await OniAssignmentService().getTimeLimit(roomId);
+      final oniCount = await OniAssignmentService().getInitialOniCount(roomId);
 
       setState(() {
         this.gameTimeLimit = gameTimeLimit;
@@ -73,8 +75,7 @@ class RoomCreationmSettingScreenState
   }
 
   Future<void> updateSettings() async {
-    await CreationRoomServices()
-        .updateSettings(roomId, gameTimeLimit, oniCount);
+    await GameService().updateSettings(roomId, gameTimeLimit, oniCount);
   }
 }
 

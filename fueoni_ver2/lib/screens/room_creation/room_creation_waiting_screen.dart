@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:fueoni_ver2/components/room/error_handling.dart';
 import 'package:fueoni_ver2/components/room/room.dart';
-import 'package:fueoni_ver2/services/database/creation_room_services.dart';
-import 'package:fueoni_ver2/services/database/loading_room_services.dart';
-import 'package:fueoni_ver2/services/database/room_services.dart';
+import 'package:fueoni_ver2/models/arguments.dart';
+import 'package:fueoni_ver2/services/room_creation/creation_service.dart';
+import 'package:fueoni_ver2/services/room_creation/oni_assignment_service.dart';
+import 'package:fueoni_ver2/services/room_management/game_service.dart';
+import 'package:fueoni_ver2/services/room_management/location_service.dart';
+import 'package:fueoni_ver2/services/room_management/room_service.dart';
 
 class RoomCreationWaitingScreen extends StatefulWidget {
   const RoomCreationWaitingScreen({super.key});
@@ -14,8 +17,6 @@ class RoomCreationWaitingScreen extends StatefulWidget {
 }
 
 class RoomCreationWaitingScreenState extends State<RoomCreationWaitingScreen> {
-  final RoomServices _roomServices = RoomServices();
-  final CreationRoomServices _creationRoomServices = CreationRoomServices();
   List<String> users = [];
   String? ownerName;
   int? roomId;
@@ -50,11 +51,11 @@ class RoomCreationWaitingScreenState extends State<RoomCreationWaitingScreen> {
   }
 
   Future<void> handleStartButtonPressed() async {
-    bool hasPermission = await RoomServices.requestLocationPermission();
+    bool hasPermission = await LocationService.requestLocationPermission();
     if (hasPermission) {
-      await RoomServices.updateCurrentLocation(_roomServices, roomId);
-      _creationRoomServices.assignOniRandomly(roomId);
-      _creationRoomServices.setGameStart(roomId, true);
+      await LocationService.updateCurrentLocation(LocationService(), roomId);
+      OniAssignmentService().assignOniRandomly(roomId);
+      GameService().setGameStart(roomId, true);
       _navigateToGameScreen();
     } else {
       if (mounted) {
@@ -70,9 +71,9 @@ class RoomCreationWaitingScreenState extends State<RoomCreationWaitingScreen> {
       final args =
           ModalRoute.of(context)!.settings.arguments as CreationRoomArguments;
       roomId = args.roomId;
-      ownerName = await _roomServices.getRoomOwnerName(roomId);
+      ownerName = await RoomService().getRoomOwnerName(roomId);
 
-      _roomServices.updatePlayersList(roomId, (updatedUsers) {
+      RoomService().updatePlayersList(roomId, (updatedUsers) {
         setState(() {
           users = updatedUsers;
         });
@@ -84,12 +85,11 @@ class RoomCreationWaitingScreenState extends State<RoomCreationWaitingScreen> {
     required BuildContext context,
     required int? roomId,
   }) {
-    final roomIdGenerator = CreationRoomServices();
     return IconButton(
       icon: const Icon(Icons.arrow_back, color: Colors.black),
       onPressed: () {
-        roomIdGenerator.removeRoomIdFromAllRoomId(roomId);
-        roomIdGenerator.removeRoomIdFromGames(roomId);
+        CreationService().removeRoomIdFromAllRoomId(roomId);
+        GameService().removeRoomIdFromGames(roomId);
         Navigator.pushReplacementNamed(context, '/home/room_settings');
       },
     );
