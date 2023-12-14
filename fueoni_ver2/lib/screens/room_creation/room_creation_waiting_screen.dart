@@ -34,16 +34,21 @@ class RoomCreationWaitingScreenState extends State<RoomCreationWaitingScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           RoomWidgets.displayRoomId(context: context, roomId: args.roomId),
+          RoomWidgets.displayOwnerName(ownerName),
           RoomWidgets.userList(users),
           ElevatedButton(
             onPressed: () async {
-              _roomServices.registerPlayer(roomId);
               _creationRoomServices.assignOniRandomly(roomId);
               _creationRoomServices.setGameStart(roomId, true);
-              await RoomServices.updateCurrentLocation(_roomServices, roomId);
-
-              //ここにゲーム画面への遷移を書く
-              Navigator.pushReplacementNamed(context, '/home/room_settings');
+              bool hasPermission =
+                  await RoomServices.requestLocationPermission();
+              if (hasPermission) {
+                await RoomServices.updateCurrentLocation(_roomServices, roomId);
+                //ここにゲーム画面への遷移を書く
+                Navigator.pushReplacementNamed(context, '/home/room_settings');
+              } else {
+                print("パーミッションが拒否されました");
+              }
             },
             child: const Text('スタート'),
           ),
@@ -64,7 +69,6 @@ class RoomCreationWaitingScreenState extends State<RoomCreationWaitingScreen> {
       _roomServices.updatePlayersList(roomId, (updatedUsers) {
         setState(() {
           users = updatedUsers;
-          users.insert(0, ownerName ?? "RoomOwner");
         });
       });
     });

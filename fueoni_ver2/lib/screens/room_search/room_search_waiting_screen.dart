@@ -59,7 +59,14 @@ class RoomSearchWaitingScreenState extends State<RoomSearchWaitingScreen> {
 
       _searchRoomServices.monitorGameStart(roomId, (gameStarted) async {
         if (gameStarted) {
-          await RoomServices.updateCurrentLocation(_roomServices, roomId);
+          bool hasPermission = await RoomServices.requestLocationPermission();
+          if (hasPermission) {
+            await RoomServices.updateCurrentLocation(_roomServices, roomId);
+            //ここにゲーム画面への遷移を書く
+            Navigator.pushReplacementNamed(context, '/home/room_settings');
+          } else {
+            print("パーミッションが拒否されました");
+          }
         }
       });
     });
