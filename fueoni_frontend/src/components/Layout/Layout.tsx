@@ -2,6 +2,7 @@ import { ReactNode } from "react";
 import CustomAppBar from "./components/CustomAppBar";
 import CustomDrawer from "./components/CustomDrawer";
 import Box from "@mui/material/Box";
+import Toolbar from "@mui/material/Toolbar";
 
 interface LayoutProps {
   open: boolean;
@@ -33,6 +34,7 @@ const Layout: React.FC<LayoutProps> = ({
             overflow: "auto",
           }}
         >
+          <Toolbar />
           {children}
         </Box>
       </Box>

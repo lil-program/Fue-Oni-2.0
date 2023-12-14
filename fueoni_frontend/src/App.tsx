@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Route, Routes } from "react-router-dom";
 import Layout from "./components/Layout/Layout";
 import Dashboard from "./pages/Dashboard";
+import MissionBoard from "./pages/MissionBoard";
 
 function App() {
   const [open, setOpen] = useState(false);
@@ -22,7 +23,7 @@ function App() {
     >
       <Routes>
         <Route path="/" element={<Dashboard />} />
-        <Route path="/missions" element={<Dashboard />} />
+        <Route path="/missions" element={<MissionBoard />} />
         <Route path="/games" element={<Dashboard />} />
         <Route path="/users" element={<Dashboard />} />
         <Route path="/reports" element={<Dashboard />} />
