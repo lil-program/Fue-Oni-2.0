@@ -288,6 +288,40 @@ export const MissionsApiAxiosParamCreator = function (configuration?: Configurat
         },
         /**
          * 
+         * @summary Get Mission
+         * @param {string} missionId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getMissionApiV1MissionsMissionMissionIdGet: async (missionId: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'missionId' is not null or undefined
+            assertParamExists('getMissionApiV1MissionsMissionMissionIdGet', 'missionId', missionId)
+            const localVarPath = `/api/v1/missions/mission/{mission_id}`
+                .replace(`{${"mission_id"}}`, encodeURIComponent(String(missionId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
          * @summary Get Missions
          * @param {number} [limit] 
          * @param {number} [startAfter] 
@@ -416,6 +450,19 @@ export const MissionsApiFp = function(configuration?: Configuration) {
         },
         /**
          * 
+         * @summary Get Mission
+         * @param {string} missionId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getMissionApiV1MissionsMissionMissionIdGet(missionId: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Mission>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getMissionApiV1MissionsMissionMissionIdGet(missionId, options);
+            const index = configuration?.serverIndex ?? 0;
+            const operationBasePath = operationServerMap['MissionsApi.getMissionApiV1MissionsMissionMissionIdGet']?.[index]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, operationBasePath || basePath);
+        },
+        /**
+         * 
          * @summary Get Missions
          * @param {number} [limit] 
          * @param {number} [startAfter] 
@@ -483,6 +530,16 @@ export const MissionsApiFactory = function (configuration?: Configuration, baseP
         },
         /**
          * 
+         * @summary Get Mission
+         * @param {string} missionId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getMissionApiV1MissionsMissionMissionIdGet(missionId: string, options?: any): AxiosPromise<Mission> {
+            return localVarFp.getMissionApiV1MissionsMissionMissionIdGet(missionId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
          * @summary Get Missions
          * @param {number} [limit] 
          * @param {number} [startAfter] 
@@ -546,6 +603,18 @@ export class MissionsApi extends BaseAPI {
      */
     public getAllMissionsApiV1MissionsAllMissionsGet(options?: AxiosRequestConfig) {
         return MissionsApiFp(this.configuration).getAllMissionsApiV1MissionsAllMissionsGet(options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Get Mission
+     * @param {string} missionId 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof MissionsApi
+     */
+    public getMissionApiV1MissionsMissionMissionIdGet(missionId: string, options?: AxiosRequestConfig) {
+        return MissionsApiFp(this.configuration).getMissionApiV1MissionsMissionMissionIdGet(missionId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

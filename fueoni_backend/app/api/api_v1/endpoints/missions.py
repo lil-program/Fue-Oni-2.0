@@ -48,3 +48,13 @@ async def get_missions(limit: int = 10, start_after: int = 0):
 @router.get("/all_missions", response_model=schemas.AllMissionsResponse)
 async def get_all_missions():
     return crud.get_all_missions()
+
+
+@router.get("/mission/{mission_id}", response_model=schemas.Mission)
+async def get_mission(mission_id: str):
+    mission = crud.get_mission(mission_id)
+
+    if mission is None:
+        raise HTTPException(status_code=404, detail="Mission not found")
+
+    return mission
