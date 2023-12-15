@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fueoni_ver2/color_schemes.dart';
 import 'package:fueoni_ver2/components/room/error_handling.dart';
-import 'package:fueoni_ver2/components/room/room.dart';
 import 'package:fueoni_ver2/models/arguments.dart';
 import 'package:fueoni_ver2/services/room_creation/creation_service.dart';
 import 'package:fueoni_ver2/services/room_creation/oni_assignment_service.dart';
@@ -32,12 +31,12 @@ class RoomCreationWaitingScreenState extends State<RoomCreationWaitingScreen> {
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      backgroundColor: lightColorScheme.primary,
+      backgroundColor: lightColorScheme.background,
       body: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           //ヘッダー
-          buildHeader(headerHeight, screenWidth, context, roomId),
+          buildHeader(headerHeight, screenWidth),
           //フォーム
           Expanded(
             child: buildFormSection(screenWidth),
@@ -49,11 +48,27 @@ class RoomCreationWaitingScreenState extends State<RoomCreationWaitingScreen> {
     );
   }
 
+  Widget buildDisplayTile(String title, String value) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+          Text(value,
+              style:
+                  const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+        ],
+      ),
+    );
+  }
+
   Widget buildFooter(double height, double width, BuildContext context) {
     return Container(
       height: height,
       width: width,
-      color: Theme.of(context).colorScheme.primary,
+      color: Theme.of(context).colorScheme.background,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24.0),
         child: Row(
@@ -62,35 +77,32 @@ class RoomCreationWaitingScreenState extends State<RoomCreationWaitingScreen> {
             IconButton(
               icon: const Icon(
                 Icons.arrow_circle_left_outlined,
-                color: Colors.white,
-                size: 50,
+                color: Color.fromARGB(255, 103, 80, 164),
+                size: 55,
+              ),
+              onPressed: () {
+                _navigateToRoomCreationSettingsScreen();
+              },
+            ),
+            IconButton(
+              icon: const Icon(
+                Icons.logout_outlined,
+                color: Color.fromARGB(255, 103, 80, 164),
+                size: 55,
               ),
               onPressed: () {
                 _navigateToHomeScreen();
               },
             ),
-            Container(
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
-                    blurRadius: 8,
-                    offset: const Offset(4, 4),
-                    spreadRadius: -9,
-                  ),
-                ],
+            IconButton(
+              icon: const Icon(
+                Icons.check_circle_sharp,
+                color: Color.fromARGB(255, 103, 80, 164),
+                size: 55,
               ),
-              child: IconButton(
-                icon: const Icon(
-                  Icons.check_circle_sharp,
-                  color: Colors.white,
-                  size: 50,
-                ),
-                onPressed: () {
-                  _navigateToRoomLoadingScreen();
-                },
-              ),
+              onPressed: () {
+                _navigateToRoomLoadingScreen();
+              },
             ),
           ],
         ),
@@ -104,20 +116,19 @@ class RoomCreationWaitingScreenState extends State<RoomCreationWaitingScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 24),
         child: Card(
+          color: Colors.grey[50],
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(25.0),
+            side: BorderSide(
+              color: Colors.grey[300] ?? Colors.grey,
+              width: 1,
+            ),
           ),
+          elevation: 4,
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                RoomWidgets.displayRoomId(context: context, roomId: roomId),
-                const SizedBox(height: 10),
-                RoomWidgets.displayOwnerName(ownerName),
-                const SizedBox(height: 10),
-                RoomWidgets.userList(users),
-              ],
+              children: buildListTiles(),
             ),
           ),
         ),
@@ -125,34 +136,66 @@ class RoomCreationWaitingScreenState extends State<RoomCreationWaitingScreen> {
     );
   }
 
-  Widget buildHeader(
-      double height, double width, BuildContext context, int? roomId) {
+  Widget buildHeader(double height, double width) {
     return Container(
       height: height,
       width: width,
-      color: lightColorScheme.primary,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      color: lightColorScheme.background,
+      child: const Center(
+        child: Text(
+          'Start your room',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Color.fromARGB(255, 103, 80, 164)),
+        ),
+      ),
+    );
+  }
+
+  List<Widget> buildListTiles() {
+    List<Widget> listTiles = [
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          const Expanded(
-            child: Center(
-              child: Text(
-                'Register Your Room Settings',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-            ),
+          Expanded(
+            child: buildRoomIDDisplay(
+                "Room ID", "${roomId ?? "Generating Room ID"}"),
           ),
-          Padding(
-            padding: const EdgeInsets.only(right: 16.0),
-            child: _buildAppBarActionButton(context, roomId),
+          Expanded(
+            child: buildOwnerNameDisplay("Owner", ownerName ?? "不明"),
           ),
         ],
       ),
+      const Divider(),
+    ];
+
+    for (String user in users) {
+      listTiles.add(
+        buildUsersTile(Icons.person_outline, user),
+      );
+      listTiles.add(const Divider());
+    }
+
+    return listTiles;
+  }
+
+  Widget buildOwnerNameDisplay(String title, String value) {
+    return buildDisplayTile(title, value);
+  }
+
+  Widget buildRoomIDDisplay(String title, String value) {
+    return buildDisplayTile(title, value);
+  }
+
+  ListTile buildUsersTile(
+    IconData leadingIcon,
+    String title,
+  ) {
+    return ListTile(
+      leading: Icon(leadingIcon),
+      title: Text(title),
     );
   }
 
@@ -171,18 +214,6 @@ class RoomCreationWaitingScreenState extends State<RoomCreationWaitingScreen> {
         });
       });
     });
-  }
-
-  Widget _buildAppBarActionButton(BuildContext context, roomId) {
-    return MaterialButton(
-        onPressed: () {
-          _navigateToRoomCreationSettingsScreen();
-        },
-        child: const Icon(
-          Icons.settings,
-          color: Colors.white,
-          size: 30,
-        ));
   }
 
   void _navigateToHomeScreen() {
@@ -218,110 +249,25 @@ class RoomCreationWaitingScreenState extends State<RoomCreationWaitingScreen> {
     }
   }
 
-  /*
-  List<String> users = [];
-  String? ownerName;
-  int? roomId;
-
-  @override
-  Widget build(BuildContext context) {
-    final args =
-        ModalRoute.of(context)!.settings.arguments as CreationRoomArguments;
-
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('ルーム作成待機'),
-        automaticallyImplyLeading: false,
-        actions: _buildAppBarActionButton(context, args.roomId),
-        leading: roomCreationBackButton(context: context, roomId: args.roomId),
-      ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          RoomWidgets.displayRoomId(context: context, roomId: args.roomId),
-          RoomWidgets.displayOwnerName(ownerName),
-          RoomWidgets.userList(users),
-          ElevatedButton(
-            onPressed: () async {
-              await handleStartButtonPressed();
-            },
-            child: const Text('スタート'),
-          ),
-        ],
+  static Widget userList(List<String> users) {
+    return Expanded(
+      child: ListView.builder(
+        itemCount: users.length,
+        itemBuilder: (context, index) {
+          return Card(
+            color: Colors.grey[50],
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            elevation: 3, // Adds shadow
+            child: ListTile(
+              title: Text(users[index]),
+              leading: const Icon(Icons.person),
+            ),
+          );
+        },
       ),
     );
   }
-
-  Future<void> handleStartButtonPressed() async {
-    bool hasPermission = await LocationService.requestLocationPermission();
-    if (hasPermission) {
-      await LocationService.updateCurrentLocation(LocationService(), roomId);
-      OniAssignmentService().assignOniRandomly(roomId);
-      GameService().setGameStart(roomId, true);
-      _navigateToGameScreen();
-    } else {
-      if (mounted) {
-        showPermissionDeniedDialog(context);
-      }
-    }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final args =
-          ModalRoute.of(context)!.settings.arguments as CreationRoomArguments;
-      roomId = args.roomId;
-      ownerName = await RoomService().getRoomOwnerName(roomId);
-
-      RoomService().updatePlayersList(roomId, (updatedUsers) {
-        setState(() {
-          users = updatedUsers;
-        });
-      });
-    });
-  }
-
-  Widget roomCreationBackButton({
-    required BuildContext context,
-    required int? roomId,
-  }) {
-    return IconButton(
-      icon: const Icon(Icons.arrow_back, color: Colors.black),
-      onPressed: () {
-        CreationService().removeRoomIdFromAllRoomId(roomId);
-        GameService().removeRoomIdFromGames(roomId);
-        Navigator.pushReplacementNamed(context, '/home/room_settings');
-      },
-    );
-  }
-
-  List<Widget> _buildAppBarActionButton(BuildContext context, roomId) {
-    return <Widget>[
-      MaterialButton(
-          onPressed: () {
-            Navigator.pushNamed(context,
-                '/home/room_settings/create_room/room_creation_settings',
-                arguments: CreationRoomArguments(roomId: roomId));
-          },
-          child: const Icon(
-            Icons.settings,
-            color: Colors.black,
-            size: 30.0,
-          ))
-    ];
-  }
-
-  void _navigateToGameScreen() {
-    final args =
-        ModalRoute.of(context)!.settings.arguments as CreationRoomArguments;
-
-    if (mounted) {
-      Navigator.pushReplacementNamed(
-          context, '/home/room_settings/loading_room',
-          arguments: LoadingRoomArguments(roomId: args.roomId));
-    }
-  }
-  */
 }

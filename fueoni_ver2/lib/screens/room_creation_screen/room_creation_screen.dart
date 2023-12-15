@@ -36,7 +36,7 @@ class CreateRoomScreenState extends State<CreateRoomScreen> {
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      backgroundColor: lightColorScheme.primary,
+      backgroundColor: lightColorScheme.background,
       body: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
@@ -57,7 +57,7 @@ class CreateRoomScreenState extends State<CreateRoomScreen> {
     return Container(
       height: height,
       width: width,
-      color: Theme.of(context).colorScheme.primary,
+      color: Theme.of(context).colorScheme.background,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24.0),
         child: Row(
@@ -66,35 +66,22 @@ class CreateRoomScreenState extends State<CreateRoomScreen> {
             IconButton(
               icon: const Icon(
                 Icons.arrow_circle_left_outlined,
-                color: Colors.white,
-                size: 50,
+                color: Color.fromARGB(255, 103, 80, 164),
+                size: 55,
               ),
               onPressed: () {
                 _navigateToHomeScreen();
               },
             ),
-            Container(
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
-                    blurRadius: 8,
-                    offset: const Offset(4, 4),
-                    spreadRadius: -9,
-                  ),
-                ],
+            IconButton(
+              icon: const Icon(
+                Icons.arrow_circle_right,
+                color: Color.fromARGB(255, 103, 80, 164),
+                size: 55,
               ),
-              child: IconButton(
-                icon: const Icon(
-                  Icons.check_circle_sharp,
-                  color: Colors.white,
-                  size: 50,
-                ),
-                onPressed: () {
-                  _navigateToRoomCreationWaitingScreen();
-                },
-              ),
+              onPressed: () {
+                _navigateToRoomCreationWaitingScreen();
+              },
             ),
           ],
         ),
@@ -108,9 +95,15 @@ class CreateRoomScreenState extends State<CreateRoomScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 24),
         child: Card(
+          color: Colors.grey[50],
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(25.0),
+            side: BorderSide(
+              color: Colors.grey[300] ?? Colors.grey,
+              width: 1,
+            ),
           ),
+          elevation: 4,
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -126,27 +119,17 @@ class CreateRoomScreenState extends State<CreateRoomScreen> {
     return Container(
       height: height,
       width: width,
-      color: lightColorScheme.primary,
+      color: lightColorScheme.background,
       child: const Center(
         child: Text(
           'Register Your Room Settings',
           textAlign: TextAlign.center,
           style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Color.fromARGB(255, 103, 80, 164)),
         ),
       ),
-    );
-  }
-
-  ListTile buildListTile(
-      IconData leadingIcon, String title, IconData trailingIcon) {
-    return ListTile(
-      leading: Icon(leadingIcon),
-      title: Text(title),
-      trailing: Icon(trailingIcon),
     );
   }
 
