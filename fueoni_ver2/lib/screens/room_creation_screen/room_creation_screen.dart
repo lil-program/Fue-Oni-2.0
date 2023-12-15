@@ -63,7 +63,6 @@ class CreateRoomScreenState extends State<CreateRoomScreen> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            // Back button
             IconButton(
               icon: const Icon(
                 Icons.arrow_circle_left_outlined,
@@ -74,16 +73,28 @@ class CreateRoomScreenState extends State<CreateRoomScreen> {
                 _navigateToHomeScreen();
               },
             ),
-            // Check button
-            IconButton(
-              icon: const Icon(
-                Icons.check_circle,
-                color: Colors.white,
-                size: 50,
+            Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.2),
+                    blurRadius: 8,
+                    offset: const Offset(4, 4),
+                    spreadRadius: -9,
+                  ),
+                ],
               ),
-              onPressed: () {
-                _navigateToRoomCreationWaitingScreen();
-              },
+              child: IconButton(
+                icon: const Icon(
+                  Icons.check_circle_sharp,
+                  color: Colors.white,
+                  size: 50,
+                ),
+                onPressed: () {
+                  _navigateToRoomCreationWaitingScreen();
+                },
+              ),
             ),
           ],
         ),
@@ -104,7 +115,6 @@ class CreateRoomScreenState extends State<CreateRoomScreen> {
             padding: const EdgeInsets.all(16.0),
             child: Column(
               children: buildListTiles(),
-              //buildListDialogCard(),
             ),
           ),
         ),
@@ -119,7 +129,7 @@ class CreateRoomScreenState extends State<CreateRoomScreen> {
       color: lightColorScheme.primary,
       child: const Center(
         child: Text(
-          'Choose your camera equipment',
+          'Register Your Room Settings',
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 20,
