@@ -5,16 +5,20 @@ import { useEffect, useState } from "react";
 import apiClient from "../../apiClient";
 import MissionCard from "../../components/MissionCard";
 import { MissionWithId } from "../../types";
+import CircularProgress from "@mui/material/CircularProgress";
+import Box from "@mui/material/Box";
 
 export default function MissionList() {
   const [missions, setMissions] = useState<MissionWithId[]>([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
 
   const limit = 10;
 
   useEffect(() => {
     const fetchMissions = async () => {
+      setIsLoading(true);
       try {
         const startAfter = limit * (page - 1);
         const response = await apiClient.getMissionsApiV1MissionsMissionsGet(
@@ -29,6 +33,8 @@ export default function MissionList() {
         setTotalPages(response.data.paging_info.total_pages);
       } catch (error) {
         console.error(error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -41,17 +47,32 @@ export default function MissionList() {
 
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-      <Grid container spacing={2}>
-        {missions.map((mission) => (
-          <MissionCard mission={mission} key={mission.id} />
-        ))}
-      </Grid>
-      <Pagination
-        count={totalPages}
-        page={page}
-        onChange={handlePageChange}
-        style={{ justifyContent: "center", display: "flex" }}
-      />
+      {isLoading ? (
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            height: "100vh",
+          }}
+        >
+          <CircularProgress />
+        </Box>
+      ) : (
+        <>
+          <Grid container spacing={2}>
+            {missions.map((mission) => (
+              <MissionCard mission={mission} key={mission.id} />
+            ))}
+          </Grid>
+          <Pagination
+            count={totalPages}
+            page={page}
+            onChange={handlePageChange}
+            style={{ justifyContent: "center", display: "flex" }}
+          />
+        </>
+      )}
     </Container>
   );
 }
