@@ -13,6 +13,7 @@ class AccountSettingsScreen extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
+    // useLocationPermissionCheck(context);
     final isExpanded = useState(false);
     final isLoading = useState(false);
 
@@ -33,17 +34,18 @@ class AccountSettingsScreen extends HookWidget {
 
     useEffect(() {
       bool isActive = true;
+      final userNameProvider = context.read<UserNameProvider>();
 
       void fetchName() async {
         final fetchedName = await userService!.fetchName();
         if (isActive) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            context.read<UserNameProvider>().setUserName(fetchedName);
+            userNameProvider.setUserName(fetchedName);
           });
         }
       }
 
-      if (context.read<UserNameProvider>().userName == null) {
+      if (userNameProvider.userName == null) {
         fetchName();
       }
 
