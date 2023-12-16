@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:fueoni_ver2/components/locate_permission_check.dart';
 
 class RoomSettingsScreen extends StatelessWidget {
   const RoomSettingsScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return LocationPermissionCheck(
+        child: Scaffold(
       appBar: AppBar(
         title: const Text('ルーム設定'),
       ),
@@ -39,6 +41,6 @@ class RoomSettingsScreen extends StatelessWidget {
           ],
         ),
       ),
-    );
+    ));
   }
 }

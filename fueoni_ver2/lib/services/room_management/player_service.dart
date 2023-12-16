@@ -34,6 +34,28 @@ class PlayerService {
     }
   }
 
+  Future<bool> isPlayerOni(int roomId) async {
+    User? currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser == null) {
+      return false;
+    }
+
+    try {
+      String playerId = currentUser.uid;
+      DatabaseReference oniStatusRef =
+          FirebaseDatabase.instance.ref('games/$roomId/players/$playerId/oni');
+
+      final snapshot = await oniStatusRef.once();
+      if (snapshot.snapshot.exists) {
+        return snapshot.snapshot.value == true;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      return false;
+    }
+  }
+
   Future<bool> registerPlayer(int? roomId) async {
     User? currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser == null) {

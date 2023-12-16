@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fueoni_ver2/components/locate_permission_check.dart';
 import 'package:fueoni_ver2/components/room/error_handling.dart';
 import 'package:fueoni_ver2/components/room/passcode_dialog.dart';
 import 'package:fueoni_ver2/components/room/room.dart';
@@ -24,45 +25,47 @@ class RoomSearchPageState extends State<RoomSearchPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: RoomWidgets.roomAppbar(
-        context: context,
-        roomId: roomId,
-        title: "ルーム設定",
-        onBackButtonPressed: (int? roomId) {
-          if (roomId != null) {
+    return LocationPermissionCheck(
+      child: Scaffold(
+        appBar: RoomWidgets.roomAppbar(
+          context: context,
+          roomId: roomId,
+          title: "Search Room",
+          onBackButtonPressed: (int? roomId) {
+            if (roomId != null) {
+              Navigator.pushReplacementNamed(context, '/home');
+            }
             Navigator.pushReplacementNamed(context, '/home');
-          }
-          Navigator.pushReplacementNamed(context, '/home');
-        },
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-            TextField(
-              controller: _controller,
-              decoration: const InputDecoration(
-                labelText: 'ルームID',
-                hintText: '検索するルームIDを入力してください',
+          },
+        ),
+        body: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              TextField(
+                controller: _controller,
+                decoration: const InputDecoration(
+                  labelText: 'ルームID',
+                  hintText: '検索するルームIDを入力してください',
+                ),
+                keyboardType: TextInputType.number,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                onChanged: (value) {
+                  setState(() {
+                    roomId = int.tryParse(value);
+                  });
+                },
               ),
-              keyboardType: TextInputType.number,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              onChanged: (value) {
-                setState(() {
-                  roomId = int.tryParse(value);
-                });
-              },
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _searchRoom,
-              child: const Text('検索'),
-            ),
-            const SizedBox(height: 20),
-            if (_isSearchDone) _buildSearchResult(),
-          ],
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: _searchRoom,
+                child: const Text('Search'),
+              ),
+              const SizedBox(height: 20),
+              if (_isSearchDone) _buildSearchResult(),
+            ],
+          ),
         ),
       ),
     );
@@ -72,8 +75,8 @@ class RoomSearchPageState extends State<RoomSearchPage> {
     if (gameInfo == null) {
       return const Card(
         child: ListTile(
-          title: Text('検索結果'),
-          subtitle: Text('ゲーム情報は見つかりませんでした。'),
+          title: Text('Result'),
+          subtitle: Text('Not Found'),
         ),
       );
     } else {
@@ -116,7 +119,7 @@ class RoomSearchPageState extends State<RoomSearchPage> {
       Navigator.pushReplacementNamed(
         context,
         '/home/room_settings/search_room/room_search_waiting',
-        arguments: SearchRoomArguments(roomId: roomId),
+        arguments: RoomArguments(roomId: roomId),
       );
     } else {
       showErrorDialog(context, 'プレイヤーの登録に失敗しました。');

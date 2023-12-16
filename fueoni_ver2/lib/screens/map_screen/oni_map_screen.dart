@@ -4,6 +4,9 @@ import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+
+import 'package:fueoni_ver2/components/locate_permission_check.dart';
+
 import 'package:fueoni_ver2/screens/map_screen/oni_timer_map.dart';
 import 'package:fueoni_ver2/screens/result_screen/result_screen.dart';
 import 'package:geolocator/geolocator.dart';
@@ -72,7 +75,8 @@ class _OniMapScreenState extends State<OniMapScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return LocationPermissionCheck(
+        child: Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(40),
@@ -251,7 +255,7 @@ class _OniMapScreenState extends State<OniMapScreen> {
         ],
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
-    );
+    ));
   }
 
   Future countOniAndNonOniPlayers(int? roomId) async {
