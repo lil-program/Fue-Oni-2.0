@@ -5,11 +5,12 @@ import 'package:fueoni_ver2/screens/home_screen/tabs/profile_settings/account_se
 import 'package:fueoni_ver2/screens/home_screen/tabs/room_settings/room_settings.dart';
 import 'package:fueoni_ver2/screens/map_screen/oni_map_screen.dart';
 import 'package:fueoni_ver2/screens/map_screen/runner_map_screen.dart';
-import 'package:fueoni_ver2/screens/room_creation/room_creation_screen.dart';
-import 'package:fueoni_ver2/screens/room_creation/room_creation_settings_screen.dart';
-import 'package:fueoni_ver2/screens/room_creation/room_creation_waiting_screen.dart';
-import 'package:fueoni_ver2/screens/room_search/room_search_screen.dart';
-import 'package:fueoni_ver2/screens/room_search/room_search_waiting_screen.dart';
+import 'package:fueoni_ver2/screens/room_creation_screen/room_creation_screen.dart';
+import 'package:fueoni_ver2/screens/room_creation_screen/room_creation_settings_screen.dart';
+import 'package:fueoni_ver2/screens/room_creation_screen/room_creation_waiting_screen.dart';
+import 'package:fueoni_ver2/screens/room_loading_screen/room_loading_screen.dart';
+import 'package:fueoni_ver2/screens/room_search_screen/room_search_screen.dart';
+import 'package:fueoni_ver2/screens/room_search_screen/room_search_waiting_screen.dart';
 import 'package:fueoni_ver2/screens/startup_screen/startup_screen.dart';
 
 class MyApp extends StatelessWidget {
@@ -40,6 +41,8 @@ class MyApp extends StatelessWidget {
             const RoomSearchPage(),
         '/home/room_settings/search_room/room_search_waiting':
             (BuildContext context) => const RoomSearchWaitingScreen(),
+        '/home/room_settings/loading_room': (BuildContext context) =>
+            const RoomLoadingScreen(),
       },
       theme: ThemeData(useMaterial3: true, colorScheme: lightColorScheme),
       darkTheme: ThemeData(useMaterial3: true, colorScheme: darkColorScheme),
