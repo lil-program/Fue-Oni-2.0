@@ -9,7 +9,10 @@ import 'package:fueoni_ver2/services/room_management/location_service.dart';
 import 'package:fueoni_ver2/services/room_management/room_service.dart';
 
 class RoomCreationWaitingScreen extends StatefulWidget {
-  const RoomCreationWaitingScreen({super.key});
+  final RoomArguments roomArguments;
+
+  const RoomCreationWaitingScreen({Key? key, required this.roomArguments})
+      : super(key: key);
 
   @override
   RoomCreationWaitingScreenState createState() =>
@@ -205,19 +208,9 @@ class RoomCreationWaitingScreenState extends State<RoomCreationWaitingScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final args = ModalRoute.of(context)!.settings.arguments as RoomArguments;
+    _roomId = widget.roomArguments.roomId;
 
-      final ownerName = await RoomService().getRoomOwnerName(_roomId);
-
-      RoomService().updatePlayersList(_roomId, (updatedUsers) {
-        setState(() {
-          _users = updatedUsers;
-          _roomId = args.roomId;
-          _ownerName = ownerName;
-        });
-      });
-    });
+    _initializeRoomInfo();
   }
 
   Widget _buildAppBarActionButton(BuildContext context, roomId) {
@@ -230,6 +223,22 @@ class RoomCreationWaitingScreenState extends State<RoomCreationWaitingScreen> {
           color: Colors.black,
           size: 30,
         ));
+  }
+
+  Future<void> _initializeRoomInfo() async {
+    try {
+      final ownerName = await RoomService().getRoomOwnerName(_roomId);
+      RoomService().updatePlayersList(_roomId, (updatedUsers) {
+        if (mounted) {
+          setState(() {
+            _users = updatedUsers;
+            _ownerName = ownerName;
+          });
+        }
+      });
+    } catch (e) {
+      print('Error fetching room information: $e');
+    }
   }
 
   void _navigateToHomeScreen() {

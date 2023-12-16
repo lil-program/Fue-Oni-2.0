@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 
 class SlideLeftRoute extends PageRouteBuilder {
   final Widget newScreen;
-  SlideLeftRoute({required this.newScreen})
-      : super(
+  SlideLeftRoute({
+    required this.newScreen,
+  }) : super(
           pageBuilder: (
             BuildContext context,
             Animation<double> animation,
