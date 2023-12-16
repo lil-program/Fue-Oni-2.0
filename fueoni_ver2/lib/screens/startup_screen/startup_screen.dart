@@ -85,12 +85,34 @@ class StartupScreen extends StatelessWidget {
   Future<void> navigateBasedOnAuth(BuildContext context) async {
     // 位置情報の許可を求める
     LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-    }
-    else if (permission == LocationPermission.deniedForever) {
+
+    Future<void> requestPermission() async {
       await Geolocator.openAppSettings();
       permission = await Geolocator.requestPermission();
+    }
+
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+    } else if (permission == LocationPermission.deniedForever) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text('位置情報の許可が必要です'),
+              content: const Text('設定から位置情報をONにしてください。'),
+              actions: <Widget>[
+                TextButton(
+                  child: const Text('OK'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            );
+          },
+        ).then((_) => requestPermission());
+      });
     }
 
     // 位置情報の許可が得られたら、ユーザー認証を行う
