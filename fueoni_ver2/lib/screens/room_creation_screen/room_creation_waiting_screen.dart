@@ -206,8 +206,7 @@ class RoomCreationWaitingScreenState extends State<RoomCreationWaitingScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final args =
-          ModalRoute.of(context)!.settings.arguments as CreationRoomArguments;
+      final args = ModalRoute.of(context)!.settings.arguments as RoomArguments;
 
       final ownerName = await RoomService().getRoomOwnerName(_roomId);
 
@@ -242,7 +241,7 @@ class RoomCreationWaitingScreenState extends State<RoomCreationWaitingScreen> {
   void _navigateToRoomCreationSettingsScreen() {
     Navigator.pushNamed(
         context, '/home/room_settings/create_room/room_creation_settings',
-        arguments: CreationRoomArguments(roomId: _roomId));
+        arguments: RoomArguments(roomId: _roomId));
   }
 
   _navigateToRoomLoadingScreen() async {
@@ -253,11 +252,11 @@ class RoomCreationWaitingScreenState extends State<RoomCreationWaitingScreen> {
       GameService().setGameStart(_roomId, true);
       if (mounted) {
         final args =
-            ModalRoute.of(context)!.settings.arguments as CreationRoomArguments;
+            ModalRoute.of(context)!.settings.arguments as RoomArguments;
 
         Navigator.pushReplacementNamed(
             context, '/home/room_settings/loading_room',
-            arguments: LoadingRoomArguments(roomId: args.roomId));
+            arguments: RoomArguments(roomId: args.roomId));
       }
     } else {
       if (mounted) {

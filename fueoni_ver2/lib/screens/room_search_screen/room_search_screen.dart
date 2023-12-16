@@ -116,7 +116,7 @@ class RoomSearchPageState extends State<RoomSearchPage> {
       Navigator.pushReplacementNamed(
         context,
         '/home/room_settings/search_room/room_search_waiting',
-        arguments: SearchRoomArguments(roomId: roomId),
+        arguments: RoomArguments(roomId: roomId),
       );
     } else {
       showErrorDialog(context, 'プレイヤーの登録に失敗しました。');

@@ -169,8 +169,7 @@ class RoomCreationmSettingScreenState
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final args =
-          ModalRoute.of(context)!.settings.arguments as CreationRoomArguments;
+      final args = ModalRoute.of(context)!.settings.arguments as RoomArguments;
       roomId = args.roomId;
 
       final gameTimeLimit = await OniAssignmentService().getTimeLimit(roomId);
@@ -217,7 +216,7 @@ class RoomCreationmSettingScreenState
     if (mounted) {
       Navigator.pushReplacementNamed(
           context, '/home/room_settings/create_room/room_creation_waiting',
-          arguments: CreationRoomArguments(roomId: roomId));
+          arguments: RoomArguments(roomId: roomId));
     }
   }
 }

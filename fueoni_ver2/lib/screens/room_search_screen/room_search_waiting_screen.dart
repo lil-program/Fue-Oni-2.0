@@ -181,8 +181,7 @@ class RoomSearchWaitingScreenState extends State<RoomSearchWaitingScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final args =
-          ModalRoute.of(context)!.settings.arguments as SearchRoomArguments;
+      final args = ModalRoute.of(context)!.settings.arguments as RoomArguments;
       roomId = args.roomId;
       ownerName = await RoomService().getRoomOwnerName(roomId);
 
@@ -220,80 +219,7 @@ class RoomSearchWaitingScreenState extends State<RoomSearchWaitingScreen> {
     if (mounted) {
       Navigator.pushReplacementNamed(
           context, '/home/room_settings/loading_room',
-          arguments: LoadingRoomArguments(roomId: roomId));
+          arguments: RoomArguments(roomId: roomId));
     }
   }
-/*
-  @override
-  Widget build(BuildContext context) {
-    final args =
-        ModalRoute.of(context)!.settings.arguments as SearchRoomArguments;
-
-    return Scaffold(
-      appBar: RoomWidgets.roomAppbar(
-        context: context,
-        roomId: args.roomId,
-        title: "ルーム待機",
-        onBackButtonPressed: (int? roomId) {
-          RoomService().removePlayerId(roomId);
-          Navigator.pushReplacementNamed(context, '/home');
-        },
-      ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          RoomWidgets.displayRoomId(context: context, roomId: args.roomId),
-          RoomWidgets.userList(users),
-        ],
-      ),
-    );
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final args =
-          ModalRoute.of(context)!.settings.arguments as SearchRoomArguments;
-      final roomId = args.roomId;
-      ownerName = await RoomService().getRoomOwnerName(roomId);
-
-      RoomService().updatePlayersList(roomId, (updatedUsers) {
-        setState(() {
-          users = updatedUsers;
-          users.insert(0, ownerName ?? "RoomOwner");
-        });
-      });
-
-      GameMonitorService().monitorGameStart(roomId, (gameStarted) async {
-        if (gameStarted) {
-          bool hasPermission =
-              await LocationService.requestLocationPermission();
-          if (hasPermission) {
-            await LocationService.updateCurrentLocation(
-                LocationService(), roomId);
-            _navigateToGameScreen();
-          } else {
-            if (mounted) {
-              showPermissionDeniedDialog(context);
-            }
-          }
-        }
-      });
-    });
-  }
-
-  void _navigateToGameScreen() {
-    int? roomId;
-    final args =
-        ModalRoute.of(context)!.settings.arguments as SearchRoomArguments;
-    roomId = args.roomId;
-
-    if (mounted) {
-      Navigator.pushReplacementNamed(
-          context, '/home/room_settings/loading_room',
-          arguments: LoadingRoomArguments(roomId: roomId));
-    }
-  }
-*/
 }

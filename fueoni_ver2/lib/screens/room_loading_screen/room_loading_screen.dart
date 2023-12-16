@@ -34,8 +34,7 @@ class RoomLoadingScreenState extends State<RoomLoadingScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final args =
-          ModalRoute.of(context)!.settings.arguments as LoadingRoomArguments;
+      final args = ModalRoute.of(context)!.settings.arguments as RoomArguments;
       setState(() {
         roomId = args.roomId;
       });
