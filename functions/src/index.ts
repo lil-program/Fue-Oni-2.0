@@ -11,11 +11,16 @@ import { onRequest } from "firebase-functions/v2/https";
 import * as logger from "firebase-functions/logger";
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
+import { addOniPlayer } from "./addOniPlayer";
+import { checkOniCount } from "./checkOniCount";
 
 // Start writing functions
 // https://firebase.google.com/docs/functions/typescript
 
 admin.initializeApp();
+
+exports.addOniPlayer = addOniPlayer;
+exports.checkOniCount = checkOniCount;
 
 export const helloWorld = onRequest((request, response) => {
   logger.info("Hello logs!", { structuredData: true });
@@ -57,10 +62,3 @@ export const getUser = functions.https.onRequest((req, res) => {
       return;
     });
 });
-
-exports.scheduledFunction = functions.pubsub
-  .schedule("every 10 minutes")
-  .onRun(() => {
-    console.log("This will be run every 10 minutes!");
-    return null;
-  });
