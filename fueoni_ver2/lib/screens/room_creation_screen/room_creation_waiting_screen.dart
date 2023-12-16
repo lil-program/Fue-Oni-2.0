@@ -3,6 +3,7 @@ import 'package:fueoni_ver2/color_schemes.dart';
 import 'package:fueoni_ver2/components/locate_permission_check.dart';
 import 'package:fueoni_ver2/models/arguments.dart';
 import 'package:fueoni_ver2/services/room_creation/creation_service.dart';
+import 'package:fueoni_ver2/services/room_creation/oni_assignment_service.dart';
 import 'package:fueoni_ver2/services/room_management/game_service.dart';
 import 'package:fueoni_ver2/services/room_management/room_service.dart';
 
@@ -254,6 +255,7 @@ class RoomCreationWaitingScreenState extends State<RoomCreationWaitingScreen> {
   }
 
   _navigateToRoomLoadingScreen() async {
+    OniAssignmentService().assignOniRandomly(_roomId);
     if (mounted) {
       Navigator.pushReplacementNamed(
           context, '/home/room_settings/loading_room',

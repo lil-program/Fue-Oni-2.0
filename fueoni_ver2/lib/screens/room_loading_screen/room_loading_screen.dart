@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fueoni_ver2/components/locate_permission_check.dart';
 import 'package:fueoni_ver2/models/arguments.dart';
+import 'package:fueoni_ver2/services/room_management/player_service.dart';
 
 class RoomLoadingScreen extends StatefulWidget {
   final RoomArguments roomArguments;
@@ -13,6 +14,8 @@ class RoomLoadingScreen extends StatefulWidget {
 
 class RoomLoadingScreenState extends State<RoomLoadingScreen> {
   int? _roomId;
+  final PlayerService _playerService =
+      PlayerService(); // Instance of PlayerService
 
   @override
   Widget build(BuildContext context) {
@@ -23,8 +26,10 @@ class RoomLoadingScreenState extends State<RoomLoadingScreen> {
         ),
         body: Center(
           child: ElevatedButton(
-            onPressed: _navigateOniMap,
-            child: const Text('鬼マップへ'),
+            onPressed: () {
+              _navigateToMap();
+            },
+            child: const Text('マップへ'),
           ),
         ),
       ),
@@ -41,8 +46,18 @@ class RoomLoadingScreenState extends State<RoomLoadingScreen> {
     });
   }
 
-  void _navigateOniMap() {
-    Navigator.pushReplacementNamed(context, '/map/oni',
-        arguments: RoomArguments(roomId: _roomId));
+  void _navigateToMap() async {
+    bool isOni = await _playerService.isPlayerOni(_roomId!);
+    if (isOni) {
+      if (mounted) {
+        Navigator.pushReplacementNamed(context, '/map/oni',
+            arguments: RoomArguments(roomId: _roomId));
+      }
+    } else {
+      if (mounted) {
+        Navigator.pushReplacementNamed(context, '/map/runner',
+            arguments: RoomArguments(roomId: _roomId));
+      }
+    }
   }
 }
