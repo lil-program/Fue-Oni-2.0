@@ -18,7 +18,7 @@ class CreateRoomPageState extends State<CreateRoomPage> {
       body: Center(
         child: ElevatedButton(
           onPressed: () async {
-            await OniMapScreen();
+            const OniMapScreen();
             if (!mounted) return; // ここでmountedをチェック
             Navigator.pushReplacementNamed(context, '/map/oni');
           },

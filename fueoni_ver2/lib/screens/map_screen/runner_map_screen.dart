@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:fueoni_ver2/components/locate_permission_check.dart';
 import 'package:fueoni_ver2/screens/result_screen/result_screen.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -52,145 +53,148 @@ class _RunnerMapScreenState extends State<RunnerMapScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(40),
-        child: AppBar(
-          automaticallyImplyLeading: false,
-          title: Column(
-            children: [
-              Text(
-                '残り時間${_formatDuration(mainTimerDuration)}',
-                style: TextStyle(
-                  color: Theme.of(context).primaryColor,
-                  fontSize: 20,
+    return LocationPermissionCheck(
+      child: Scaffold(
+        resizeToAvoidBottomInset: false,
+        appBar: PreferredSize(
+          preferredSize: const Size.fromHeight(40),
+          child: AppBar(
+            automaticallyImplyLeading: false,
+            title: Column(
+              children: [
+                Text(
+                  '残り時間${_formatDuration(mainTimerDuration)}',
+                  style: TextStyle(
+                    color: Theme.of(context).primaryColor,
+                    fontSize: 20,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
-      ),
-      body: GoogleMap(
-        initialCameraPosition: initialCameraPosition,
-        onMapCreated: (GoogleMapController controller) async {
-          mapController = controller;
-          // await _requestPermission();
-          await _moveToCurrentLocation();
-          // await _watchPosition();
-        },
-        myLocationEnabled: false,
-        myLocationButtonEnabled: false,
-        markers: markers,
-      ),
-      floatingActionButton: Stack(
-        children: <Widget>[
-          Positioned(
-            left: 0.0,
-            bottom: 50,
-            child: FloatingActionButton(
-              onPressed: () async {
-                await _moveToCurrentLocation();
-              },
-              elevation: 6,
-              child: Icon(
-                Icons.my_location,
-                color: Theme.of(context).iconTheme.color,
+        body: GoogleMap(
+          initialCameraPosition: initialCameraPosition,
+          onMapCreated: (GoogleMapController controller) async {
+            mapController = controller;
+            // await _requestPermission();
+            await _moveToCurrentLocation();
+            // await _watchPosition();
+          },
+          myLocationEnabled: false,
+          myLocationButtonEnabled: false,
+          markers: markers,
+        ),
+        floatingActionButton: Stack(
+          children: <Widget>[
+            Positioned(
+              left: 0.0,
+              bottom: 50,
+              child: FloatingActionButton(
+                onPressed: () async {
+                  await _moveToCurrentLocation();
+                },
+                elevation: 6,
+                child: Icon(
+                  Icons.my_location,
+                  color: Theme.of(context).iconTheme.color,
+                ),
               ),
             ),
-          ),
-          Positioned(
-            right: 30,
-            bottom: 10,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor,
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(20.0),
-                  topRight: Radius.circular(20.0),
-                  bottomLeft: Radius.circular(20.0),
-                ),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Colors.black26,
-                    offset: Offset(5, 5),
-                    blurRadius: 6,
-                    spreadRadius: 2,
+            Positioned(
+              right: 30,
+              bottom: 10,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).primaryColor,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(20.0),
+                    topRight: Radius.circular(20.0),
+                    bottomLeft: Radius.circular(20.0),
                   ),
-                ],
-              ),
-              child: Text(
-                '鬼残り$remainingOni人',
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold, // テキストを太字に
-                  fontSize: 16,
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Colors.black26,
+                      offset: Offset(5, 5),
+                      blurRadius: 6,
+                      spreadRadius: 2,
+                    ),
+                  ],
                 ),
-              ),
-            ),
-          ),
-          Positioned(
-            left: 3,
-            bottom: 10,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor,
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(20.0),
-                  topRight: Radius.circular(20.0),
-                  bottomRight: Radius.circular(20.0),
-                ),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Colors.black26,
-                    offset: Offset(3, 3),
-                    blurRadius: 4,
-                    spreadRadius: 2,
+                child: Text(
+                  '鬼残り$remainingOni人',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold, // テキストを太字に
+                    fontSize: 16,
                   ),
-                ],
-              ),
-              child: Text(
-                '逃走者残り$remainingRunner人',
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
                 ),
               ),
             ),
-          ),
-          Positioned(
-            right: 30,
-            bottom: 50.0,
-            child: FloatingActionButton(
-              onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (context) {
-                    return Dialog(
-                      // child: Container(
+            Positioned(
+              left: 3,
+              bottom: 10,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).primaryColor,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(20.0),
+                    topRight: Radius.circular(20.0),
+                    bottomRight: Radius.circular(20.0),
+                  ),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Colors.black26,
+                      offset: Offset(3, 3),
+                      blurRadius: 4,
+                      spreadRadius: 2,
+                    ),
+                  ],
+                ),
+                child: Text(
+                  '逃走者残り$remainingRunner人',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              right: 30,
+              bottom: 50.0,
+              child: FloatingActionButton(
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) {
+                      return Dialog(
+                        // child: Container(
                         // insetPadding : const EdgeInsets.only(left:5, right: 5, top: 20, bottom:20),
                         // padding: const EdgeInsets.all(20),
-                          child: QrImageView(
-                            padding: const EdgeInsets.only(left: 60, right: 20, top: 20, bottom: 20), 
-                            data: "https://www.kamo-it.org/blog/36/",
-                            version: QrVersions.auto,
-                            size: 200.0,
+                        child: QrImageView(
+                          padding: const EdgeInsets.only(
+                              left: 60, right: 20, top: 20, bottom: 20),
+                          data: "https://www.kamo-it.org/blog/36/",
+                          version: QrVersions.auto,
+                          size: 200.0,
                         ),
                         // ),
-                    );
-                  },
-                );
-              },
-              child: Icon(
-                Icons.qr_code_scanner,
-                color: Theme.of(context).iconTheme.color,
+                      );
+                    },
+                  );
+                },
+                child: Icon(
+                  Icons.qr_code_scanner,
+                  color: Theme.of(context).iconTheme.color,
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
     );
   }
 

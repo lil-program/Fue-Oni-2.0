@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fueoni_ver2/components/locate_permission_check.dart';
 import 'package:fueoni_ver2/components/room/error_handling.dart';
 import 'package:fueoni_ver2/components/room/room.dart';
 import 'package:fueoni_ver2/models/arguments.dart';
@@ -22,22 +23,24 @@ class RoomSearchWaitingScreenState extends State<RoomSearchWaitingScreen> {
     final args =
         ModalRoute.of(context)!.settings.arguments as SearchRoomArguments;
 
-    return Scaffold(
-      appBar: RoomWidgets.roomAppbar(
-        context: context,
-        roomId: args.roomId,
-        title: "ルーム待機",
-        onBackButtonPressed: (int? roomId) {
-          RoomService().removePlayerId(roomId);
-          Navigator.pushReplacementNamed(context, '/home');
-        },
-      ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          RoomWidgets.displayRoomId(context: context, roomId: args.roomId),
-          RoomWidgets.userList(users),
-        ],
+    return LocationPermissionCheck(
+      child: Scaffold(
+        appBar: RoomWidgets.roomAppbar(
+          context: context,
+          roomId: args.roomId,
+          title: "ルーム待機",
+          onBackButtonPressed: (int? roomId) {
+            RoomService().removePlayerId(roomId);
+            Navigator.pushReplacementNamed(context, '/home');
+          },
+        ),
+        body: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            RoomWidgets.displayRoomId(context: context, roomId: args.roomId),
+            RoomWidgets.userList(users),
+          ],
+        ),
       ),
     );
   }

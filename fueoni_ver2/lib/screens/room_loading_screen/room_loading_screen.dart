@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:fueoni_ver2/models/arguments.dart';
-import 'package:fueoni_ver2/services/room_management/room_service.dart';
 //import 'package:fueoni_ver2/services/database/loading_room_services.dart';
 //import 'package:fueoni_ver2/services/database/room_services.dart';
+import 'package:fueoni_ver2/components/locate_permission_check.dart';
+import 'package:fueoni_ver2/models/arguments.dart';
+import 'package:fueoni_ver2/services/room_management/room_service.dart';
 
 class RoomLoadingScreen extends StatefulWidget {
   const RoomLoadingScreen({Key? key}) : super(key: key);
@@ -18,14 +19,16 @@ class RoomLoadingScreenState extends State<RoomLoadingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('ゲーム準備中'),
-      ),
-      body: Center(
-        child: _isLoading
-            ? const CircularProgressIndicator()
-            : const Text('すべてのプレイヤーが準備完了しました'),
+    return LocationPermissionCheck(
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('ゲーム準備中'),
+        ),
+        body: Center(
+          child: _isLoading
+              ? const CircularProgressIndicator()
+              : const Text('すべてのプレイヤーが準備完了しました'),
+        ),
       ),
     );
   }

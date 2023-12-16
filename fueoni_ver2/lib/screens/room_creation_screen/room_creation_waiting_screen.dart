@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fueoni_ver2/components/locate_permission_check.dart';
 import 'package:fueoni_ver2/components/room/error_handling.dart';
 import 'package:fueoni_ver2/components/room/room.dart';
 import 'package:fueoni_ver2/models/arguments.dart';
@@ -26,26 +27,29 @@ class RoomCreationWaitingScreenState extends State<RoomCreationWaitingScreen> {
     final args =
         ModalRoute.of(context)!.settings.arguments as CreationRoomArguments;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('ルーム作成待機'),
-        automaticallyImplyLeading: false,
-        actions: _buildAppBarActionButton(context, args.roomId),
-        leading: roomCreationBackButton(context: context, roomId: args.roomId),
-      ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          RoomWidgets.displayRoomId(context: context, roomId: args.roomId),
-          RoomWidgets.displayOwnerName(ownerName),
-          RoomWidgets.userList(users),
-          ElevatedButton(
-            onPressed: () async {
-              await handleStartButtonPressed();
-            },
-            child: const Text('スタート'),
-          ),
-        ],
+    return LocationPermissionCheck(
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('ルーム作成待機'),
+          automaticallyImplyLeading: false,
+          actions: _buildAppBarActionButton(context, args.roomId),
+          leading:
+              roomCreationBackButton(context: context, roomId: args.roomId),
+        ),
+        body: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            RoomWidgets.displayRoomId(context: context, roomId: args.roomId),
+            RoomWidgets.displayOwnerName(ownerName),
+            RoomWidgets.userList(users),
+            ElevatedButton(
+              onPressed: () async {
+                await handleStartButtonPressed();
+              },
+              child: const Text('スタート'),
+            ),
+          ],
+        ),
       ),
     );
   }
