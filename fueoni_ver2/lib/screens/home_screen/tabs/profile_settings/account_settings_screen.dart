@@ -5,7 +5,7 @@ import 'package:fueoni_ver2/hooks/use_location.dart';
 import 'package:fueoni_ver2/main.dart';
 import 'package:fueoni_ver2/services/database/user.dart';
 import 'package:provider/provider.dart';
-import 'package:fueoni_ver2/hooks/useLocation.dart';
+
 import 'components/accounting_info_card.dart';
 import 'components/logout_button.dart';
 

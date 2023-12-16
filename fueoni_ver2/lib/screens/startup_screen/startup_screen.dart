@@ -91,6 +91,8 @@ class StartupScreen extends StatelessWidget {
       permission = await Geolocator.requestPermission();
     }
 
+    print(permission);
+
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
     } else if (permission == LocationPermission.deniedForever) {
@@ -121,7 +123,7 @@ class StartupScreen extends StatelessWidget {
       final user = FirebaseAuth.instance.currentUser;
       if (user != null) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          Navigator.pushReplacementNamed(context, '/map/oni');
+          Navigator.pushReplacementNamed(context, '/home');
         });
       } else {
         WidgetsBinding.instance.addPostFrameCallback((_) {
