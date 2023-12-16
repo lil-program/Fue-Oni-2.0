@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="JAVA_MODULE" version="4">
+  <component name="NewModuleRootManager" inherit-compiler-output="true">
+    <exclude-output />
+    <content url="file://$MODULE_DIR$">
+      <excludeFolder url="file://$MODULE_DIR$/fueoni_ver2/ios/.symlinks/plugins/google_maps_flutter_ios/example/ios13/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/fueoni_ver2/ios/.symlinks/plugins/google_maps_flutter_ios/example/ios13/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/fueoni_ver2/ios/.symlinks/plugins/google_maps_flutter_ios/example/ios13/build" />
+      <excludeFolder url="file://$MODULE_DIR$/fueoni_ver2/ios/.symlinks/plugins/google_sign_in_ios/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/fueoni_ver2/ios/.symlinks/plugins/google_sign_in_ios/build" />
+      <excludeFolder url="file://$MODULE_DIR$/fueoni_ver2/ios/.symlinks/plugins/google_sign_in_ios/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/fueoni_ver2/ios/.symlinks/plugins/firebase_database/example/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/fueoni_ver2/ios/.symlinks/plugins/firebase_database/example/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/fueoni_ver2/ios/.symlinks/plugins/firebase_database/example/build" />
+      <excludeFolder url="file://$MODULE_DIR$/fueoni_ver2/ios/.symlinks/plugins/google_maps_flutter_ios/example/ios12/build" />
+      <excludeFolder url="file://$MODULE_DIR$/fueoni_ver2/ios/.symlinks/plugins/google_maps_flutter_ios/example/ios12/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/fueoni_ver2/ios/.symlinks/plugins/google_maps_flutter_ios/example/ios12/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/fueoni_ver2/ios/.symlinks/plugins/firebase_database/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/fueoni_ver2/ios/.symlinks/plugins/firebase_database/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/fueoni_ver2/ios/.symlinks/plugins/firebase_database/build" />
+      <excludeFolder url="file://$MODULE_DIR$/fueoni_ver2/build" />
+      <excludeFolder url="file://$MODULE_DIR$/fueoni_ver2/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/fueoni_ver2/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/fueoni_ver2/ios/.symlinks/plugins/path_provider_foundation/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/fueoni_ver2/ios/.symlinks/plugins/path_provider_foundation/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/fueoni_ver2/ios/.symlinks/plugins/path_provider_foundation/build" />
+      <excludeFolder url="file://$MODULE_DIR$/fueoni_ver2/ios/.symlinks/plugins/firebase_crashlytics/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/fueoni_ver2/ios/.symlinks/plugins/firebase_crashlytics/build" />
+      <excludeFolder url="file://$MODULE_DIR$/fueoni_ver2/ios/.symlinks/plugins/firebase_crashlytics/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/fueoni_ver2/linux/flutter/ephemeral/.plugin_symlinks/path_provider_linux/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/fueoni_ver2/linux/flutter/ephemeral/.plugin_symlinks/path_provider_linux/build" />
+      <excludeFolder url="file://$MODULE_DIR$/fueoni_ver2/linux/flutter/ephemeral/.plugin_symlinks/path_provider_linux/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/fueoni_ver2/linux/flutter/ephemeral/.plugin_symlinks/path_provider_linux/example/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/fueoni_ver2/linux/flutter/ephemeral/.plugin_symlinks/path_provider_linux/example/build" />
+      <excludeFolder url="file://$MODULE_DIR$/fueoni_ver2/linux/flutter/ephemeral/.plugin_symlinks/path_provider_linux/example/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/fueoni_ver2/ios/.symlinks/plugins/google_sign_in_ios/example/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/fueoni_ver2/ios/.symlinks/plugins/google_sign_in_ios/example/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/fueoni_ver2/ios/.symlinks/plugins/google_sign_in_ios/example/build" />
+      <excludeFolder url="file://$MODULE_DIR$/fueoni_ver2/ios/.symlinks/plugins/google_maps_flutter_ios/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/fueoni_ver2/ios/.symlinks/plugins/google_maps_flutter_ios/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/fueoni_ver2/ios/.symlinks/plugins/google_maps_flutter_ios/build" />
+      <excludeFolder url="file://$MODULE_DIR$/fueoni_ver2/ios/.symlinks/plugins/geolocator_apple/build" />
+      <excludeFolder url="file://$MODULE_DIR$/fueoni_ver2/ios/.symlinks/plugins/geolocator_apple/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/fueoni_ver2/ios/.symlinks/plugins/geolocator_apple/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/fueoni_ver2/ios/.symlinks/plugins/geolocator_apple/example/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/fueoni_ver2/ios/.symlinks/plugins/geolocator_apple/example/build" />
+      <excludeFolder url="file://$MODULE_DIR$/fueoni_ver2/ios/.symlinks/plugins/geolocator_apple/example/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/fueoni_ver2/ios/.symlinks/plugins/google_maps_flutter_ios/example/ios11/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/fueoni_ver2/ios/.symlinks/plugins/google_maps_flutter_ios/example/ios11/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/fueoni_ver2/ios/.symlinks/plugins/google_maps_flutter_ios/example/ios11/build" />
+      <excludeFolder url="file://$MODULE_DIR$/fueoni_ver2/ios/.symlinks/plugins/firebase_auth/example/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/fueoni_ver2/ios/.symlinks/plugins/firebase_auth/example/build" />
+      <excludeFolder url="file://$MODULE_DIR$/fueoni_ver2/ios/.symlinks/plugins/firebase_auth/example/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/fueoni_ver2/ios/.symlinks/plugins/firebase_core/build" />
+      <excludeFolder url="file://$MODULE_DIR$/fueoni_ver2/ios/.symlinks/plugins/firebase_core/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/fueoni_ver2/ios/.symlinks/plugins/firebase_core/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/fueoni_ver2/ios/.symlinks/plugins/path_provider_foundation/example/build" />
+      <excludeFolder url="file://$MODULE_DIR$/fueoni_ver2/ios/.symlinks/plugins/path_provider_foundation/example/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/fueoni_ver2/ios/.symlinks/plugins/path_provider_foundation/example/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/fueoni_ver2/ios/.symlinks/plugins/firebase_auth/build" />
+      <excludeFolder url="file://$MODULE_DIR$/fueoni_ver2/ios/.symlinks/plugins/firebase_auth/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/fueoni_ver2/ios/.symlinks/plugins/firebase_auth/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/fueoni_ver2/ios/.symlinks/plugins/firebase_core/example/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/fueoni_ver2/ios/.symlinks/plugins/firebase_core/example/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/fueoni_ver2/ios/.symlinks/plugins/firebase_core/example/build" />
+      <excludeFolder url="file://$MODULE_DIR$/fueoni_ver2/ios/.symlinks/plugins/firebase_crashlytics/example/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/fueoni_ver2/ios/.symlinks/plugins/firebase_crashlytics/example/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/fueoni_ver2/ios/.symlinks/plugins/firebase_crashlytics/example/build" />
+      <excludeFolder url="file://$MODULE_DIR$/fueoni_ver2/ios/.symlinks/plugins/google_maps_flutter_ios/example/shared/maps_example_dart/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/fueoni_ver2/ios/.symlinks/plugins/google_maps_flutter_ios/example/shared/maps_example_dart/build" />
+      <excludeFolder url="file://$MODULE_DIR$/fueoni_ver2/ios/.symlinks/plugins/google_maps_flutter_ios/example/shared/maps_example_dart/.pub" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+  </component>
+</module>

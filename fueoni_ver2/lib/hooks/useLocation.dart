@@ -52,9 +52,9 @@ void useLocationPermissionCheck(BuildContext context) {
           print(hasPermission);
           if (!hasPermission) {
             try {
-              // WidgetsBinding.instance.addPostFrameCallback((_) {
-              //   Navigator.pushNamed(context, '/');
-              // });
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                Navigator.pushNamed(context, '/');
+              });
             } catch (e) {
               print('リダイレクト中にエラーが発生しました: $e');
             }

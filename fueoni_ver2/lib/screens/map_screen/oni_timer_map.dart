@@ -95,13 +95,13 @@ class _RunnerLocationScreenState extends State<RunnerLocationScreen> {
 Widget build(BuildContext context) {
   return Scaffold(
     appBar: AppBar(
-      title: Text('逃走者の場所'),
+      title: const Text('逃走者の場所'),
     ),
     body: Stack(
       children: <Widget>[
         GoogleMap(
           onMapCreated: _onMapCreated,
-          initialCameraPosition: CameraPosition(
+          initialCameraPosition: const CameraPosition(
             target: LatLng(0, 0), 
             zoom: 10,
           ),
@@ -119,7 +119,7 @@ Widget build(BuildContext context) {
               padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
               child: Text(
                 '自分のマップに戻るまであと: ${_formatDuration(_duration)}',
-                style: TextStyle(fontSize: 20, color: Colors.white),
+                style: const TextStyle(fontSize: 20, color: Colors.white),
                 textAlign: TextAlign.center,
               ),
             ),
