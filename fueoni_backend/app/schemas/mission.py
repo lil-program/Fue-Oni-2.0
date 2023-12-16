@@ -27,6 +27,7 @@ class PagingInfo(BaseModel):
 class MissionsResponse(BaseModel):
     missions: Dict[str, Mission]
     paging_info: PagingInfo
+    next_page_token: str = Field(None, description="Token for the next page of results")
 
 
 class AllMissionsResponse(BaseModel):
