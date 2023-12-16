@@ -41,7 +41,7 @@ class _RunnerMapScreenState extends State<RunnerMapScreen> {
 
   bool isLoading = false;
 
-  final bool _mapIsLoading = true;
+  bool _mapIsLoading = true;
 
   int countOni = 0;
   int countNonOni = 0;
@@ -189,8 +189,13 @@ class _RunnerMapScreenState extends State<RunnerMapScreen> {
               target: snapshot.data!,
               zoom: 16.0,
             ),
-            onMapCreated: (GoogleMapController controller) {
+            onMapCreated: (GoogleMapController controller) async {
               mapController = controller;
+              await _moveToCurrentLocation();
+              await _watchPosition();
+              setState(() {
+                _mapIsLoading = false;
+              });
             },
             myLocationEnabled: false,
             myLocationButtonEnabled: false,
