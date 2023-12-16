@@ -15,11 +15,13 @@ const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 const addOniPlayer_1 = require("./addOniPlayer");
 const checkOniCount_1 = require("./checkOniCount");
+const calculateRankings_1 = require("./calculateRankings");
 // Start writing functions
 // https://firebase.google.com/docs/functions/typescript
 admin.initializeApp();
 exports.addOniPlayer = addOniPlayer_1.addOniPlayer;
 exports.checkOniCount = checkOniCount_1.checkOniCount;
+exports.calculateRankings = calculateRankings_1.calculateRankings;
 exports.helloWorld = (0, https_1.onRequest)((request, response) => {
     logger.info("Hello logs!", { structuredData: true });
     response.send("Hello from Firebase!");
