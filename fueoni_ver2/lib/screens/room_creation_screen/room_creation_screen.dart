@@ -38,7 +38,7 @@ class CreateRoomScreenState extends State<CreateRoomScreen> {
     return LocationPermissionCheck(
       child: Scaffold(
         resizeToAvoidBottomInset: false,
-        backgroundColor: lightColorScheme.primary,
+        backgroundColor: lightColorScheme.background,
         body: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[

@@ -255,11 +255,9 @@ class RoomCreationWaitingScreenState extends State<RoomCreationWaitingScreen> {
 
   _navigateToRoomLoadingScreen() async {
     if (mounted) {
-      final args = ModalRoute.of(context)!.settings.arguments as RoomArguments;
-
       Navigator.pushReplacementNamed(
           context, '/home/room_settings/loading_room',
-          arguments: RoomArguments(roomId: args.roomId));
+          arguments: RoomArguments(roomId: _roomId));
     }
   }
 

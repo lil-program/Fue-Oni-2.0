@@ -44,8 +44,15 @@ class MyApp extends StatelessWidget {
               const RoomSearchPage(),
           '/home/room_settings/search_room/room_search_waiting':
               (BuildContext context) => const RoomSearchWaitingScreen(),
+          /*
           '/home/room_settings/loading_room': (BuildContext context) =>
               const RoomLoadingScreen(),
+              */
+          '/home/room_settings/loading_room': (BuildContext context) {
+            final RoomArguments args =
+                ModalRoute.of(context)!.settings.arguments as RoomArguments;
+            return RoomLoadingScreen(roomArguments: args);
+          },
         },
         theme: ThemeData(useMaterial3: true, colorScheme: lightColorScheme),
         darkTheme: ThemeData(useMaterial3: true, colorScheme: darkColorScheme),
