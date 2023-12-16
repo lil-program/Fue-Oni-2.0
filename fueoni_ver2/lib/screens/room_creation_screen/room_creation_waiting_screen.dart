@@ -74,18 +74,6 @@ class RoomCreationWaitingScreenState extends State<RoomCreationWaitingScreen> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            /*
-            IconButton(
-              icon: const Icon(
-                Icons.arrow_circle_left_outlined,
-                color: Color.fromARGB(255, 103, 80, 164),
-                size: 55,
-              ),
-              onPressed: () {
-                _navigateToRoomCreationSettingsScreen();
-              },
-            ),
-            */
             IconButton(
               icon: const Icon(
                 Icons.logout_outlined,
@@ -137,25 +125,6 @@ class RoomCreationWaitingScreenState extends State<RoomCreationWaitingScreen> {
       ),
     );
   }
-/*
-  Widget buildHeader(double height, double width) {
-    return Container(
-      height: height,
-      width: width,
-      color: lightColorScheme.background,
-      child: const Center(
-        child: Text(
-          'Start your room',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Color.fromARGB(255, 103, 80, 164)),
-        ),
-      ),
-    );
-  }
-  */
 
   Widget buildHeader(
       double height, double width, BuildContext context, int? roomId) {
