@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fueoni_ver2/color_schemes.dart';
-//import 'package:fueoni_ver2/routes/slide_left_route.dart';
+import 'package:fueoni_ver2/routes/slide_left_route.dart';
 import 'package:fueoni_ver2/routes/slide_right_route.dart';
 import 'package:fueoni_ver2/screens/home_screen/home_screen.dart';
 import 'package:fueoni_ver2/screens/home_screen/tabs/profile_settings/account_settings_screen.dart';
@@ -22,39 +22,47 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Fueoni ver2',
-      initialRoute: '/',
-      routes: {
-        '/': (BuildContext context) => const StartupScreen(),
-        //'/home': (BuildContext context) => const HomeScreen(),
-        '/map/oni': (BuildContext context) => const OniMapScreen(),
-        '/map/runner': (BuildContext context) => const RunnerMapScreen(),
-        '/home/account_settings': (BuildContext context) =>
-            const AccountSettingsScreen(),
-        '/home/room_settings': (BuildContext context) =>
-            const RoomSettingsScreen(),
-        '/home/room_settings/create_room': (BuildContext context) =>
-            const CreateRoomScreen(),
-        '/home/room_settings/create_room/room_creation_waiting':
-            (BuildContext context) => const RoomCreationWaitingScreen(),
-        '/home/room_settings/create_room/room_creation_settings':
-            (BuildContext context) => const RoomCreationSettingsScreen(),
-        '/home/room_settings/search_room': (BuildContext context) =>
-            const RoomSearchPage(),
-        '/home/room_settings/search_room/room_search_waiting':
-            (BuildContext context) => const RoomSearchWaitingScreen(),
-        '/home/room_settings/loading_room': (BuildContext context) =>
-            const RoomLoadingScreen(),
-      },
-      theme: ThemeData(useMaterial3: true, colorScheme: lightColorScheme),
-      darkTheme: ThemeData(useMaterial3: true, colorScheme: darkColorScheme),
-      onGenerateRoute: (RouteSettings settings) {
-        if (settings.name == '/home') {
-          return SlideRightRoute(newScreen: const HomeScreen());
-        }
-        // 他の名前付きルートをここに追加
-        return null;
-      },
-    );
+        title: 'Fueoni ver2',
+        initialRoute: '/',
+        routes: {
+          '/': (BuildContext context) => const StartupScreen(),
+          //'/home': (BuildContext context) => const HomeScreen(),
+          '/map/oni': (BuildContext context) => const OniMapScreen(),
+          '/map/runner': (BuildContext context) => const RunnerMapScreen(),
+          '/home/account_settings': (BuildContext context) =>
+              const AccountSettingsScreen(),
+          '/home/room_settings': (BuildContext context) =>
+              const RoomSettingsScreen(),
+          '/home/room_settings/create_room': (BuildContext context) =>
+              const CreateRoomScreen(),
+          //'/home/room_settings/create_room/room_creation_waiting':
+          //    (BuildContext context) => const RoomCreationWaitingScreen(),
+          '/home/room_settings/create_room/room_creation_settings':
+              (BuildContext context) => const RoomCreationSettingsScreen(),
+          '/home/room_settings/search_room': (BuildContext context) =>
+              const RoomSearchPage(),
+          '/home/room_settings/search_room/room_search_waiting':
+              (BuildContext context) => const RoomSearchWaitingScreen(),
+          '/home/room_settings/loading_room': (BuildContext context) =>
+              const RoomLoadingScreen(),
+        },
+        theme: ThemeData(useMaterial3: true, colorScheme: lightColorScheme),
+        darkTheme: ThemeData(useMaterial3: true, colorScheme: darkColorScheme),
+        onGenerateRoute: (RouteSettings settings) {
+          if (settings.name == '/home') {
+            bool useAnimation = settings.arguments as bool? ?? false;
+            if (useAnimation) {
+              return SlideRightRoute(newScreen: const HomeScreen());
+            } else {
+              return MaterialPageRoute(
+                  builder: (context) => const HomeScreen());
+            }
+          }
+          if (settings.name ==
+              '/home/room_settings/create_room/room_creation_waiting') {
+            return SlideLeftRoute(newScreen: const RoomCreationWaitingScreen());
+          }
+          return null;
+        });
   }
 }

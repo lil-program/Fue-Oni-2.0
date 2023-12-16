@@ -17,9 +17,9 @@ class RoomCreationWaitingScreen extends StatefulWidget {
 }
 
 class RoomCreationWaitingScreenState extends State<RoomCreationWaitingScreen> {
-  List<String> users = [];
-  String? ownerName;
-  int? roomId;
+  List<String> _users = [];
+  String? _ownerName;
+  int? _roomId;
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +36,7 @@ class RoomCreationWaitingScreenState extends State<RoomCreationWaitingScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           //ヘッダー
-          buildHeader(headerHeight, screenWidth, context, roomId),
+          buildHeader(headerHeight, screenWidth, context, _roomId),
           //フォーム
           Expanded(
             child: buildFormSection(screenWidth),
@@ -164,17 +164,17 @@ class RoomCreationWaitingScreenState extends State<RoomCreationWaitingScreen> {
         children: [
           Expanded(
             child: buildRoomIDDisplay(
-                "Room ID", "${roomId ?? "Generating Room ID"}"),
+                "Room ID", "${_roomId ?? "Generating Room ID"}"),
           ),
           Expanded(
-            child: buildOwnerNameDisplay("Owner", ownerName ?? "不明"),
+            child: buildOwnerNameDisplay("Owner", _ownerName ?? "不明"),
           ),
         ],
       ),
       const Divider(),
     ];
 
-    for (String user in users) {
+    for (String user in _users) {
       listTiles.add(
         buildUsersTile(Icons.person_outline, user),
       );
@@ -208,12 +208,14 @@ class RoomCreationWaitingScreenState extends State<RoomCreationWaitingScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final args =
           ModalRoute.of(context)!.settings.arguments as CreationRoomArguments;
-      roomId = args.roomId;
-      ownerName = await RoomService().getRoomOwnerName(roomId);
 
-      RoomService().updatePlayersList(roomId, (updatedUsers) {
+      final ownerName = await RoomService().getRoomOwnerName(_roomId);
+
+      RoomService().updatePlayersList(_roomId, (updatedUsers) {
         setState(() {
-          users = updatedUsers;
+          _users = updatedUsers;
+          _roomId = args.roomId;
+          _ownerName = ownerName;
         });
       });
     });
@@ -232,23 +234,23 @@ class RoomCreationWaitingScreenState extends State<RoomCreationWaitingScreen> {
   }
 
   void _navigateToHomeScreen() {
-    CreationService().removeRoomIdFromAllRoomId(roomId);
-    GameService().removeRoomIdFromGames(roomId);
-    Navigator.pushReplacementNamed(context, '/home');
+    CreationService().removeRoomIdFromAllRoomId(_roomId);
+    GameService().removeRoomIdFromGames(_roomId);
+    Navigator.pushReplacementNamed(context, '/home', arguments: true);
   }
 
   void _navigateToRoomCreationSettingsScreen() {
     Navigator.pushNamed(
         context, '/home/room_settings/create_room/room_creation_settings',
-        arguments: CreationRoomArguments(roomId: roomId));
+        arguments: CreationRoomArguments(roomId: _roomId));
   }
 
   _navigateToRoomLoadingScreen() async {
     bool hasPermission = await LocationService.requestLocationPermission();
     if (hasPermission) {
-      await LocationService.updateCurrentLocation(LocationService(), roomId);
-      OniAssignmentService().assignOniRandomly(roomId);
-      GameService().setGameStart(roomId, true);
+      await LocationService.updateCurrentLocation(LocationService(), _roomId);
+      OniAssignmentService().assignOniRandomly(_roomId);
+      GameService().setGameStart(_roomId, true);
       if (mounted) {
         final args =
             ModalRoute.of(context)!.settings.arguments as CreationRoomArguments;
@@ -275,7 +277,7 @@ class RoomCreationWaitingScreenState extends State<RoomCreationWaitingScreen> {
               borderRadius: BorderRadius.circular(10),
             ),
             margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            elevation: 3, // Adds shadow
+            elevation: 3,
             child: ListTile(
               title: Text(users[index]),
               leading: const Icon(Icons.person),

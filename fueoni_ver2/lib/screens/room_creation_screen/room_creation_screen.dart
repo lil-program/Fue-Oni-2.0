@@ -287,7 +287,7 @@ class CreateRoomScreenState extends State<CreateRoomScreen> {
 
   void _navigateToHomeScreen() {
     CreationService().removeRoomIdFromAllRoomId(roomId);
-    Navigator.pushReplacementNamed(context, '/home');
+    Navigator.pushReplacementNamed(context, '/home', arguments: true);
   }
 
   void _navigateToRoomCreationWaitingScreen() async {
@@ -297,7 +297,7 @@ class CreateRoomScreenState extends State<CreateRoomScreen> {
       if (success && mounted) {
         Navigator.pushReplacementNamed(
             context, '/home/room_settings/create_room/room_creation_waiting',
-            arguments: CreationRoomArguments(roomId: roomId));
+            arguments: RoomArguments(roomId: roomId));
       }
     } catch (e) {
       if (mounted) {
