@@ -46,8 +46,6 @@ class RoomLoadingScreenState extends State<RoomLoadingScreen> {
     });
   }
 
-
-
   void _navigateToMap() async {
     bool isOni = await _playerService.isPlayerOni(_roomId!);
     if (isOni) {

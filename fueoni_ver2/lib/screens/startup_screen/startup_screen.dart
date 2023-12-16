@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:fueoni_ver2/components/auth_modal/auth_modal.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:fueoni_ver2/models/arguments.dart';
 
 class StartupScreen extends StatelessWidget {
   const StartupScreen({
@@ -121,7 +122,8 @@ class StartupScreen extends StatelessWidget {
       final user = FirebaseAuth.instance.currentUser;
       if (user != null) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          Navigator.pushReplacementNamed(context, '/home');
+          Navigator.pushReplacementNamed(context, '/map/oni',
+              arguments: RoomArguments(roomId: 166221));
         });
       } else {
         WidgetsBinding.instance.addPostFrameCallback((_) {

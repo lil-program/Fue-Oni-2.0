@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fueoni_ver2/components/locate_permission_check.dart';
@@ -7,11 +6,9 @@ import 'package:fueoni_ver2/screens/result_screen/result_screen.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:qr_flutter/qr_flutter.dart';
-
-// とりあえず鬼３人逃走者２人にする
-int remainingOni = 3;
-
-int remainingRunner = 2;
+import 'package:fueoni_ver2/services/room_creation/oni_assignment_service.dart';
+import 'package:fueoni_ver2/models/arguments.dart';
+// import 'package:firebase_database/firebase_database.dart';
 
 Future<void> initRunnerMapScreen() async {
   // MapScreenの初期化処理をここに書く
@@ -37,9 +34,14 @@ class _RunnerMapScreenState extends State<RunnerMapScreen> {
   Duration mainTimerDuration = const Duration(minutes: 100); // 残り時間のタイマー
   Timer? mainTimer;
 
+  int? roomId;
+
   bool isSignedIn = false;
 
   bool isLoading = false;
+
+  int countOni = 0;
+  int countNonOni = 0;
 
   final CameraPosition initialCameraPosition = const CameraPosition(
     target: LatLng(33.570734171832, 130.24635431587),
@@ -91,6 +93,7 @@ class _RunnerMapScreenState extends State<RunnerMapScreen> {
               left: 0.0,
               bottom: 50,
               child: FloatingActionButton(
+                heroTag: null,
                 onPressed: () async {
                   await _moveToCurrentLocation();
                 },
@@ -123,7 +126,7 @@ class _RunnerMapScreenState extends State<RunnerMapScreen> {
                   ],
                 ),
                 child: Text(
-                  '鬼残り$remainingOni人',
+                  '鬼残り$countOni人',
                   style: const TextStyle(
                     fontWeight: FontWeight.bold, // テキストを太字に
                     fontSize: 16,
@@ -153,7 +156,7 @@ class _RunnerMapScreenState extends State<RunnerMapScreen> {
                   ],
                 ),
                 child: Text(
-                  '逃走者残り$remainingRunner人',
+                  '逃走者残り$countNonOni人',
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
@@ -165,6 +168,7 @@ class _RunnerMapScreenState extends State<RunnerMapScreen> {
               right: 30,
               bottom: 50.0,
               child: FloatingActionButton(
+                heroTag: null,
                 onPressed: () {
                   showDialog(
                     context: context,
@@ -207,17 +211,56 @@ class _RunnerMapScreenState extends State<RunnerMapScreen> {
     super.dispose();
   }
 
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   markers.add(
+  //     const Marker(
+  //       markerId: MarkerId('oni'),
+  //       position: LatLng(33.570734171832, 130.24635431587),
+  //     ),
+  //   );
+  //   startMainTimer(); // 主タイマーを起動します。
+  // }
   @override
   void initState() {
     super.initState();
+    final args = ModalRoute.of(context)!.settings.arguments as RoomArguments;
+    print(args.roomId);
     markers.add(
       const Marker(
         markerId: MarkerId('oni'),
         position: LatLng(33.570734171832, 130.24635431587),
       ),
     );
+    setState(() {
+      roomId = args.roomId;
+    });
     startMainTimer(); // 主タイマーを起動します。
+    // countOniAndNonOniPlayers(roomId);
+    // WidgetsBinding.instance.addPostFrameCallback((_) async {
+    //   final timeLimit = await OniAssignmentService().getTimeLimit(roomId);
+    //   print("Time Limit: $timeLimit");
+    // });
+    // print(
+    //     "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
   }
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // contextに依存する処理
+    final args = ModalRoute.of(context)!.settings.arguments as RoomArguments;
+    setState(() {
+      roomId = args.roomId;
+    });
+
+    // countOniAndNonOniPlayers(roomId);
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final timeLimit = await OniAssignmentService().getTimeLimit(roomId);
+      print("Time Limit: $timeLimit");
+    });
+  }
+
 
   void setIsLoading(bool value) {
     setState(() {
@@ -293,6 +336,31 @@ class _RunnerMapScreenState extends State<RunnerMapScreen> {
       );
     }
   }
+
+  //   Future countOniAndNonOniPlayers(int? roomId) async {
+  //   DatabaseReference playersRef =
+  //       FirebaseDatabase.instance.ref('games/$roomId/players');
+  //   final snapshot = await playersRef.once();
+  //   int oniCount = 0;
+  //   int nonOniCount = 0;
+  //   if (snapshot.snapshot.exists) {
+  //     Map<dynamic, dynamic> playersData =
+  //         snapshot.snapshot.value as Map<dynamic, dynamic>;
+  //     for (var playerData in playersData.values) {
+  //       if (playerData['oni'] == true) {
+  //         oniCount++;
+  //       } else {
+  //         nonOniCount++;
+  //       }
+  //     }
+  //   }
+  //   print({'oni': oniCount, 'nonOni': nonOniCount});
+
+  //   setState(() {
+  //     countOni = oniCount;
+  //     countNonOni = nonOniCount;
+  //   });
+  // }
 
   Future<void> _signOut() async {
     setIsLoading(true);

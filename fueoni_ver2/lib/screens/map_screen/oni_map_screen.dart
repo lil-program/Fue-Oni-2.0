@@ -4,19 +4,16 @@ import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
-
+import 'package:fueoni_ver2/services/room_creation/oni_assignment_service.dart';
 import 'package:fueoni_ver2/components/locate_permission_check.dart';
-
+import 'package:fueoni_ver2/models/arguments.dart';
 import 'package:fueoni_ver2/screens/map_screen/oni_timer_map.dart';
 import 'package:fueoni_ver2/screens/result_screen/result_screen.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 
-// とりあえず鬼３人逃走者２人にする
-int remainingOni = 3;
 
-int remainingRunner = 2;
 
 String? scannaData;
 
@@ -48,10 +45,12 @@ class _OniMapScreenState extends State<OniMapScreen> {
   Set<Marker> markers = {};
   late StreamSubscription<User?> authUserStream;
 
-  Duration mainTimerDuration = const Duration(minutes: 10); // 残り時間のタイマー
-  Duration oniTimerDuration = const Duration(minutes: 1); // 鬼タイマー
+  Duration? mainTimerDuration; // 残り時間のタイマー
+  Duration oniTimerDuration = const Duration(minutes: 2); // 鬼タイマー
   Timer? mainTimer;
   Timer? oniTimer;
+
+  int? roomId;
 
   bool isSignedIn = false;
 
@@ -85,7 +84,7 @@ class _OniMapScreenState extends State<OniMapScreen> {
           title: Column(
             children: [
               Text(
-                '残り時間${_formatDuration(mainTimerDuration)}',
+                '残り時間${_formatDuration(mainTimerDuration ?? const Duration(seconds: 0))}',
                 style: TextStyle(
                   color: Theme.of(context).primaryColor,
                   fontSize: 20,
@@ -160,7 +159,7 @@ class _OniMapScreenState extends State<OniMapScreen> {
                 ],
               ),
               child: Text(
-                '鬼残り$remainingOni人',
+                '鬼残り$countOni人',
                 style: const TextStyle(
                   fontWeight: FontWeight.bold, // テキストを太字に
                   fontSize: 16,
@@ -190,7 +189,7 @@ class _OniMapScreenState extends State<OniMapScreen> {
                 ],
               ),
               child: Text(
-                '逃走者残り$remainingRunner人',
+                '逃走者残り$countNonOni人',
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
@@ -258,31 +257,6 @@ class _OniMapScreenState extends State<OniMapScreen> {
     ));
   }
 
-  Future countOniAndNonOniPlayers(int? roomId) async {
-    DatabaseReference playersRef =
-        FirebaseDatabase.instance.ref('games/$roomId/players');
-    final snapshot = await playersRef.once();
-    int oniCount = 0;
-    int nonOniCount = 0;
-    if (snapshot.snapshot.exists) {
-      Map<dynamic, dynamic> playersData =
-          snapshot.snapshot.value as Map<dynamic, dynamic>;
-      for (var playerData in playersData.values) {
-        if (playerData['oni'] == true) {
-          oniCount++;
-        } else {
-          nonOniCount++;
-        }
-      }
-    }
-    print({'oni': oniCount, 'nonOni': nonOniCount});
-
-    setState(() {
-      countOni = oniCount;
-      countNonOni = nonOniCount;
-    });
-  }
-
   @override
   void dispose() {
     mainTimer?.cancel();
@@ -295,16 +269,25 @@ class _OniMapScreenState extends State<OniMapScreen> {
 
   @override
   void initState() {
+
     super.initState();
-    markers.add(
-      const Marker(
-        markerId: MarkerId('oni'),
-        position: LatLng(33.570734171832, 130.24635431587),
-      ),
-    );
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final args = ModalRoute.of(context)!.settings.arguments as RoomArguments;
+      roomId = args.roomId;
+
+      final gameTimeLimit = await OniAssignmentService().getTimeLimit(roomId);
+      // final oniCount = await OniAssignmentService().getInitialOniCount(roomId);
+      // print(oniCount);
+
+      setState(() {
+        mainTimerDuration = gameTimeLimit;
+        oniTimerDuration = const Duration(minutes: 1);
+      });
+    });
     startMainTimer(); // 主タイマーを起動します。
     startOniTimer(); // 鬼タイマーを起動します。
-    countOniAndNonOniPlayers(146275);
+    // countOniAndNonOniPlayers(roomId);
+    
   }
 
   void navigateToRunnerLocationScreen() {
@@ -333,8 +316,9 @@ class _OniMapScreenState extends State<OniMapScreen> {
 
   void startMainTimer() {
     mainTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+
       setState(() {
-        if (mainTimerDuration.inSeconds <= 0) {
+         if(mainTimerDuration!.inSeconds <= 0) {
           timer.cancel();
           Navigator.pushReplacement(
             context,
@@ -343,7 +327,7 @@ class _OniMapScreenState extends State<OniMapScreen> {
             ),
           );
         } else {
-          mainTimerDuration = mainTimerDuration - const Duration(seconds: 1);
+          mainTimerDuration = mainTimerDuration! - const Duration(seconds: 1);
         }
       });
     });
