@@ -46,7 +46,7 @@ dependencies:
   qr_flutter: ^4.1.0
   flutter_hooks: ^0.20.3
   provider: ^6.1.1
-  qr_code_scanner: ^0.4.0
+  qr_code_scanner: ^1.0.1
 
 dev_dependencies:
   flutter_test:
