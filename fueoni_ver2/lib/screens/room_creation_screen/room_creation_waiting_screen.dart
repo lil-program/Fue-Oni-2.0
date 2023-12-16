@@ -36,7 +36,7 @@ class RoomCreationWaitingScreenState extends State<RoomCreationWaitingScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           //ヘッダー
-          buildHeader(headerHeight, screenWidth),
+          buildHeader(headerHeight, screenWidth, context, roomId),
           //フォーム
           Expanded(
             child: buildFormSection(screenWidth),
@@ -137,7 +137,7 @@ class RoomCreationWaitingScreenState extends State<RoomCreationWaitingScreen> {
       ),
     );
   }
-
+/*
   Widget buildHeader(double height, double width) {
     return Container(
       height: height,
@@ -152,6 +152,38 @@ class RoomCreationWaitingScreenState extends State<RoomCreationWaitingScreen> {
               fontWeight: FontWeight.bold,
               color: Color.fromARGB(255, 103, 80, 164)),
         ),
+      ),
+    );
+  }
+  */
+
+  Widget buildHeader(
+      double height, double width, BuildContext context, int? roomId) {
+    return Container(
+      height: height,
+      width: width,
+      color: lightColorScheme.background,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          const Expanded(
+            child: Center(
+              child: Text(
+                'Register Your Room Settings',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Color.fromARGB(255, 103, 80, 164),
+                ),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(right: 16.0),
+            child: _buildAppBarActionButton(context, roomId),
+          ),
+        ],
       ),
     );
   }
@@ -216,6 +248,18 @@ class RoomCreationWaitingScreenState extends State<RoomCreationWaitingScreen> {
         });
       });
     });
+  }
+
+  Widget _buildAppBarActionButton(BuildContext context, roomId) {
+    return MaterialButton(
+        onPressed: () {
+          _navigateToRoomCreationSettingsScreen();
+        },
+        child: const Icon(
+          Icons.settings_outlined,
+          color: Colors.black,
+          size: 30,
+        ));
   }
 
   void _navigateToHomeScreen() {
