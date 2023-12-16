@@ -91,8 +91,6 @@ class StartupScreen extends StatelessWidget {
       permission = await Geolocator.requestPermission();
     }
 
-    print(permission);
-
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
     } else if (permission == LocationPermission.deniedForever) {
@@ -101,7 +99,7 @@ class StartupScreen extends StatelessWidget {
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
-              title: const Text('位置情報の許可が必要です'),
+              title: const Text('位置情報の許可が必要'),
               content: const Text('設定から位置情報をONにしてください。'),
               actions: <Widget>[
                 TextButton(

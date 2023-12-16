@@ -1,12 +1,14 @@
 import 'dart:async';
 import 'dart:io';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:qr_code_scanner/qr_code_scanner.dart';
+import 'package:fueoni_ver2/components/locate_permission_check.dart';
 import 'package:fueoni_ver2/screens/map_screen/oni_timer_map.dart';
 import 'package:fueoni_ver2/screens/result_screen/result_screen.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:qr_code_scanner/qr_code_scanner.dart';
 
 // とりあえず鬼３人逃走者２人にする
 int remainingOni = 3;
@@ -28,6 +30,13 @@ class OniMapScreen extends StatefulWidget {
 
   @override
   State<OniMapScreen> createState() => _OniMapScreenState();
+}
+
+class QRViewExample extends StatefulWidget {
+  const QRViewExample({super.key});
+
+  @override
+  State<StatefulWidget> createState() => _QRViewExampleState();
 }
 
 class _OniMapScreenState extends State<OniMapScreen> {
@@ -60,7 +69,8 @@ class _OniMapScreenState extends State<OniMapScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return LocationPermissionCheck(
+        child: Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(40),
@@ -195,7 +205,6 @@ class _OniMapScreenState extends State<OniMapScreen> {
                     bottomLeft: Radius.circular(20.0),
                     bottomRight: Radius.circular(20.0),
                   ),
-
                   boxShadow: const [
                     BoxShadow(
                       color: Colors.black26,
@@ -205,7 +214,6 @@ class _OniMapScreenState extends State<OniMapScreen> {
                     ),
                   ],
                 ),
-              
                 child: Text(
                   '鬼タイマー: ${_formatDuration(oniTimerDuration)}',
                   style: const TextStyle(
@@ -221,18 +229,17 @@ class _OniMapScreenState extends State<OniMapScreen> {
             bottom: 50.0,
             child: FloatingActionButton(
               heroTag: "uniqueTag2",
-                 onPressed: () async {
-                  var scannedData = await Navigator.of(context).push(
-                    MaterialPageRoute(builder: (context) => QRViewExample()),
-                  );
+              onPressed: () async {
+                var scannedData = await Navigator.of(context).push(
+                  MaterialPageRoute(
+                      builder: (context) => const QRViewExample()),
+                );
 
-                  if (scannedData != null) {
-                    // スキャンされたデータに基づいて何かの処理を行う
-                    print(scannedData); // 例: コンソールにスキャンされたデータを表示
-                  }
-                },
-
-
+                if (scannedData != null) {
+                  // スキャンされたデータに基づいて何かの処理を行う
+                  print(scannedData); // 例: コンソールにスキャンされたデータを表示
+                }
+              },
               child: Icon(
                 Icons.qr_code_scanner,
                 color: Theme.of(context).iconTheme.color,
@@ -242,7 +249,7 @@ class _OniMapScreenState extends State<OniMapScreen> {
         ],
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
-    );
+    ));
   }
 
   @override
@@ -383,68 +390,65 @@ class _OniMapScreenState extends State<OniMapScreen> {
     setIsLoading(false);
   }
 }
-  class QRViewExample extends StatefulWidget {
-      @override
-      State<StatefulWidget> createState() => _QRViewExampleState();
-    }
-  class _QRViewExampleState extends State<QRViewExample> {
-    final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
-    QRViewController? controller;
 
-    @override
-    void reassemble() {
-      super.reassemble();
-      if (Platform.isIOS) {
-        controller!.pauseCamera();
-      }
-      controller!.resumeCamera();
-    }
+class _QRViewExampleState extends State<QRViewExample> {
+  final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
+  QRViewController? controller;
 
-    @override
-    Widget build(BuildContext context) {
-      return Scaffold(
-        appBar: AppBar(
-      title: const Text('QRコードスキャン'),
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back),
-        onPressed: () {
-          Navigator.of(context).pop();
-        },
-      ),
-    ),
-        body: Column(
-          children: <Widget>[
-            Expanded(
-              flex: 5,
-              child: QRView(
-                key: qrKey,
-                onQRViewCreated: _onQRViewCreated,
-              ),
-            ),
-          ],
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('QRコードスキャン'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
         ),
-      );
-    }
-
-    void _onQRViewCreated(QRViewController controller) {
-      this.controller = controller;
-      controller.scannedDataStream.listen((scanData) {
-        setState(() {
-          scannaData = scanData.code;
-        });
-        // スキャンされたQRコードデータを処理
-        Navigator.pop(context,scannaData);
-        controller.dispose();
-        // print(scannaData);
-      });
-    }
-
-    @override
-    void dispose() {
-      controller?.dispose();
-      super.dispose();
-    }
+      ),
+      body: Column(
+        children: <Widget>[
+          Expanded(
+            flex: 5,
+            child: QRView(
+              key: qrKey,
+              onQRViewCreated: _onQRViewCreated,
+            ),
+          ),
+        ],
+      ),
+    );
   }
+
+  @override
+  void dispose() {
+    controller?.dispose();
+    super.dispose();
+  }
+
+  @override
+  void reassemble() {
+    super.reassemble();
+    if (Platform.isIOS) {
+      controller!.pauseCamera();
+    }
+    controller!.resumeCamera();
+  }
+
+  void _onQRViewCreated(QRViewController controller) {
+    this.controller = controller;
+    controller.scannedDataStream.listen((scanData) {
+      setState(() {
+        scannaData = scanData.code;
+      });
+      // スキャンされたQRコードデータを処理
+      Navigator.pop(context, scannaData);
+      controller.dispose();
+      // print(scannaData);
+    });
+  }
+}
 
 
   // Future<void> _watchPosition() async {
