@@ -88,6 +88,10 @@ class StartupScreen extends StatelessWidget {
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
     }
+    else if (permission == LocationPermission.deniedForever) {
+      await Geolocator.openAppSettings();
+      permission = await Geolocator.requestPermission();
+    }
 
     // 位置情報の許可が得られたら、ユーザー認証を行う
     if (permission == LocationPermission.always ||
