@@ -15,6 +15,7 @@ import 'package:fueoni_ver2/screens/room_loading_screen/room_loading_screen.dart
 import 'package:fueoni_ver2/screens/room_search_screen/room_search_screen.dart';
 import 'package:fueoni_ver2/screens/room_search_screen/room_search_waiting_screen.dart';
 import 'package:fueoni_ver2/screens/startup_screen/startup_screen.dart';
+import 'package:fueoni_ver2/screens/test_screen.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -28,7 +29,10 @@ class MyApp extends StatelessWidget {
         routes: {
           '/': (BuildContext context) => const StartupScreen(),
           //'/home': (BuildContext context) => const HomeScreen(),
-          '/map/oni': (BuildContext context) => const OniMapScreen(),
+          '/map/oni': (BuildContext context) {
+            final roomId = ModalRoute.of(context)!.settings.arguments as String;
+            return OniMapScreen(roomId: roomId);
+          },
           '/map/runner': (BuildContext context) => const RunnerMapScreen(),
           '/home/account_settings': (BuildContext context) =>
               const AccountSettingsScreen(),
@@ -52,6 +56,11 @@ class MyApp extends StatelessWidget {
             final RoomArguments args =
                 ModalRoute.of(context)!.settings.arguments as RoomArguments;
             return RoomLoadingScreen(roomArguments: args);
+          },
+          '/test': (BuildContext context) {
+            final String roomId =
+                ModalRoute.of(context)!.settings.arguments as String;
+            return TestScreen(roomId: roomId);
           },
         },
         theme: ThemeData(useMaterial3: true, colorScheme: lightColorScheme),

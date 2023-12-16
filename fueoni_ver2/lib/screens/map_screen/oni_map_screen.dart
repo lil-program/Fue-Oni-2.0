@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:fueoni_ver2/components/locate_permission_check.dart';
 import 'package:fueoni_ver2/screens/map_screen/oni_timer_map.dart';
@@ -17,33 +18,19 @@ int remainingRunner = 2;
 
 String? scannaData;
 
-Future<void> initOniMapScreen() async {
-  // MapScreenの初期化処理をここに書く
-  // 例えば、Firebaseの初期化やデータの取得など
-  await Future.delayed(const Duration(seconds: 2)); // ここでは2秒待つだけの例を示しています
-}
-
-class OniMapScreen extends StatefulWidget {
-  const OniMapScreen({
+class GameScreen extends StatefulWidget {
+  const GameScreen({
     Key? key,
   }) : super(key: key);
 
   @override
-  State<OniMapScreen> createState() => _OniMapScreenState();
+  State<GameScreen> createState() => GameScreenState();
 }
 
-class QRViewExample extends StatefulWidget {
-  const QRViewExample({super.key});
-
-  @override
-  State<StatefulWidget> createState() => _QRViewExampleState();
-}
-
-class _OniMapScreenState extends State<OniMapScreen> {
+class GameScreenState extends State<GameScreen> {
   late GoogleMapController mapController;
   late StreamSubscription<Position> positionStreamSubscription;
   Set<Marker> markers = {};
-  late StreamSubscription<User?> authUserStream;
 
   Duration mainTimerDuration = const Duration(minutes: 10); // 残り時間のタイマー
   Duration oniTimerDuration = const Duration(minutes: 1); // 鬼タイマー
@@ -257,8 +244,11 @@ class _OniMapScreenState extends State<OniMapScreen> {
     mainTimer?.cancel();
     oniTimer?.cancel();
     mapController.dispose();
-    positionStreamSubscription.cancel();
-    authUserStream.cancel();
+    try {
+      positionStreamSubscription.cancel();
+    } catch (_) {
+      // positionStreamSubscriptionが既にキャンセルされている場合、何もしない
+    }
     super.dispose();
   }
 
@@ -388,6 +378,96 @@ class _OniMapScreenState extends State<OniMapScreen> {
     await Future.delayed(const Duration(seconds: 1), () {});
     await FirebaseAuth.instance.signOut();
     setIsLoading(false);
+  }
+}
+
+class OniMapScreen extends StatefulWidget {
+  final String roomId;
+
+  const OniMapScreen({
+    Key? key,
+    required this.roomId,
+  }) : super(key: key);
+
+  @override
+  State<OniMapScreen> createState() => _OniMapScreenState();
+}
+
+class QRViewExample extends StatefulWidget {
+  const QRViewExample({super.key});
+
+  @override
+  State<StatefulWidget> createState() => _QRViewExampleState();
+}
+
+class RankingsScreen extends StatelessWidget {
+  final List rankings;
+
+  const RankingsScreen({Key? key, required this.rankings}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Rankings'),
+      ),
+      body: ListView.builder(
+        itemCount: rankings.length,
+        itemBuilder: (context, index) {
+          return ListTile(
+            title: Text('Player: ${rankings[index]['player']}'),
+            subtitle: Text('Rank: ${rankings[index]['rank']}'),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _OniMapScreenState extends State<OniMapScreen> {
+  bool gameStart = true;
+  List rankings = [];
+
+  @override
+  Widget build(BuildContext context) {
+    return gameStart ? const GameScreen() : RankingsScreen(rankings: rankings);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    print('initState');
+    print(widget.roomId);
+    print('initState');
+    final gameStartRef = FirebaseDatabase.instance
+        .ref()
+        .child('games')
+        .child('121233')
+        .child('settings')
+        .child('gameStart');
+
+    gameStartRef.onValue.listen((event) {
+      setState(() {
+        print('gameStartRef.onValue.listen((event) {');
+        print(event.snapshot.value);
+        gameStart = event.snapshot.value as bool? ?? true;
+      });
+    });
+
+    final rankingsRef = FirebaseDatabase.instance
+        .ref()
+        .child('games')
+        .child('121233')
+        .child('rankings');
+
+    rankingsRef.onValue.listen((event) {
+      setState(() {
+        print('rankingsRef.onValue.listen((event) {');
+        print(event.snapshot.value);
+        rankings = event.snapshot.value as List? ?? [];
+      });
+    });
   }
 }
 

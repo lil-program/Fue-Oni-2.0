@@ -121,7 +121,8 @@ class StartupScreen extends StatelessWidget {
       final user = FirebaseAuth.instance.currentUser;
       if (user != null) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          Navigator.pushReplacementNamed(context, '/home');
+          Navigator.pushReplacementNamed(context, '/map/oni',
+              arguments: '121233');
         });
       } else {
         WidgetsBinding.instance.addPostFrameCallback((_) {
