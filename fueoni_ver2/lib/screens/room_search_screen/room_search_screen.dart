@@ -30,7 +30,7 @@ class RoomSearchPageState extends State<RoomSearchPage> {
         appBar: RoomWidgets.roomAppbar(
           context: context,
           roomId: roomId,
-          title: "ルーム設定",
+          title: "Search Room",
           onBackButtonPressed: (int? roomId) {
             if (roomId != null) {
               Navigator.pushReplacementNamed(context, '/home');
@@ -60,7 +60,7 @@ class RoomSearchPageState extends State<RoomSearchPage> {
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _searchRoom,
-                child: const Text('検索'),
+                child: const Text('Search'),
               ),
               const SizedBox(height: 20),
               if (_isSearchDone) _buildSearchResult(),
@@ -75,8 +75,8 @@ class RoomSearchPageState extends State<RoomSearchPage> {
     if (gameInfo == null) {
       return const Card(
         child: ListTile(
-          title: Text('検索結果'),
-          subtitle: Text('ゲーム情報は見つかりませんでした。'),
+          title: Text('Result'),
+          subtitle: Text('Not Found'),
         ),
       );
     } else {
@@ -119,7 +119,7 @@ class RoomSearchPageState extends State<RoomSearchPage> {
       Navigator.pushReplacementNamed(
         context,
         '/home/room_settings/search_room/room_search_waiting',
-        arguments: SearchRoomArguments(roomId: roomId),
+        arguments: RoomArguments(roomId: roomId),
       );
     } else {
       showErrorDialog(context, 'プレイヤーの登録に失敗しました。');

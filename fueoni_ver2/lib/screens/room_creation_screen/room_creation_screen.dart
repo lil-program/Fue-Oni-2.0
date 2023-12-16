@@ -38,7 +38,7 @@ class CreateRoomScreenState extends State<CreateRoomScreen> {
     return LocationPermissionCheck(
       child: Scaffold(
         resizeToAvoidBottomInset: false,
-        backgroundColor: lightColorScheme.primary,
+        backgroundColor: lightColorScheme.background,
         body: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
@@ -60,29 +60,27 @@ class CreateRoomScreenState extends State<CreateRoomScreen> {
     return Container(
       height: height,
       width: width,
-      color: Theme.of(context).colorScheme.primary,
+      color: Theme.of(context).colorScheme.background,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24.0),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            // Back button
             IconButton(
               icon: const Icon(
                 Icons.arrow_circle_left_outlined,
-                color: Colors.white,
-                size: 50,
+                color: Color.fromARGB(255, 103, 80, 164),
+                size: 55,
               ),
               onPressed: () {
                 _navigateToHomeScreen();
               },
             ),
-            // Check button
             IconButton(
               icon: const Icon(
-                Icons.check_circle,
-                color: Colors.white,
-                size: 50,
+                Icons.arrow_circle_right,
+                color: Color.fromARGB(255, 103, 80, 164),
+                size: 55,
               ),
               onPressed: () {
                 _navigateToRoomCreationWaitingScreen();
@@ -100,14 +98,19 @@ class CreateRoomScreenState extends State<CreateRoomScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 24),
         child: Card(
+          color: Colors.grey[50],
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(25.0),
+            side: BorderSide(
+              color: Colors.grey[300] ?? Colors.grey,
+              width: 1,
+            ),
           ),
+          elevation: 4,
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
               children: buildListTiles(),
-              //buildListDialogCard(),
             ),
           ),
         ),
@@ -119,27 +122,17 @@ class CreateRoomScreenState extends State<CreateRoomScreen> {
     return Container(
       height: height,
       width: width,
-      color: lightColorScheme.primary,
+      color: lightColorScheme.background,
       child: const Center(
         child: Text(
-          'Choose your camera equipment',
+          'Register Your Room Settings',
           textAlign: TextAlign.center,
           style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Color.fromARGB(255, 103, 80, 164)),
         ),
       ),
-    );
-  }
-
-  ListTile buildListTile(
-      IconData leadingIcon, String title, IconData trailingIcon) {
-    return ListTile(
-      leading: Icon(leadingIcon),
-      title: Text(title),
-      trailing: Icon(trailingIcon),
     );
   }
 
@@ -297,7 +290,7 @@ class CreateRoomScreenState extends State<CreateRoomScreen> {
 
   void _navigateToHomeScreen() {
     CreationService().removeRoomIdFromAllRoomId(roomId);
-    Navigator.pushReplacementNamed(context, '/home');
+    Navigator.pushReplacementNamed(context, '/home', arguments: true);
   }
 
   void _navigateToRoomCreationWaitingScreen() async {
@@ -307,7 +300,7 @@ class CreateRoomScreenState extends State<CreateRoomScreen> {
       if (success && mounted) {
         Navigator.pushReplacementNamed(
             context, '/home/room_settings/create_room/room_creation_waiting',
-            arguments: CreationRoomArguments(roomId: roomId));
+            arguments: RoomArguments(roomId: roomId));
       }
     } catch (e) {
       if (mounted) {

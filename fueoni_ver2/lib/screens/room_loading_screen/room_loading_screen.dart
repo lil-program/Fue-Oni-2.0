@@ -1,21 +1,18 @@
 import 'package:flutter/material.dart';
-//import 'package:fueoni_ver2/services/database/loading_room_services.dart';
-//import 'package:fueoni_ver2/services/database/room_services.dart';
 import 'package:fueoni_ver2/components/locate_permission_check.dart';
 import 'package:fueoni_ver2/models/arguments.dart';
-import 'package:fueoni_ver2/services/room_management/room_service.dart';
 
 class RoomLoadingScreen extends StatefulWidget {
-  const RoomLoadingScreen({Key? key}) : super(key: key);
+  final RoomArguments roomArguments;
+  const RoomLoadingScreen({Key? key, required this.roomArguments})
+      : super(key: key);
 
   @override
   RoomLoadingScreenState createState() => RoomLoadingScreenState();
 }
 
 class RoomLoadingScreenState extends State<RoomLoadingScreen> {
-  final RoomService _roomServices = RoomService();
-  int? roomId;
-  bool _isLoading = true;
+  int? _roomId;
 
   @override
   Widget build(BuildContext context) {
@@ -25,9 +22,10 @@ class RoomLoadingScreenState extends State<RoomLoadingScreen> {
           title: const Text('ゲーム準備中'),
         ),
         body: Center(
-          child: _isLoading
-              ? const CircularProgressIndicator()
-              : const Text('すべてのプレイヤーが準備完了しました'),
+          child: ElevatedButton(
+            onPressed: _navigateOniMap,
+            child: const Text('鬼マップへ'),
+          ),
         ),
       ),
     );
@@ -37,34 +35,14 @@ class RoomLoadingScreenState extends State<RoomLoadingScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final args =
-          ModalRoute.of(context)!.settings.arguments as LoadingRoomArguments;
       setState(() {
-        roomId = args.roomId;
+        _roomId = widget.roomArguments.roomId;
       });
-      _checkAllPlayersReady();
     });
   }
 
-  _checkAllPlayersReady() async {
-    // 最初のチェックを行う前に2秒待機
-    await Future.delayed(const Duration(seconds: 2));
-
-    while (_isLoading) {
-      bool allReady = await _roomServices.areAllPlayersLocationsSet(roomId);
-
-      if (allReady) {
-        setState(() {
-          _isLoading = false;
-        });
-        await Future.delayed(const Duration(seconds: 1));
-        if (mounted) {
-          Navigator.pushReplacementNamed(context, '/home');
-        }
-      } else {
-        // プレイヤーがまだ準備完了していない場合、さらに10秒待機
-        await Future.delayed(const Duration(seconds: 10));
-      }
-    }
+  void _navigateOniMap() {
+    Navigator.pushReplacementNamed(context, '/map/oni',
+        arguments: RoomArguments(roomId: _roomId));
   }
 }
