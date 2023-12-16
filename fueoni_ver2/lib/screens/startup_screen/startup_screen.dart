@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fueoni_ver2/components/auth_modal/auth_modal.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class StartupScreen extends StatelessWidget {
@@ -82,23 +83,37 @@ class StartupScreen extends StatelessWidget {
   }
 
   Future<void> navigateBasedOnAuth(BuildContext context) async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      Navigator.pushReplacementNamed(context, '/home');
-    } else {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          contentPadding: EdgeInsets.zero,
-          insetPadding: const EdgeInsets.all(20), // 画面の周囲に20ピクセルのパディングを追加
-          content: SizedBox(
-            height:
-                MediaQuery.of(context).size.height * 0.6, // ダイアログの高さを画面の80%に設定
-            width: MediaQuery.of(context).size.width, // ダイアログの幅を画面の幅に設定
-            child: const AuthModal(),
-          ),
-        ),
-      );
+    // 位置情報の許可を求める
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+    }
+
+    // 位置情報の許可が得られたら、ユーザー認証を行う
+    if (permission == LocationPermission.always ||
+        permission == LocationPermission.whileInUse) {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          Navigator.pushReplacementNamed(context, '/map/oni');
+        });
+      } else {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          final size = MediaQuery.of(context).size;
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              contentPadding: EdgeInsets.zero,
+              insetPadding: const EdgeInsets.all(20),
+              content: SizedBox(
+                height: size.height * 0.6,
+                width: size.width,
+                child: const AuthModal(),
+              ),
+            ),
+          );
+        });
+      }
     }
   }
 }

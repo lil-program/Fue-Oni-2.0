@@ -4,7 +4,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:fueoni_ver2/main.dart';
 import 'package:fueoni_ver2/services/database/user.dart';
 import 'package:provider/provider.dart';
-
+import 'package:fueoni_ver2/hooks/useLocation.dart';
 import 'components/accounting_info_card.dart';
 import 'components/logout_button.dart';
 
@@ -13,6 +13,8 @@ class AccountSettingsScreen extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
+    useLocationPermissionCheck(context);
+    // useLocationPermissionCheck(context);
     final isExpanded = useState(false);
     final isLoading = useState(false);
 
@@ -33,17 +35,18 @@ class AccountSettingsScreen extends HookWidget {
 
     useEffect(() {
       bool isActive = true;
+      final userNameProvider = context.read<UserNameProvider>();
 
       void fetchName() async {
         final fetchedName = await userService!.fetchName();
         if (isActive) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            context.read<UserNameProvider>().setUserName(fetchedName);
+            userNameProvider.setUserName(fetchedName);
           });
         }
       }
 
-      if (context.read<UserNameProvider>().userName == null) {
+      if (userNameProvider.userName == null) {
         fetchName();
       }
 
