@@ -2,18 +2,15 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
-import 'package:fueoni_ver2/services/room_creation/oni_assignment_service.dart';
 import 'package:fueoni_ver2/components/locate_permission_check.dart';
 import 'package:fueoni_ver2/models/arguments.dart';
 import 'package:fueoni_ver2/screens/map_screen/oni_timer_map.dart';
 import 'package:fueoni_ver2/screens/result_screen/result_screen.dart';
+import 'package:fueoni_ver2/services/room_creation/oni_assignment_service.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
-
-
 
 String? scannaData;
 
@@ -45,6 +42,11 @@ class _OniMapScreenState extends State<OniMapScreen> {
   Set<Marker> markers = {};
   late StreamSubscription<User?> authUserStream;
 
+  LocationSettings locationSettings = const LocationSettings(
+    accuracy: LocationAccuracy.high, // 高精度の位置情報
+    distanceFilter: 10, // 最小の距離変化（メートル）
+  );
+
   Duration? mainTimerDuration; // 残り時間のタイマー
   Duration oniTimerDuration = const Duration(minutes: 2); // 鬼タイマー
   Timer? mainTimer;
@@ -64,12 +66,6 @@ class _OniMapScreenState extends State<OniMapScreen> {
   final CameraPosition initialCameraPosition = const CameraPosition(
     target: LatLng(33.570734171832, 130.24635431587),
     zoom: 16.0,
-  );
-
-  // 現在地通知の設定
-  final LocationSettings locationSettings = const LocationSettings(
-    accuracy: LocationAccuracy.high, //正確性:highはAndroid(0-100m),iOS(10m)
-    distanceFilter: 10,
   );
 
   @override
@@ -269,7 +265,6 @@ class _OniMapScreenState extends State<OniMapScreen> {
 
   @override
   void initState() {
-
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final args = ModalRoute.of(context)!.settings.arguments as RoomArguments;
@@ -287,7 +282,6 @@ class _OniMapScreenState extends State<OniMapScreen> {
     startMainTimer(); // 主タイマーを起動します。
     startOniTimer(); // 鬼タイマーを起動します。
     // countOniAndNonOniPlayers(roomId);
-    
   }
 
   void navigateToRunnerLocationScreen() {
@@ -316,9 +310,8 @@ class _OniMapScreenState extends State<OniMapScreen> {
 
   void startMainTimer() {
     mainTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-
       setState(() {
-         if(mainTimerDuration!.inSeconds <= 0) {
+        if (mainTimerDuration!.inSeconds <= 0) {
           timer.cancel();
           Navigator.pushReplacement(
             context,
