@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fueoni_ver2/components/room/room.dart';
-import 'package:fueoni_ver2/screens/room_creation/widgets/oni_dialog.dart';
-import 'package:fueoni_ver2/screens/room_creation/widgets/timer_dialog.dart';
+import 'package:fueoni_ver2/screens/room_creation_screen/widgets/oni_dialog.dart';
+import 'package:fueoni_ver2/screens/room_creation_screen/widgets/timer_dialog.dart';
 
 typedef DialogCallback = Future<void> Function();
 

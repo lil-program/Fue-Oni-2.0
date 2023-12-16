@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:fueoni_ver2/components/room/error_handling.dart';
 import 'package:fueoni_ver2/components/room/room.dart';
-import 'package:fueoni_ver2/services/creation_room_services.dart';
-import 'package:fueoni_ver2/services/room_services.dart';
+import 'package:fueoni_ver2/models/arguments.dart';
+import 'package:fueoni_ver2/services/room_creation/creation_service.dart';
+import 'package:fueoni_ver2/services/room_creation/oni_assignment_service.dart';
+import 'package:fueoni_ver2/services/room_management/game_service.dart';
+import 'package:fueoni_ver2/services/room_management/location_service.dart';
+import 'package:fueoni_ver2/services/room_management/room_service.dart';
 
 class RoomCreationWaitingScreen extends StatefulWidget {
   const RoomCreationWaitingScreen({super.key});
@@ -12,8 +17,6 @@ class RoomCreationWaitingScreen extends StatefulWidget {
 }
 
 class RoomCreationWaitingScreenState extends State<RoomCreationWaitingScreen> {
-  final RoomServices _roomServices = RoomServices();
-  final CreationRoomServices _creationRoomServices = CreationRoomServices();
   List<String> users = [];
   String? ownerName;
   int? roomId;
@@ -38,23 +41,27 @@ class RoomCreationWaitingScreenState extends State<RoomCreationWaitingScreen> {
           RoomWidgets.userList(users),
           ElevatedButton(
             onPressed: () async {
-              _creationRoomServices.assignOniRandomly(roomId);
-              _creationRoomServices.setGameStart(roomId, true);
-              bool hasPermission =
-                  await RoomServices.requestLocationPermission();
-              if (hasPermission) {
-                await RoomServices.updateCurrentLocation(_roomServices, roomId);
-                //ここにゲーム画面への遷移を書く
-                Navigator.pushReplacementNamed(context, '/home/room_settings');
-              } else {
-                print("パーミッションが拒否されました");
-              }
+              await handleStartButtonPressed();
             },
             child: const Text('スタート'),
           ),
         ],
       ),
     );
+  }
+
+  Future<void> handleStartButtonPressed() async {
+    bool hasPermission = await LocationService.requestLocationPermission();
+    if (hasPermission) {
+      await LocationService.updateCurrentLocation(LocationService(), roomId);
+      OniAssignmentService().assignOniRandomly(roomId);
+      GameService().setGameStart(roomId, true);
+      _navigateToGameScreen();
+    } else {
+      if (mounted) {
+        showPermissionDeniedDialog(context);
+      }
+    }
   }
 
   @override
@@ -64,9 +71,9 @@ class RoomCreationWaitingScreenState extends State<RoomCreationWaitingScreen> {
       final args =
           ModalRoute.of(context)!.settings.arguments as CreationRoomArguments;
       roomId = args.roomId;
-      ownerName = await _roomServices.getRoomOwnerName(roomId);
+      ownerName = await RoomService().getRoomOwnerName(roomId);
 
-      _roomServices.updatePlayersList(roomId, (updatedUsers) {
+      RoomService().updatePlayersList(roomId, (updatedUsers) {
         setState(() {
           users = updatedUsers;
         });
@@ -78,12 +85,11 @@ class RoomCreationWaitingScreenState extends State<RoomCreationWaitingScreen> {
     required BuildContext context,
     required int? roomId,
   }) {
-    final roomIdGenerator = CreationRoomServices();
     return IconButton(
       icon: const Icon(Icons.arrow_back, color: Colors.black),
       onPressed: () {
-        roomIdGenerator.removeRoomIdFromAllRoomId(roomId);
-        roomIdGenerator.removeRoomIdFromGames(roomId);
+        CreationService().removeRoomIdFromAllRoomId(roomId);
+        GameService().removeRoomIdFromGames(roomId);
         Navigator.pushReplacementNamed(context, '/home/room_settings');
       },
     );
@@ -103,5 +109,16 @@ class RoomCreationWaitingScreenState extends State<RoomCreationWaitingScreen> {
             size: 30.0,
           ))
     ];
+  }
+
+  void _navigateToGameScreen() {
+    final args =
+        ModalRoute.of(context)!.settings.arguments as CreationRoomArguments;
+
+    if (mounted) {
+      Navigator.pushReplacementNamed(
+          context, '/home/room_settings/loading_room',
+          arguments: LoadingRoomArguments(roomId: args.roomId));
+    }
   }
 }
