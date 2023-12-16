@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fueoni_ver2/color_schemes.dart';
+import 'package:fueoni_ver2/components/locate_permission_check.dart';
 import 'package:fueoni_ver2/components/room/error_handling.dart';
-//import 'package:fueoni_ver2/components/room/room.dart';
 import 'package:fueoni_ver2/models/arguments.dart';
 import 'package:fueoni_ver2/services/room_management/location_service.dart';
 import 'package:fueoni_ver2/services/room_management/room_service.dart';
@@ -27,21 +27,23 @@ class RoomSearchWaitingScreenState extends State<RoomSearchWaitingScreen> {
     double headerHeight = screenHeight * 0.20;
     double footerHeight = screenHeight * 0.10;
 
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      backgroundColor: lightColorScheme.background,
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          //ヘッダー
-          buildHeader(headerHeight, screenWidth),
-          //フォーム
-          Expanded(
-            child: buildFormSection(screenWidth),
-          ),
-          //フッター
-          buildFooter(footerHeight, screenWidth, context),
-        ],
+    return LocationPermissionCheck(
+      child: Scaffold(
+        resizeToAvoidBottomInset: false,
+        backgroundColor: lightColorScheme.background,
+        body: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            //ヘッダー
+            buildHeader(headerHeight, screenWidth),
+            //フォーム
+            Expanded(
+              child: buildFormSection(screenWidth),
+            ),
+            //フッター
+            buildFooter(footerHeight, screenWidth, context),
+          ],
+        ),
       ),
     );
   }

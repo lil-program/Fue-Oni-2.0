@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:fueoni_ver2/color_schemes.dart';
-import 'package:fueoni_ver2/components/room/error_handling.dart';
+import 'package:fueoni_ver2/components/locate_permission_check.dart';
 import 'package:fueoni_ver2/models/arguments.dart';
 import 'package:fueoni_ver2/services/room_creation/creation_service.dart';
-import 'package:fueoni_ver2/services/room_creation/oni_assignment_service.dart';
 import 'package:fueoni_ver2/services/room_management/game_service.dart';
-import 'package:fueoni_ver2/services/room_management/location_service.dart';
 import 'package:fueoni_ver2/services/room_management/room_service.dart';
 
 class RoomCreationWaitingScreen extends StatefulWidget {
@@ -32,21 +30,23 @@ class RoomCreationWaitingScreenState extends State<RoomCreationWaitingScreen> {
     double headerHeight = screenHeight * 0.20;
     double footerHeight = screenHeight * 0.10;
 
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      backgroundColor: lightColorScheme.background,
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          //ヘッダー
-          buildHeader(headerHeight, screenWidth, context, _roomId),
-          //フォーム
-          Expanded(
-            child: buildFormSection(screenWidth),
-          ),
-          //フッター
-          buildFooter(footerHeight, screenWidth, context),
-        ],
+    return LocationPermissionCheck(
+      child: Scaffold(
+        resizeToAvoidBottomInset: false,
+        backgroundColor: lightColorScheme.background,
+        body: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            //ヘッダー
+            buildHeader(headerHeight, screenWidth, context, _roomId),
+            //フォーム
+            Expanded(
+              child: buildFormSection(screenWidth),
+            ),
+            //フッター
+            buildFooter(footerHeight, screenWidth, context),
+          ],
+        ),
       ),
     );
   }
@@ -254,23 +254,12 @@ class RoomCreationWaitingScreenState extends State<RoomCreationWaitingScreen> {
   }
 
   _navigateToRoomLoadingScreen() async {
-    bool hasPermission = await LocationService.requestLocationPermission();
-    if (hasPermission) {
-      await LocationService.updateCurrentLocation(LocationService(), _roomId);
-      OniAssignmentService().assignOniRandomly(_roomId);
-      GameService().setGameStart(_roomId, true);
-      if (mounted) {
-        final args =
-            ModalRoute.of(context)!.settings.arguments as RoomArguments;
+    if (mounted) {
+      final args = ModalRoute.of(context)!.settings.arguments as RoomArguments;
 
-        Navigator.pushReplacementNamed(
-            context, '/home/room_settings/loading_room',
-            arguments: RoomArguments(roomId: args.roomId));
-      }
-    } else {
-      if (mounted) {
-        showPermissionDeniedDialog(context);
-      }
+      Navigator.pushReplacementNamed(
+          context, '/home/room_settings/loading_room',
+          arguments: RoomArguments(roomId: args.roomId));
     }
   }
 
