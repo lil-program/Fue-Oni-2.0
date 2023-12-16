@@ -168,14 +168,16 @@ class _RunnerMapScreenState extends State<RunnerMapScreen> {
                   context: context,
                   builder: (context) {
                     return Dialog(
-                      child: Container(
-                        padding: const EdgeInsets.all(20),
-                        child: QrImageView(
-                          data: "https://www.kamo-it.org/blog/36/",
-                          version: QrVersions.auto,
-                          size: 200.0,
+                      // child: Container(
+                        // insetPadding : const EdgeInsets.only(left:5, right: 5, top: 20, bottom:20),
+                        // padding: const EdgeInsets.all(20),
+                          child: QrImageView(
+                            padding: const EdgeInsets.only(left: 60, right: 20, top: 20, bottom: 20), 
+                            data: "https://www.kamo-it.org/blog/36/",
+                            version: QrVersions.auto,
+                            size: 200.0,
                         ),
-                      ),
+                        // ),
                     );
                   },
                 );

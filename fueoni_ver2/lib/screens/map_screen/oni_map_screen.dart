@@ -1,7 +1,8 @@
 import 'dart:async';
-
+import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:fueoni_ver2/screens/map_screen/oni_timer_map.dart';
 import 'package:fueoni_ver2/screens/result_screen/result_screen.dart';
 import 'package:geolocator/geolocator.dart';
@@ -11,6 +12,8 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 int remainingOni = 3;
 
 int remainingRunner = 2;
+
+String? scannaData;
 
 Future<void> initOniMapScreen() async {
   // MapScreenの初期化処理をここに書く
@@ -41,6 +44,8 @@ class _OniMapScreenState extends State<OniMapScreen> {
   bool isSignedIn = false;
 
   bool isLoading = false;
+
+  bool _mapIsLoading = true;
 
   final CameraPosition initialCameraPosition = const CameraPosition(
     target: LatLng(33.570734171832, 130.24635431587),
@@ -74,17 +79,31 @@ class _OniMapScreenState extends State<OniMapScreen> {
           ),
         ),
       ),
-      body: GoogleMap(
-        initialCameraPosition: initialCameraPosition,
-        onMapCreated: (GoogleMapController controller) async {
-          mapController = controller;
-          // await _requestPermission();
-          await _moveToCurrentLocation();
-          // await _watchPosition();
-        },
-        myLocationEnabled: false,
-        myLocationButtonEnabled: false,
-        markers: markers,
+      body: Stack(
+        children: [
+          GoogleMap(
+            initialCameraPosition: initialCameraPosition,
+            onMapCreated: (GoogleMapController controller) async {
+              mapController = controller;
+              await _requestPermission();
+              await _moveToCurrentLocation();
+              // await _watchPosition();
+              setState(() {
+                _mapIsLoading = false;
+              });
+            },
+            myLocationEnabled: false,
+            myLocationButtonEnabled: false,
+            markers: markers,
+          ),
+          if (_mapIsLoading)
+            Container(
+              color: Colors.white,
+              child: const Center(
+                child: CircularProgressIndicator(),
+              ),
+            ),
+        ],
       ),
       floatingActionButton: Stack(
         children: <Widget>[
@@ -164,32 +183,35 @@ class _OniMapScreenState extends State<OniMapScreen> {
             ),
           ),
           Positioned(
-            right: 115,
-            bottom: 650,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor,
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(20.0),
-                  topRight: Radius.circular(20.0),
-                  bottomLeft: Radius.circular(20.0),
-                  bottomRight: Radius.circular(20.0),
-                ),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Colors.black26,
-                    blurRadius: 4,
-                    offset: Offset(5, 5),
-                    spreadRadius: 2,
+            child: Align(
+              alignment: const Alignment(-0.15, -0.6),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).primaryColor,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(20.0),
+                    topRight: Radius.circular(20.0),
+                    bottomLeft: Radius.circular(20.0),
+                    bottomRight: Radius.circular(20.0),
                   ),
-                ],
-              ),
-              child: Text(
-                '鬼タイマー: ${_formatDuration(oniTimerDuration)}',
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20,
+
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Colors.black26,
+                      blurRadius: 4,
+                      offset: Offset(5, 5),
+                      spreadRadius: 2,
+                    ),
+                  ],
+                ),
+              
+                child: Text(
+                  '鬼タイマー: ${_formatDuration(oniTimerDuration)}',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                  ),
                 ),
               ),
             ),
@@ -199,9 +221,18 @@ class _OniMapScreenState extends State<OniMapScreen> {
             bottom: 50.0,
             child: FloatingActionButton(
               heroTag: "uniqueTag2",
-              onPressed: () async {
-                // TODO: ここにカメラを起動する記述
-              },
+                 onPressed: () async {
+                  var scannedData = await Navigator.of(context).push(
+                    MaterialPageRoute(builder: (context) => QRViewExample()),
+                  );
+
+                  if (scannedData != null) {
+                    // スキャンされたデータに基づいて何かの処理を行う
+                    print(scannedData); // 例: コンソールにスキャンされたデータを表示
+                  }
+                },
+
+
               child: Icon(
                 Icons.qr_code_scanner,
                 color: Theme.of(context).iconTheme.color,
@@ -337,13 +368,13 @@ class _OniMapScreenState extends State<OniMapScreen> {
     }
   }
 
-  // Future<void> _requestPermission() async {
-  //   // 位置情報の許可を求める
-  //   LocationPermission permission = await Geolocator.checkPermission();
-  //   if (permission == LocationPermission.denied) {
-  //     await Geolocator.requestPermission();
-  //   }
-  // }
+  Future<void> _requestPermission() async {
+    // 位置情報の許可を求める
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      await Geolocator.requestPermission();
+    }
+  }
 
   Future<void> _signOut() async {
     setIsLoading(true);
@@ -351,6 +382,70 @@ class _OniMapScreenState extends State<OniMapScreen> {
     await FirebaseAuth.instance.signOut();
     setIsLoading(false);
   }
+}
+  class QRViewExample extends StatefulWidget {
+      @override
+      State<StatefulWidget> createState() => _QRViewExampleState();
+    }
+  class _QRViewExampleState extends State<QRViewExample> {
+    final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
+    QRViewController? controller;
+
+    @override
+    void reassemble() {
+      super.reassemble();
+      if (Platform.isIOS) {
+        controller!.pauseCamera();
+      }
+      controller!.resumeCamera();
+    }
+
+    @override
+    Widget build(BuildContext context) {
+      return Scaffold(
+        appBar: AppBar(
+      title: const Text('QRコードスキャン'),
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back),
+        onPressed: () {
+          Navigator.of(context).pop();
+        },
+      ),
+    ),
+        body: Column(
+          children: <Widget>[
+            Expanded(
+              flex: 5,
+              child: QRView(
+                key: qrKey,
+                onQRViewCreated: _onQRViewCreated,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    void _onQRViewCreated(QRViewController controller) {
+      this.controller = controller;
+      controller.scannedDataStream.listen((scanData) {
+        setState(() {
+          scannaData = scanData.code;
+        });
+        // スキャンされたQRコードデータを処理
+        Navigator.pop(context,scannaData);
+        controller.dispose();
+        // print(scannaData);
+      });
+    }
+
+    @override
+    void dispose() {
+      controller?.dispose();
+      super.dispose();
+    }
+  }
+
 
   // Future<void> _watchPosition() async {
   //   // 現在地の変化を監視
@@ -383,7 +478,7 @@ class _OniMapScreenState extends State<OniMapScreen> {
   //     ),
   //   );
   // });
-}
+
 
 //   void _watchSignInState() {
 //     authUserStream =
