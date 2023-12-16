@@ -74,6 +74,7 @@ class RoomCreationWaitingScreenState extends State<RoomCreationWaitingScreen> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
+            /*
             IconButton(
               icon: const Icon(
                 Icons.arrow_circle_left_outlined,
@@ -84,6 +85,7 @@ class RoomCreationWaitingScreenState extends State<RoomCreationWaitingScreen> {
                 _navigateToRoomCreationSettingsScreen();
               },
             ),
+            */
             IconButton(
               icon: const Icon(
                 Icons.logout_outlined,
