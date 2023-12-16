@@ -57,10 +57,6 @@ class RoomCreationWaitingScreenState extends State<RoomCreationWaitingScreen> {
       OniAssignmentService().assignOniRandomly(roomId);
       GameService().setGameStart(roomId, true);
       _navigateToGameScreen();
-    } else {
-      if (mounted) {
-        showPermissionDeniedDialog(context);
-      }
     }
   }
 

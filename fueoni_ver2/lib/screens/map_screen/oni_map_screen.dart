@@ -7,11 +7,14 @@ import 'package:fueoni_ver2/screens/map_screen/oni_timer_map.dart';
 import 'package:fueoni_ver2/screens/result_screen/result_screen.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 
 // とりあえず鬼３人逃走者２人にする
 int remainingOni = 3;
 
 int remainingRunner = 2;
+
 
 String? scannaData;
 
@@ -46,6 +49,8 @@ class _OniMapScreenState extends State<OniMapScreen> {
   bool isLoading = false;
 
   bool _mapIsLoading = true;
+
+  test = countOniAndNonOniPlayers(146275);
 
   final CameraPosition initialCameraPosition = const CameraPosition(
     target: LatLng(33.570734171832, 130.24635431587),
@@ -223,7 +228,7 @@ class _OniMapScreenState extends State<OniMapScreen> {
               heroTag: "uniqueTag2",
                  onPressed: () async {
                   var scannedData = await Navigator.of(context).push(
-                    MaterialPageRoute(builder: (context) => QRViewExample()),
+                    MaterialPageRoute(builder: (context) => const QRViewExample()),
                   );
 
                   if (scannedData != null) {
@@ -382,8 +387,31 @@ class _OniMapScreenState extends State<OniMapScreen> {
     await FirebaseAuth.instance.signOut();
     setIsLoading(false);
   }
+
+  Future<bool> countOniAndNonOniPlayers(int? roomId) async {
+    DatabaseReference playersRef =
+        FirebaseDatabase.instance.ref('games/$roomId/players');
+    final snapshot = await playersRef.once();
+    int oniCount = 0;
+    int nonOniCount = 0;
+    if (snapshot.snapshot.exists) {
+      Map<dynamic, dynamic> playersData =
+          snapshot.snapshot.value as Map<dynamic, dynamic>;
+      for (var playerData in playersData.values) {
+        if (playerData['oni'] == true) {
+          oniCount++;
+        } else {
+          nonOniCount++;
+        }
+      }
+    }
+  print({'oni': oniCount, 'nonOni': nonOniCount});
+  return true;
+  }
 }
   class QRViewExample extends StatefulWidget {
+  const QRViewExample({super.key});
+
       @override
       State<StatefulWidget> createState() => _QRViewExampleState();
     }
