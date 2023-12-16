@@ -255,6 +255,7 @@ class RoomCreationWaitingScreenState extends State<RoomCreationWaitingScreen> {
   }
 
   _navigateToRoomLoadingScreen() async {
+    GameService().setGameStart(_roomId, true);
     OniAssignmentService().assignOniRandomly(_roomId);
     if (mounted) {
       Navigator.pushReplacementNamed(
