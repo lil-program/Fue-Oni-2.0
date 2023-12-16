@@ -56,7 +56,7 @@ class RoomLoadingScreenState extends State<RoomLoadingScreen> {
         });
         await Future.delayed(const Duration(seconds: 1));
         if (mounted) {
-          Navigator.pushReplacementNamed(context, '/home');
+          Navigator.pushReplacementNamed(context, '/map/oni');
         }
       } else {
         // プレイヤーがまだ準備完了していない場合、さらに10秒待機
