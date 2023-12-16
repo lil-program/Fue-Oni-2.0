@@ -26,7 +26,9 @@ class RoomLoadingScreenState extends State<RoomLoadingScreen> {
         ),
         body: Center(
           child: ElevatedButton(
-            onPressed: _navigateToMap,
+            onPressed: () {
+              _navigateToMap();
+            },
             child: const Text('マップへ'),
           ),
         ),
