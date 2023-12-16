@@ -11,4 +11,22 @@ class GameMonitorService {
       }
     });
   }
+
+  void monitorOniPlayers(int? roomId, Function(Map<String, bool>) onOniPlayersChanged) {
+    DatabaseReference oniPlayersRef = FirebaseDatabase.instance.ref('games/$roomId/oniPlayers');
+
+    oniPlayersRef.onValue.listen((event) {
+      if (event.snapshot.exists) {
+        Map<String, bool> oniPlayers = {};
+        Map<dynamic, dynamic> values = event.snapshot.value as Map<dynamic, dynamic>;
+        values.forEach((key, value) {
+          // ここでは、keyがplayerId、valueがそのプレイヤーが鬼かどうかを表します
+          oniPlayers[key] = value;
+        });
+        onOniPlayersChanged(oniPlayers);
+      }
+    });
+  }
 }
+
+

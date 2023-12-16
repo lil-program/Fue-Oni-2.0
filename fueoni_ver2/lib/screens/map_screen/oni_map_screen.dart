@@ -1,8 +1,7 @@
 import 'dart:async';
 import 'dart:io';
-
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:fueoni_ver2/services/room_creation/oni_assignment_service.dart';
 import 'package:fueoni_ver2/components/locate_permission_check.dart';
@@ -12,8 +11,7 @@ import 'package:fueoni_ver2/screens/result_screen/result_screen.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
-
-
+import 'package:fueoni_ver2/services/room_search/game_monitor_service.dart';
 
 String? scannaData;
 
@@ -100,9 +98,8 @@ class _OniMapScreenState extends State<OniMapScreen> {
             initialCameraPosition: initialCameraPosition,
             onMapCreated: (GoogleMapController controller) async {
               mapController = controller;
-              await _requestPermission();
               await _moveToCurrentLocation();
-              // await _watchPosition();
+              await _watchPosition();
               setState(() {
                 _mapIsLoading = false;
               });
@@ -269,15 +266,21 @@ class _OniMapScreenState extends State<OniMapScreen> {
 
   @override
   void initState() {
-
     super.initState();
+    _watchPosition();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final args = ModalRoute.of(context)!.settings.arguments as RoomArguments;
       roomId = args.roomId;
 
       final gameTimeLimit = await OniAssignmentService().getTimeLimit(roomId);
-      // final oniCount = await OniAssignmentService().getInitialOniCount(roomId);
-      // print(oniCount);
+      final nononiCount = await OniAssignmentService().getPlayersList(roomId);
+
+      GameMonitorService().monitorOniPlayers(roomId, (oniPlayers) async {
+        if (oniPlayers != null) {
+          countOni = oniPlayers.length;
+          countNonOni = nononiCount.length - countOni;
+        }
+      });
 
       setState(() {
         mainTimerDuration = gameTimeLimit;
@@ -286,8 +289,6 @@ class _OniMapScreenState extends State<OniMapScreen> {
     });
     startMainTimer(); // 主タイマーを起動します。
     startOniTimer(); // 鬼タイマーを起動します。
-    // countOniAndNonOniPlayers(roomId);
-    
   }
 
   void navigateToRunnerLocationScreen() {
@@ -308,17 +309,10 @@ class _OniMapScreenState extends State<OniMapScreen> {
     });
   }
 
-  void setIsSignedIn(bool value) {
-    setState(() {
-      isSignedIn = value;
-    });
-  }
-
   void startMainTimer() {
     mainTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-
       setState(() {
-         if(mainTimerDuration!.inSeconds <= 0) {
+        if (mainTimerDuration == null || mainTimerDuration!.inSeconds <= 0) {
           timer.cancel();
           Navigator.pushReplacement(
             context,
@@ -353,28 +347,49 @@ class _OniMapScreenState extends State<OniMapScreen> {
     return "$twoDigitMinutes:$twoDigitSeconds";
   }
 
-  Future<void> _moveToCurrentLocation() async {
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.always ||
-        permission == LocationPermission.whileInUse) {
-      // // 現在地を取得
-      // final Position position = await Geolocator.getCurrentPosition(
-      //   desiredAccuracy: LocationAccuracy.high,
-      // );
-      const double latitude = 33.570734171832;
-      const double longitude = 130.24635431587;
+Future<void> _moveToCurrentLocation() async {
+    // 現在地を取得
+    final Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
 
+    setState(() {
+      // 現在地マーカーを削除
+      markers.removeWhere(
+          (Marker marker) => marker.markerId.value == 'current_location');
+
+      // 現在地マーカーを追加
+      markers.add(
+        Marker(
+          markerId: const MarkerId('current_location'),
+          position: LatLng(position.latitude, position.longitude),
+          infoWindow: const InfoWindow(title: '現在地'),
+        ),
+      );
+    });
+
+    // 現在地にカメラを移動
+    await mapController.animateCamera(
+      CameraUpdate.newCameraPosition(
+        CameraPosition(
+          target: LatLng(position.latitude, position.longitude),
+          zoom: 16.0,
+        ),
+      ),
+    );
+  }
+Future<void> _watchPosition() async {
+    // 現在地の変化を監視
+    positionStreamSubscription = Geolocator.getPositionStream(
+      locationSettings: locationSettings,
+    ).listen((Position position) async {
       setState(() {
-        markers.removeWhere((Marker marker) {
-          return marker.markerId.value == 'current_location';
-        });
+        markers.removeWhere(
+            (Marker marker) => marker.markerId.value == 'current_location');
         markers.add(
-          const Marker(
-            markerId: MarkerId('current_location'),
-            position: LatLng(latitude, longitude),
-            infoWindow: InfoWindow(
-              title: '現在地',
-            ),
+          Marker(
+            markerId: const MarkerId('current_location'),
+            position: LatLng(position.latitude, position.longitude),
+            infoWindow: const InfoWindow(title: '現在地'),
           ),
         );
       });
@@ -382,28 +397,13 @@ class _OniMapScreenState extends State<OniMapScreen> {
       // 現在地にカメラを移動
       await mapController.animateCamera(
         CameraUpdate.newCameraPosition(
-          const CameraPosition(
-            target: LatLng(latitude, longitude),
+          CameraPosition(
+            target: LatLng(position.latitude, position.longitude),
             zoom: 16.0,
           ),
         ),
       );
-    }
-  }
-
-  Future<void> _requestPermission() async {
-    // 位置情報の許可を求める
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      await Geolocator.requestPermission();
-    }
-  }
-
-  Future<void> _signOut() async {
-    setIsLoading(true);
-    await Future.delayed(const Duration(seconds: 1), () {});
-    await FirebaseAuth.instance.signOut();
-    setIsLoading(false);
+    });
   }
 }
 
@@ -461,62 +461,6 @@ class _QRViewExampleState extends State<QRViewExample> {
       // スキャンされたQRコードデータを処理
       Navigator.pop(context, scannaData);
       controller.dispose();
-      // print(scannaData);
     });
   }
 }
-
-
-  // Future<void> _watchPosition() async {
-  //   // 現在地の変化を監視
-  //   positionStreamSubscription =
-  //       Geolocator.getPositionStream(locationSettings: locationSettings)
-  //           .listen((Position position) async {
-  //     setState(() {
-  //       markers.removeWhere((Marker marker) {
-  //         return marker.markerId.value == 'current_location';
-  //       });
-
-  //       markers.add(
-  //         Marker(
-  //           markerId: const MarkerId('current_location'),
-  //           position: LatLng(position.latitude, position.longitude),
-  //           infoWindow: const InfoWindow(
-  //             title: '現在地',
-  //           ),
-  //         ),
-  //       );
-  //     });
-
-  //   // 現在地にカメラを移動
-  //   await mapController.animateCamera(
-  //     CameraUpdate.newCameraPosition(
-  //       CameraPosition(
-  //         target: LatLng(position.latitude, position.longitude),
-  //         zoom: 16.0,
-  //       ),
-  //     ),
-  //   );
-  // });
-
-
-//   void _watchSignInState() {
-//     authUserStream =
-//         FirebaseAuth.instance.authStateChanges().listen((User? user) {
-//       if (user == null) {
-//         setIsSignedIn(false);
-//       } else {
-//         setIsSignedIn(true);
-//       }
-//     });
-//   }
-// }
-      //     Align(
-      //       alignment: Alignment.bottomCenter,
-      //       child: !isSignedIn
-      //           ? const SignInButton()
-      //           : SignOutButton(
-      //               isLoading: isLoading,
-      //               onPressed: () => _signOut(),
-      //             ),
-      //     ),
