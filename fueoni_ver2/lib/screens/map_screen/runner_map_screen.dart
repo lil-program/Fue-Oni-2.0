@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:fueoni_ver2/components/locate_permission_check.dart';
 import 'package:fueoni_ver2/models/arguments.dart';
 import 'package:fueoni_ver2/services/room_creation/oni_assignment_service.dart';
+import 'package:fueoni_ver2/services/room_management/location_service.dart';
 import 'package:fueoni_ver2/services/room_management/player_service.dart';
 import 'package:fueoni_ver2/services/room_search/game_monitor_service.dart';
 import 'package:geolocator/geolocator.dart';
@@ -105,11 +106,21 @@ class _RunnerMapScreenState extends State<RunnerMapScreen> {
         }
       });
 
+      // ゲームスタートの監視
       GameMonitorService().monitorGameStart(roomId, (gameStarted) {
         if (!gameStarted) {
           // ゲームが終了したらリザルト画面へ遷移
           // Navigator.pushReplacementNamed(context, '/result');
           print("ゲーム終了");
+        }
+      });
+
+      // 鬼スキャンスタートの監視
+      GameMonitorService().monitorOniScanStart(roomId, (oniScanStarted) {
+        if (oniScanStarted) {
+          print("鬼スキャンが開始されました");
+
+          LocationService.updateCurrentLocation(LocationService(), roomId);
         }
       });
     });

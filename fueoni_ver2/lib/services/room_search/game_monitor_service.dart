@@ -30,6 +30,18 @@ class GameMonitorService {
     });
   }
 
+  void monitorOniScanStart(int? roomId, Function(bool) onOniScanStartChanged) {
+    DatabaseReference oniScanStartRef =
+        FirebaseDatabase.instance.ref('games/$roomId/settings/oniScanStart');
+
+    oniScanStartRef.onValue.listen((event) {
+      if (event.snapshot.exists) {
+        bool isOniScanStarted = event.snapshot.value as bool;
+        onOniScanStartChanged(isOniScanStarted);
+      }
+    });
+  }
+
   void monitorPlayerOniState(
       int? roomId, String? playerId, Function(bool) onOniStateChanged) {
     DatabaseReference playerRef =

@@ -27,6 +27,7 @@ class RoomSearchPageState extends State<RoomSearchPage> {
   Widget build(BuildContext context) {
     return LocationPermissionCheck(
       child: Scaffold(
+        resizeToAvoidBottomInset: false,
         appBar: RoomWidgets.roomAppbar(
           context: context,
           roomId: roomId,

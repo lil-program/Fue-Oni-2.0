@@ -2,14 +2,9 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:firebase_database/firebase_database.dart';
-
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fueoni_ver2/components/locate_permission_check.dart';
 import 'package:fueoni_ver2/screens/map_screen/oni_timer_map.dart';
-
-import 'package:fueoni_ver2/screens/result_screen/result_screen.dart';
-
 import 'package:fueoni_ver2/services/room_creation/oni_assignment_service.dart';
 import 'package:fueoni_ver2/services/room_search/game_monitor_service.dart';
 import 'package:geolocator/geolocator.dart';
@@ -512,35 +507,33 @@ class _OniMapScreenState extends State<OniMapScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final gameStartRef = FirebaseDatabase.instance
+          .ref()
+          .child('games')
+          .child(widget.roomId.toString())
+          .child('settings')
+          .child('gameStart');
 
-    final gameStartRef = FirebaseDatabase.instance
-        .ref()
-        .child('games')
-        .child(widget.roomId.toString())
-        .child('settings')
-        .child('gameStart');
+      gameStartSubscription = gameStartRef.onValue.listen((event) {
+        setState(() {
+          gameStart = event.snapshot.value as bool? ?? true;
+        });
+      });
 
-    gameStartSubscription = gameStartRef.onValue.listen((event) {
-      setState(() {
-        gameStart = event.snapshot.value as bool? ?? true;
+      final rankingsRef = FirebaseDatabase.instance
+          .ref()
+          .child('games')
+          .child(widget.roomId.toString())
+          .child('rankings');
+
+      rankingsSubscription = rankingsRef.onValue.listen((event) {
+        setState(() {
+          rankings = (event.snapshot.value as List? ?? [])
+              .map((e) => Map<String, dynamic>.from(e))
+              .toList();
+        });
       });
     });
-
-    final rankingsRef = FirebaseDatabase.instance
-        .ref()
-        .child('games')
-        .child(widget.roomId.toString())
-        .child('rankings');
-
-    rankingsSubscription = rankingsRef.onValue.listen((event) {
-      setState(() {
-        rankings = (event.snapshot.value as List? ?? [])
-            .map((e) => Map<String, dynamic>.from(e))
-            .toList();
-      });
-    });
-  }
-  );
   }
 }
 
