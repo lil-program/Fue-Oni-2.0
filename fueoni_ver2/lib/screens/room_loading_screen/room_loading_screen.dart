@@ -14,8 +14,7 @@ class RoomLoadingScreen extends StatefulWidget {
 
 class RoomLoadingScreenState extends State<RoomLoadingScreen> {
   int? _roomId;
-  final PlayerService _playerService =
-      PlayerService(); // Instance of PlayerService
+  final PlayerService _playerService = PlayerService();
 
   @override
   Widget build(BuildContext context) {

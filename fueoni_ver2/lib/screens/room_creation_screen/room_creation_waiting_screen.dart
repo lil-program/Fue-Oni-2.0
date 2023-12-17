@@ -161,6 +161,7 @@ class RoomCreationWaitingScreenState extends State<RoomCreationWaitingScreen> {
     );
   }
 
+
   List<Widget> buildListTiles() {
     List<Widget> listTiles = [
       Row(
@@ -183,6 +184,7 @@ class RoomCreationWaitingScreenState extends State<RoomCreationWaitingScreen> {
         buildUsersTile(Icons.person_outline, user),
       );
       listTiles.add(const Divider());
+
     }
 
     return listTiles;
