@@ -67,4 +67,12 @@ class OniAssignmentService {
     }
     return Duration.zero;
   }
+
+  Future<void> setOni(int? roomId, String? userId) async {
+    if (userId != null && roomId != null) {
+      DatabaseReference playerRef =
+          FirebaseDatabase.instance.ref('games/$roomId/players/$userId');
+      await playerRef.child('oni').set(true);
+    }
+  }
 }

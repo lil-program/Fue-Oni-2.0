@@ -31,7 +31,9 @@ class OniMapScreen extends StatefulWidget {
 }
 
 class QRViewExample extends StatefulWidget {
-  const QRViewExample({super.key});
+  final int? roomId; // roomIdを追加
+
+  const QRViewExample({super.key, required this.roomId});
 
   @override
   State<StatefulWidget> createState() => _QRViewExampleState();
@@ -233,7 +235,9 @@ class _OniMapScreenState extends State<OniMapScreen> {
               onPressed: () async {
                 var scannedData = await Navigator.of(context).push(
                   MaterialPageRoute(
-                      builder: (context) => const QRViewExample()),
+                      builder: (context) => QRViewExample(
+                            roomId: roomId,
+                          )),
                 );
 
                 if (scannedData != null) {
@@ -454,6 +458,7 @@ class _QRViewExampleState extends State<QRViewExample> {
     controller!.resumeCamera();
   }
 
+/*
   void _onQRViewCreated(QRViewController controller) {
     this.controller = controller;
     controller.scannedDataStream.listen((scanData) {
@@ -461,6 +466,21 @@ class _QRViewExampleState extends State<QRViewExample> {
         scannaData = scanData.code;
       });
       // スキャンされたQRコードデータを処理
+      Navigator.pop(context, scannaData);
+      controller.dispose();
+    });
+  }
+*/
+
+  void _onQRViewCreated(QRViewController controller) {
+    this.controller = controller;
+    controller.scannedDataStream.listen((scanData) async {
+      setState(() {
+        scannaData = scanData.code;
+      });
+      // スキャンされたQRコードデータを処理
+      await OniAssignmentService()
+          .setOni(widget.roomId, scannaData); // widgetを使用してroomIdにアクセス
       Navigator.pop(context, scannaData);
       controller.dispose();
     });
