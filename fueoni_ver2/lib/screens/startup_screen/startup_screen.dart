@@ -123,7 +123,8 @@ class StartupScreen extends StatelessWidget {
       if (user != null) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           Navigator.pushReplacementNamed(context, '/map/oni',
-              arguments: RoomArguments(roomId: 166221));
+              arguments: RoomArguments(roomId: 121233));
+          // Navigator.pushReplacementNamed(context, '/home');
         });
       } else {
         WidgetsBinding.instance.addPostFrameCallback((_) {

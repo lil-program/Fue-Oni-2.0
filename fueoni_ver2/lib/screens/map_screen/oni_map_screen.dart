@@ -446,7 +446,7 @@ class _OniMapScreenState extends State<OniMapScreen> {
     if (!gameStart) {
       Future.delayed(Duration.zero, () {
         Navigator.pushNamed(context, '/result',
-            arguments: rankings.map((e) => e.toString()).toList());
+            arguments: {'rankings': rankings, 'roomId': widget.roomId});
       });
     }
 
@@ -489,7 +489,9 @@ class _OniMapScreenState extends State<OniMapScreen> {
 
     rankingsSubscription = rankingsRef.onValue.listen((event) {
       setState(() {
-        rankings = event.snapshot.value as List? ?? [];
+        rankings = (event.snapshot.value as List? ?? [])
+            .map((e) => Map<String, dynamic>.from(e))
+            .toList();
       });
     });
   }
