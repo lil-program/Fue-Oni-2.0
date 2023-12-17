@@ -3,13 +3,9 @@ import 'package:fueoni_ver2/components/locate_permission_check.dart';
 import 'package:fueoni_ver2/screens/startup_screen/startup_screen.dart';
 
 class ResultScreen extends StatelessWidget {
-  final List<String> playerNames = [
-    "kazuki",
-    "daiki",
-    "hyuuga",
-    "ou"
-  ]; // プレイヤー名のリスト
-  ResultScreen({Key? key}) : super(key: key);
+  final List<String> playerNames; // プレイヤー名のリストを引数として受け取る
+
+  const ResultScreen({Key? key, required this.playerNames}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

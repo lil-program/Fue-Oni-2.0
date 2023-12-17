@@ -279,12 +279,12 @@ class _RunnerMapScreenState extends State<RunnerMapScreen> {
       setState(() {
         if (mainTimerDuration.inSeconds <= 0) {
           timer.cancel();
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ResultScreen(),
-            ),
-          );
+          // Navigator.pushReplacement(
+          //   context,
+          //   MaterialPageRoute(
+          //     builder: (context) => ResultScreen(),
+          //   ),
+          // );
         } else {
           mainTimerDuration = mainTimerDuration - const Duration(seconds: 1);
         }

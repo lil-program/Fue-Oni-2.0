@@ -8,6 +8,7 @@ import 'package:fueoni_ver2/screens/home_screen/tabs/profile_settings/account_se
 import 'package:fueoni_ver2/screens/home_screen/tabs/room_settings/room_settings.dart';
 import 'package:fueoni_ver2/screens/map_screen/oni_map_screen.dart';
 import 'package:fueoni_ver2/screens/map_screen/runner_map_screen.dart';
+import 'package:fueoni_ver2/screens/result_screen/result_screen.dart';
 import 'package:fueoni_ver2/screens/room_creation_screen/room_creation_screen.dart';
 import 'package:fueoni_ver2/screens/room_creation_screen/room_creation_settings_screen.dart';
 import 'package:fueoni_ver2/screens/room_creation_screen/room_creation_waiting_screen.dart';
@@ -28,7 +29,11 @@ class MyApp extends StatelessWidget {
         routes: {
           '/': (BuildContext context) => const StartupScreen(),
           //'/home': (BuildContext context) => const HomeScreen(),
-          '/map/oni': (BuildContext context) => const OniMapScreen(),
+          '/map/oni': (BuildContext context) {
+            final args =
+                ModalRoute.of(context)!.settings.arguments as RoomArguments;
+            return OniMapScreen(roomId: args.roomId);
+          },
           '/map/runner': (BuildContext context) => const RunnerMapScreen(),
           '/home/account_settings': (BuildContext context) =>
               const AccountSettingsScreen(),
@@ -52,6 +57,11 @@ class MyApp extends StatelessWidget {
             final RoomArguments args =
                 ModalRoute.of(context)!.settings.arguments as RoomArguments;
             return RoomLoadingScreen(roomArguments: args);
+          },
+          '/result': (BuildContext context) {
+            final List<String> playerNames =
+                ModalRoute.of(context)!.settings.arguments as List<String>;
+            return ResultScreen(playerNames: playerNames);
           },
         },
         theme: ThemeData(useMaterial3: true, colorScheme: lightColorScheme),
