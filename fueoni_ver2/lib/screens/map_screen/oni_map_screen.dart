@@ -1,11 +1,15 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:fueoni_ver2/components/locate_permission_check.dart';
 import 'package:fueoni_ver2/screens/map_screen/oni_timer_map.dart';
 import 'package:fueoni_ver2/services/room_creation/oni_assignment_service.dart';
+import 'package:fueoni_ver2/services/room_management/game_service.dart';
+import 'package:fueoni_ver2/services/room_management/location_service.dart';
+import 'package:fueoni_ver2/services/room_management/player_service.dart';
 import 'package:fueoni_ver2/services/room_search/game_monitor_service.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -47,6 +51,7 @@ class QRViewExample extends StatefulWidget {
 }
 
 class _OniMapGameScreenState extends State<OniMapGameScreen> {
+  String? baseOniPlayerId;
   GoogleMapController? mapController;
   late StreamSubscription<Position> positionStreamSubscription;
   Set<Marker> markers = {};
@@ -57,7 +62,8 @@ class _OniMapGameScreenState extends State<OniMapGameScreen> {
   );
 
   Duration? mainTimerDuration; // 残り時間のタイマー
-  Duration oniTimerDuration = const Duration(minutes: 2); // 鬼タイマー
+  //Duration oniTimerDuration = const Duration(seconds: 2); // 鬼タイマー
+  Duration oniTimerDuration = const Duration(seconds: 10); // 鬼タイマー
   Timer? mainTimer;
   Timer? oniTimer;
 
@@ -274,6 +280,19 @@ class _OniMapGameScreenState extends State<OniMapGameScreen> {
     super.dispose();
   }
 
+  void initializeOniPlayers() async {
+    Map<String, bool> oniPlayers = await PlayerService().getOniPlayers(roomId);
+
+    // oniPlayersをIDに基づいてソート
+    var sortedOniPlayers = oniPlayers.keys.toList()..sort();
+    if (sortedOniPlayers.isNotEmpty) {
+      // 最初のプレイヤーを基準の鬼として保存
+      setState(() {
+        baseOniPlayerId = sortedOniPlayers.first;
+      });
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -299,19 +318,23 @@ class _OniMapGameScreenState extends State<OniMapGameScreen> {
       // mainTimerDurationが設定された後でタイマーを起動します
       startMainTimer(); // 主タイマーを起動します。
       startOniTimer(); // 鬼タイマーを起動します。
+      initializeOniPlayers();
     });
   }
 
-  void navigateToRunnerLocationScreen() {
-    Navigator.push(
+  Future<void> navigateToRunnerLocationScreen() async {
+    List<LatLng> nonOniPlayerLocations =
+        await LocationService().getNonOniPlayerLocations(roomId);
+
+    await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => RunnerLocationScreen(),
-      ),
-    ).then((_) {
-      oniTimerDuration = const Duration(minutes: 1);
-      startOniTimer();
-    });
+          builder: (context) =>
+              RunnerLocationScreen(locations: nonOniPlayerLocations)),
+    );
+
+    oniTimerDuration = const Duration(minutes: 1);
+    startOniTimer();
   }
 
   void setIsLoading(bool value) {
@@ -350,13 +373,59 @@ class _OniMapGameScreenState extends State<OniMapGameScreen> {
     });
   }
 
+  /*
+  void navigateToRunnerLocationScreen() async {
+    List<LatLng> nonOniPlayerLocations =
+        await LocationService().getNonOniPlayerLocations(roomId);
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+          builder: (context) =>
+              RunnerLocationScreen(locations: nonOniPlayerLocations)),
+    ).then((_) {
+      oniTimerDuration = const Duration(minutes: 1);
+      startOniTimer();
+    });
+  }
+  */
+
+  void startOniTimer() {
+    oniTimer = Timer.periodic(const Duration(seconds: 1), (timer) async {
+      if (oniTimerDuration.inSeconds <= 0) {
+        timer.cancel();
+
+        if (FirebaseAuth.instance.currentUser?.uid == baseOniPlayerId) {
+          await GameService().setOniScanStart(roomId, true);
+        }
+
+        await navigateToRunnerLocationScreen();
+
+        setState(() {
+          oniTimerDuration = const Duration(minutes: 1);
+        });
+        startOniTimer();
+      } else {
+        setState(() {
+          oniTimerDuration = oniTimerDuration - const Duration(seconds: 1);
+        });
+      }
+    });
+  }
+
+/*
   void startOniTimer() {
     oniTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (mounted) {
         setState(() {
           if (oniTimerDuration.inSeconds <= 0) {
             timer.cancel();
-            navigateToRunnerLocationScreen(); // RunnerLocationScreenに遷移
+
+            if (FirebaseAuth.instance.currentUser?.uid == baseOniPlayerId) {
+              GameService().setOniScanStart(roomId, true);
+            }
+
+            navigateToRunnerLocationScreen();
           } else {
             oniTimerDuration = oniTimerDuration - const Duration(seconds: 1);
           }
@@ -366,6 +435,7 @@ class _OniMapGameScreenState extends State<OniMapGameScreen> {
       }
     });
   }
+  */
 
   String _formatDuration(Duration duration) {
     String twoDigits(int n) => n.toString().padLeft(2, '0');

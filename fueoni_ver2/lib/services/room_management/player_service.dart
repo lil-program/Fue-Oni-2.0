@@ -2,6 +2,24 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 
 class PlayerService {
+  Future<Map<String, bool>> getOniPlayers(int? roomId) async {
+    if (roomId == null) {
+      return {};
+    }
+
+    DatabaseReference oniPlayersRef =
+        FirebaseDatabase.instance.ref('games/$roomId/oniPlayers');
+
+    final snapshot = await oniPlayersRef.once();
+    if (snapshot.snapshot.exists && snapshot.snapshot.value != null) {
+      Map<String, bool> oniPlayers =
+          Map<String, bool>.from(snapshot.snapshot.value as Map);
+      return oniPlayers;
+    } else {
+      return {};
+    }
+  }
+
   Future<String?> getPlayer() async {
     User? currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser != null) {

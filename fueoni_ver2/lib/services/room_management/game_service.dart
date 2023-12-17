@@ -44,6 +44,17 @@ class GameService {
     await gameStartRef.set(gameStart);
   }
 
+  Future<void> setOniScanStart(int? roomId, bool oniScanStart) async {
+    if (roomId == null) {
+      return;
+    }
+
+    DatabaseReference oniScanStartRef =
+        FirebaseDatabase.instance.ref('games/$roomId/settings/oniScanStart');
+
+    await oniScanStartRef.set(oniScanStart);
+  }
+
   Future<bool> updateSettings(
       int? roomId, Duration? selectedDuration, int numberOfDemons) async {
     if (roomId == null || selectedDuration == null) {
