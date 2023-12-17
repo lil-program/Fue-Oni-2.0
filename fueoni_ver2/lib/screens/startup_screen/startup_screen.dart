@@ -122,6 +122,7 @@ class StartupScreen extends StatelessWidget {
       if (user != null) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           Navigator.pushReplacementNamed(context, '/home');
+
         });
       } else {
         WidgetsBinding.instance.addPostFrameCallback((_) {

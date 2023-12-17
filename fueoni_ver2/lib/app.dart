@@ -60,10 +60,12 @@ class MyApp extends StatelessWidget {
             return RoomLoadingScreen(roomArguments: args);
           },
           '/result': (BuildContext context) {
-            final List<String> playerNames =
-                ModalRoute.of(context)!.settings.arguments as List<String>;
-            return ResultScreen(playerNames: playerNames);
-          },
+            final Map<String, dynamic> args = ModalRoute.of(context)!
+                .settings
+                .arguments as Map<String, dynamic>;
+            return ResultScreen(
+                rankings: args['rankings'], roomId: args['roomId']);
+          }
         },
         theme: ThemeData(useMaterial3: true, colorScheme: lightColorScheme),
         darkTheme: ThemeData(useMaterial3: true, colorScheme: darkColorScheme),

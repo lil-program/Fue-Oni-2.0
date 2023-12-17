@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-
 import 'package:firebase_database/firebase_database.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
@@ -385,7 +384,6 @@ class _OniMapGameScreenState extends State<OniMapGameScreen> {
   }
 
   Future<void> _moveToCurrentLocation() async {
-
     // 現在地を取得
     final Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high);
@@ -492,7 +490,7 @@ class _OniMapScreenState extends State<OniMapScreen> {
     if (!gameStart) {
       Future.delayed(Duration.zero, () {
         Navigator.pushNamed(context, '/result',
-            arguments: rankings.map((e) => e.toString()).toList());
+            arguments: {'rankings': rankings, 'roomId': widget.roomId});
       });
     }
 
@@ -513,6 +511,7 @@ class _OniMapScreenState extends State<OniMapScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
 
     final gameStartRef = FirebaseDatabase.instance
         .ref()
@@ -535,9 +534,13 @@ class _OniMapScreenState extends State<OniMapScreen> {
 
     rankingsSubscription = rankingsRef.onValue.listen((event) {
       setState(() {
-        rankings = event.snapshot.value as List? ?? [];
+        rankings = (event.snapshot.value as List? ?? [])
+            .map((e) => Map<String, dynamic>.from(e))
+            .toList();
       });
     });
+  }
+  );
   }
 }
 
@@ -609,7 +612,9 @@ class _QRViewExampleState extends State<QRViewExample> {
       // スキャンされたQRコードデータを処理
       await OniAssignmentService()
           .setOni(widget.roomId, scannaData); // widgetを使用してroomIdにアクセス
-      Navigator.pop(context, scannaData);
+      if (mounted) {
+        Navigator.pop(context, scannaData);
+      }
       controller.dispose();
     });
   }
