@@ -18,6 +18,18 @@ export const calculateRankings = functions.database
 
       const oniPlayers = oniPlayersSnapshot.val();
       const players = playersSnapshot.val();
+
+      // 各プレイヤーの名前を取得
+      const playerNames = await Promise.all(
+        Object.keys(players).map(async (playerId) => {
+          const snapshot = await admin
+            .database()
+            .ref(`/users/${playerId}/name`)
+            .once("value");
+          return snapshot.val();
+        })
+      );
+
       const sortedPlayers = Object.keys(players).sort((a, b) => {
         if (oniPlayers[a] && oniPlayers[b]) {
           return oniPlayers[a] - oniPlayers[b];
@@ -47,7 +59,7 @@ export const calculateRankings = functions.database
         return {
           player,
           rank,
-          name: players[player].name, // プレイヤーの名前を追加
+          name: playerNames[index], // プレイヤーの名前を追加
           isOni: !!oniPlayers[player], // プレイヤーが最終的に鬼であったかどうかを追加
         };
       });
