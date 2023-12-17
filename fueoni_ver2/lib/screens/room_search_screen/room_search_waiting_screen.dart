@@ -193,20 +193,13 @@ class RoomSearchWaitingScreenState extends State<RoomSearchWaitingScreen> {
           users = updatedUsers;
         });
       });
-
       GameMonitorService().monitorGameStart(roomId, (gameStarted) async {
         if (gameStarted) {
-          bool hasPermission =
-              await LocationService.requestLocationPermission();
-          if (hasPermission) {
-            await LocationService.updateCurrentLocation(
-                LocationService(), roomId);
-            _navigateToRoomLoadingScreen();
-          } else {
-            if (mounted) {
-              showPermissionDeniedDialog(context);
-            }
-          }
+          /*
+          await LocationService.updateCurrentLocation(
+              LocationService(), roomId);
+              */
+          _navigateToRoomLoadingScreen();
         }
       });
     });

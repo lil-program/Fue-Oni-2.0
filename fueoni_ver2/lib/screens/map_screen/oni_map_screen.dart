@@ -5,16 +5,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:fueoni_ver2/components/locate_permission_check.dart';
+import 'package:fueoni_ver2/models/arguments.dart';
 import 'package:fueoni_ver2/screens/map_screen/oni_timer_map.dart';
 import 'package:fueoni_ver2/screens/result_screen/result_screen.dart';
+import 'package:fueoni_ver2/services/room_creation/oni_assignment_service.dart';
+import 'package:fueoni_ver2/services/room_search/game_monitor_service.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
-
-// とりあえず鬼３人逃走者２人にする
-int remainingOni = 3;
-
-int remainingRunner = 2;
 
 String? scannaData;
 
@@ -27,15 +25,32 @@ class GameScreen extends StatefulWidget {
   State<GameScreen> createState() => GameScreenState();
 }
 
-class GameScreenState extends State<GameScreen> {
+class QRViewExample extends StatefulWidget {
+  final int? roomId; // roomIdを追加
+
+  const QRViewExample({super.key, required this.roomId});
+
+  @override
+  State<StatefulWidget> createState() => _QRViewExampleState();
+}
+
+class _OniMapScreenState extends State<OniMapScreen> {
   late GoogleMapController mapController;
   late StreamSubscription<Position> positionStreamSubscription;
   Set<Marker> markers = {};
+  late StreamSubscription<User?> authUserStream;
 
-  Duration mainTimerDuration = const Duration(minutes: 10); // 残り時間のタイマー
-  Duration oniTimerDuration = const Duration(minutes: 1); // 鬼タイマー
+  LocationSettings locationSettings = const LocationSettings(
+    accuracy: LocationAccuracy.high, // 高精度の位置情報
+    distanceFilter: 10, // 最小の距離変化（メートル）
+  );
+
+  Duration? mainTimerDuration; // 残り時間のタイマー
+  Duration oniTimerDuration = const Duration(minutes: 2); // 鬼タイマー
   Timer? mainTimer;
   Timer? oniTimer;
+
+  int? roomId;
 
   bool isSignedIn = false;
 
@@ -43,15 +58,12 @@ class GameScreenState extends State<GameScreen> {
 
   bool _mapIsLoading = true;
 
+  int countOni = 0;
+  int countNonOni = 0;
+
   final CameraPosition initialCameraPosition = const CameraPosition(
     target: LatLng(33.570734171832, 130.24635431587),
     zoom: 16.0,
-  );
-
-  // 現在地通知の設定
-  final LocationSettings locationSettings = const LocationSettings(
-    accuracy: LocationAccuracy.high, //正確性:highはAndroid(0-100m),iOS(10m)
-    distanceFilter: 10,
   );
 
   @override
@@ -66,7 +78,7 @@ class GameScreenState extends State<GameScreen> {
           title: Column(
             children: [
               Text(
-                '残り時間${_formatDuration(mainTimerDuration)}',
+                '残り時間${_formatDuration(mainTimerDuration ?? const Duration(seconds: 0))}',
                 style: TextStyle(
                   color: Theme.of(context).primaryColor,
                   fontSize: 20,
@@ -82,9 +94,8 @@ class GameScreenState extends State<GameScreen> {
             initialCameraPosition: initialCameraPosition,
             onMapCreated: (GoogleMapController controller) async {
               mapController = controller;
-              await _requestPermission();
               await _moveToCurrentLocation();
-              // await _watchPosition();
+              await _watchPosition();
               setState(() {
                 _mapIsLoading = false;
               });
@@ -141,7 +152,7 @@ class GameScreenState extends State<GameScreen> {
                 ],
               ),
               child: Text(
-                '鬼残り$remainingOni人',
+                '鬼残り$countOni人',
                 style: const TextStyle(
                   fontWeight: FontWeight.bold, // テキストを太字に
                   fontSize: 16,
@@ -171,7 +182,7 @@ class GameScreenState extends State<GameScreen> {
                 ],
               ),
               child: Text(
-                '逃走者残り$remainingRunner人',
+                '逃走者残り$countNonOni人',
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
@@ -219,7 +230,9 @@ class GameScreenState extends State<GameScreen> {
               onPressed: () async {
                 var scannedData = await Navigator.of(context).push(
                   MaterialPageRoute(
-                      builder: (context) => const QRViewExample()),
+                      builder: (context) => QRViewExample(
+                            roomId: roomId,
+                          )),
                 );
 
                 if (scannedData != null) {
@@ -255,12 +268,24 @@ class GameScreenState extends State<GameScreen> {
   @override
   void initState() {
     super.initState();
-    markers.add(
-      const Marker(
-        markerId: MarkerId('oni'),
-        position: LatLng(33.570734171832, 130.24635431587),
-      ),
-    );
+    _watchPosition();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final args = ModalRoute.of(context)!.settings.arguments as RoomArguments;
+      roomId = args.roomId;
+
+      final gameTimeLimit = await OniAssignmentService().getTimeLimit(roomId);
+      final nononiCount = await OniAssignmentService().getPlayersList(roomId);
+
+      GameMonitorService().monitorOniPlayers(roomId, (oniPlayers) async {
+        countOni = oniPlayers.length;
+        countNonOni = nononiCount.length - countOni;
+      });
+
+      setState(() {
+        mainTimerDuration = gameTimeLimit;
+        oniTimerDuration = const Duration(minutes: 1);
+      });
+    });
     startMainTimer(); // 主タイマーを起動します。
     startOniTimer(); // 鬼タイマーを起動します。
   }
@@ -283,16 +308,10 @@ class GameScreenState extends State<GameScreen> {
     });
   }
 
-  void setIsSignedIn(bool value) {
-    setState(() {
-      isSignedIn = value;
-    });
-  }
-
   void startMainTimer() {
     mainTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       setState(() {
-        if (mainTimerDuration.inSeconds <= 0) {
+        if (mainTimerDuration == null || mainTimerDuration!.inSeconds <= 0) {
           timer.cancel();
           Navigator.pushReplacement(
             context,
@@ -301,7 +320,7 @@ class GameScreenState extends State<GameScreen> {
             ),
           );
         } else {
-          mainTimerDuration = mainTimerDuration - const Duration(seconds: 1);
+          mainTimerDuration = mainTimerDuration! - const Duration(seconds: 1);
         }
       });
     });
@@ -322,33 +341,59 @@ class GameScreenState extends State<GameScreen> {
 
   String _formatDuration(Duration duration) {
     String twoDigits(int n) => n.toString().padLeft(2, '0');
-    String twoDigitMinutes = twoDigits(duration.inMinutes.remainder(60));
-    String twoDigitSeconds = twoDigits(duration.inSeconds.remainder(60));
-    return "$twoDigitMinutes:$twoDigitSeconds";
+
+    // 全体の分数を取得
+    String minutes = twoDigits(duration.inMinutes);
+    // 分を超える秒数を取得
+    String seconds = twoDigits(duration.inSeconds.remainder(60));
+
+    return "$minutes:$seconds";
   }
 
   Future<void> _moveToCurrentLocation() async {
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.always ||
-        permission == LocationPermission.whileInUse) {
-      // // 現在地を取得
-      // final Position position = await Geolocator.getCurrentPosition(
-      //   desiredAccuracy: LocationAccuracy.high,
-      // );
-      const double latitude = 33.570734171832;
-      const double longitude = 130.24635431587;
+    // 現在地を取得
+    final Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
 
+    setState(() {
+      // 現在地マーカーを削除
+      markers.removeWhere(
+          (Marker marker) => marker.markerId.value == 'current_location');
+
+      // 現在地マーカーを追加
+      markers.add(
+        Marker(
+          markerId: const MarkerId('current_location'),
+          position: LatLng(position.latitude, position.longitude),
+          infoWindow: const InfoWindow(title: '現在地'),
+        ),
+      );
+    });
+
+    // 現在地にカメラを移動
+    await mapController.animateCamera(
+      CameraUpdate.newCameraPosition(
+        CameraPosition(
+          target: LatLng(position.latitude, position.longitude),
+          zoom: 16.0,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _watchPosition() async {
+    // 現在地の変化を監視
+    positionStreamSubscription = Geolocator.getPositionStream(
+      locationSettings: locationSettings,
+    ).listen((Position position) async {
       setState(() {
-        markers.removeWhere((Marker marker) {
-          return marker.markerId.value == 'current_location';
-        });
+        markers.removeWhere(
+            (Marker marker) => marker.markerId.value == 'current_location');
         markers.add(
-          const Marker(
-            markerId: MarkerId('current_location'),
-            position: LatLng(latitude, longitude),
-            infoWindow: InfoWindow(
-              title: '現在地',
-            ),
+          Marker(
+            markerId: const MarkerId('current_location'),
+            position: LatLng(position.latitude, position.longitude),
+            infoWindow: const InfoWindow(title: '現在地'),
           ),
         );
       });
@@ -356,117 +401,12 @@ class GameScreenState extends State<GameScreen> {
       // 現在地にカメラを移動
       await mapController.animateCamera(
         CameraUpdate.newCameraPosition(
-          const CameraPosition(
-            target: LatLng(latitude, longitude),
+          CameraPosition(
+            target: LatLng(position.latitude, position.longitude),
             zoom: 16.0,
           ),
         ),
       );
-    }
-  }
-
-  Future<void> _requestPermission() async {
-    // 位置情報の許可を求める
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      await Geolocator.requestPermission();
-    }
-  }
-
-  Future<void> _signOut() async {
-    setIsLoading(true);
-    await Future.delayed(const Duration(seconds: 1), () {});
-    await FirebaseAuth.instance.signOut();
-    setIsLoading(false);
-  }
-}
-
-class OniMapScreen extends StatefulWidget {
-  final String roomId;
-
-  const OniMapScreen({
-    Key? key,
-    required this.roomId,
-  }) : super(key: key);
-
-  @override
-  State<OniMapScreen> createState() => _OniMapScreenState();
-}
-
-class QRViewExample extends StatefulWidget {
-  const QRViewExample({super.key});
-
-  @override
-  State<StatefulWidget> createState() => _QRViewExampleState();
-}
-
-class RankingsScreen extends StatelessWidget {
-  final List rankings;
-
-  const RankingsScreen({Key? key, required this.rankings}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Rankings'),
-      ),
-      body: ListView.builder(
-        itemCount: rankings.length,
-        itemBuilder: (context, index) {
-          return ListTile(
-            title: Text('Player: ${rankings[index]['player']}'),
-            subtitle: Text('Rank: ${rankings[index]['rank']}'),
-          );
-        },
-      ),
-    );
-  }
-}
-
-class _OniMapScreenState extends State<OniMapScreen> {
-  bool gameStart = true;
-  List rankings = [];
-
-  @override
-  Widget build(BuildContext context) {
-    return gameStart ? const GameScreen() : RankingsScreen(rankings: rankings);
-  }
-
-  @override
-  void initState() {
-    super.initState();
-
-    print('initState');
-    print(widget.roomId);
-    print('initState');
-    final gameStartRef = FirebaseDatabase.instance
-        .ref()
-        .child('games')
-        .child('121233')
-        .child('settings')
-        .child('gameStart');
-
-    gameStartRef.onValue.listen((event) {
-      setState(() {
-        print('gameStartRef.onValue.listen((event) {');
-        print(event.snapshot.value);
-        gameStart = event.snapshot.value as bool? ?? true;
-      });
-    });
-
-    final rankingsRef = FirebaseDatabase.instance
-        .ref()
-        .child('games')
-        .child('121233')
-        .child('rankings');
-
-    rankingsRef.onValue.listen((event) {
-      setState(() {
-        print('rankingsRef.onValue.listen((event) {');
-        print(event.snapshot.value);
-        rankings = event.snapshot.value as List? ?? [];
-      });
     });
   }
 }
@@ -516,6 +456,7 @@ class _QRViewExampleState extends State<QRViewExample> {
     controller!.resumeCamera();
   }
 
+/*
   void _onQRViewCreated(QRViewController controller) {
     this.controller = controller;
     controller.scannedDataStream.listen((scanData) {
@@ -525,62 +466,21 @@ class _QRViewExampleState extends State<QRViewExample> {
       // スキャンされたQRコードデータを処理
       Navigator.pop(context, scannaData);
       controller.dispose();
-      // print(scannaData);
+    });
+  }
+*/
+
+  void _onQRViewCreated(QRViewController controller) {
+    this.controller = controller;
+    controller.scannedDataStream.listen((scanData) async {
+      setState(() {
+        scannaData = scanData.code;
+      });
+      // スキャンされたQRコードデータを処理
+      await OniAssignmentService()
+          .setOni(widget.roomId, scannaData); // widgetを使用してroomIdにアクセス
+      Navigator.pop(context, scannaData);
+      controller.dispose();
     });
   }
 }
-
-
-  // Future<void> _watchPosition() async {
-  //   // 現在地の変化を監視
-  //   positionStreamSubscription =
-  //       Geolocator.getPositionStream(locationSettings: locationSettings)
-  //           .listen((Position position) async {
-  //     setState(() {
-  //       markers.removeWhere((Marker marker) {
-  //         return marker.markerId.value == 'current_location';
-  //       });
-
-  //       markers.add(
-  //         Marker(
-  //           markerId: const MarkerId('current_location'),
-  //           position: LatLng(position.latitude, position.longitude),
-  //           infoWindow: const InfoWindow(
-  //             title: '現在地',
-  //           ),
-  //         ),
-  //       );
-  //     });
-
-  //   // 現在地にカメラを移動
-  //   await mapController.animateCamera(
-  //     CameraUpdate.newCameraPosition(
-  //       CameraPosition(
-  //         target: LatLng(position.latitude, position.longitude),
-  //         zoom: 16.0,
-  //       ),
-  //     ),
-  //   );
-  // });
-
-
-//   void _watchSignInState() {
-//     authUserStream =
-//         FirebaseAuth.instance.authStateChanges().listen((User? user) {
-//       if (user == null) {
-//         setIsSignedIn(false);
-//       } else {
-//         setIsSignedIn(true);
-//       }
-//     });
-//   }
-// }
-      //     Align(
-      //       alignment: Alignment.bottomCenter,
-      //       child: !isSignedIn
-      //           ? const SignInButton()
-      //           : SignOutButton(
-      //               isLoading: isLoading,
-      //               onPressed: () => _signOut(),
-      //             ),
-      //     ),

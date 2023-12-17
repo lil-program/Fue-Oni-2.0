@@ -4,8 +4,8 @@ import 'package:firebase_database/firebase_database.dart';
 class PlayerService {
   Future<String?> getPlayer() async {
     User? currentUser = FirebaseAuth.instance.currentUser;
-    if (currentUser == null) {
-      return null;
+    if (currentUser != null) {
+      return currentUser.uid;
     }
     return null;
   }
