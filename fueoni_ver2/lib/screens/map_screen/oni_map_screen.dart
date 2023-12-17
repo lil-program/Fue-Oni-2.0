@@ -409,39 +409,6 @@ class _OniMapGameScreenState extends State<OniMapGameScreen> {
     );
   }
 
-  // Future<void> _watchPosition() async {
-  //   // 現在地の変化を監視
-  //   positionStreamSubscription = Geolocator.getPositionStream(
-  //     locationSettings: locationSettings,
-  //   ).listen((Position position) async {
-
-  //     setState(() {
-  //       // 現在地マーカーを削除
-  //       markers.removeWhere(
-  //           (Marker marker) => marker.markerId.value == 'current_location');
-
-  //       // 現在地マーカーを追加
-  //       markers.add(
-  //         Marker(
-  //           markerId: const MarkerId('current_location'),
-  //           position: LatLng(position.latitude, position.longitude),
-  //           infoWindow: const InfoWindow(title: '現在地'),
-  //         ),
-  //       );
-  //     });
-
-  //     // 現在地にカメラを移動
-  //     await mapController!.animateCamera(
-  //       CameraUpdate.newCameraPosition(
-  //         CameraPosition(
-  //           target: LatLng(position.latitude, position.longitude),
-  //           zoom: 16.0,
-  //         ),
-  //       ),
-  //     );
-  //   });
-  // }
-
   Future<void> _watchPosition() async {
     positionStreamSubscription = Geolocator.getPositionStream(
       locationSettings: locationSettings,
@@ -581,20 +548,6 @@ class _QRViewExampleState extends State<QRViewExample> {
     }
     controller!.resumeCamera();
   }
-
-/*
-  void _onQRViewCreated(QRViewController controller) {
-    this.controller = controller;
-    controller.scannedDataStream.listen((scanData) {
-      setState(() {
-        scannaData = scanData.code;
-      });
-      // スキャンされたQRコードデータを処理
-      Navigator.pop(context, scannaData);
-      controller.dispose();
-    });
-  }
-*/
 
   void _onQRViewCreated(QRViewController controller) {
     this.controller = controller;

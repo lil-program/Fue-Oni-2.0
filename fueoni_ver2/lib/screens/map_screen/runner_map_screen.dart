@@ -123,6 +123,21 @@ class _RunnerMapScreenState extends State<RunnerMapScreen> {
           LocationService.updateCurrentLocation(LocationService(), roomId);
         }
       });
+
+      GameMonitorService().monitorOniPlayers(roomId, (oniPlayers) async {
+        // 鬼の数をカウント
+        int oniCount = oniPlayers.values.where((isOni) => isOni).length;
+
+        final allPlayers = await OniAssignmentService().getPlayersList(roomId);
+        // 全プレイヤー数から鬼の数を引いて逃走者の数を算出
+        int nonOniCount = allPlayers.length - oniCount;
+
+        // 状態を更新
+        setState(() {
+          countOni = oniCount;
+          countNonOni = nonOniCount;
+        });
+      });
     });
   }
 
