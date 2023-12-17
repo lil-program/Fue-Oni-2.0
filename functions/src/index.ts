@@ -13,6 +13,7 @@ import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 import { addOniPlayer } from "./addOniPlayer";
 import { checkOniCount } from "./checkOniCount";
+import { calculateRankings } from "./calculateRankings";
 
 // Start writing functions
 // https://firebase.google.com/docs/functions/typescript
@@ -21,6 +22,7 @@ admin.initializeApp();
 
 exports.addOniPlayer = addOniPlayer;
 exports.checkOniCount = checkOniCount;
+exports.calculateRankings = calculateRankings;
 
 export const helloWorld = onRequest((request, response) => {
   logger.info("Hello logs!", { structuredData: true });

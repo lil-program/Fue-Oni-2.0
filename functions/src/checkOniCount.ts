@@ -8,28 +8,26 @@ export const checkOniCount = functions.database
     // ルームIDを取得
     const roomId: string = context.params.roomId;
 
-    // データベースの'oniPlayers'と'initialOniCount'への参照を取得
+    // データベースの'oniPlayers'と'players'への参照を取得
     const oniPlayersRef = admin.database().ref(`/games/${roomId}/oniPlayers`);
-    const initialOniCountRef = admin
-      .database()
-      .ref(`/games/${roomId}/settings/initialOniCount`);
+    const playersRef = admin.database().ref(`/games/${roomId}/players`);
 
-    // 'oniPlayers'の現在の数と'initialOniCount'をフェッチ
+    // 'oniPlayers'の現在の数と'players'の数をフェッチ
     return Promise.all([
       oniPlayersRef.once("value"),
-      initialOniCountRef.once("value"),
-    ]).then(([oniPlayersSnapshot, initialOniCountSnapshot]) => {
+      playersRef.once("value"),
+    ]).then(([oniPlayersSnapshot, playersSnapshot]) => {
       const oniPlayersCount: number = oniPlayersSnapshot.numChildren();
-      const initialOniCount: number = initialOniCountSnapshot.val();
+      const playersCount: number = playersSnapshot.numChildren();
 
-      // 'oniPlayers'の数が'initialOniCount'と等しい場合、'gameStart'をfalseに設定
-      if (oniPlayersCount === initialOniCount) {
+      // 'oniPlayers'の数が'players'の数と等しい場合、'gameStart'をfalseに設定
+      if (oniPlayersCount === playersCount) {
         return admin
           .database()
           .ref(`/games/${roomId}/settings/gameStart`)
           .set(false);
       } else {
-        // 'oniPlayers'の数が'initialOniCount'と等しくない場合、何もしない
+        // 'oniPlayers'の数が'players'の数と等しくない場合、何もしない
         return null;
       }
     });
