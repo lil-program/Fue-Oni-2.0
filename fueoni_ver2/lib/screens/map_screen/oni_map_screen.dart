@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:fueoni_ver2/components/locate_permission_check.dart';
 import 'package:fueoni_ver2/models/arguments.dart';
@@ -16,13 +15,19 @@ import 'package:qr_code_scanner/qr_code_scanner.dart';
 
 String? scannaData;
 
-class GameScreen extends StatefulWidget {
-  const GameScreen({
+Future<void> initOniMapScreen() async {
+  // MapScreenの初期化処理をここに書く
+  // 例えば、Firebaseの初期化やデータの取得など
+  await Future.delayed(const Duration(seconds: 2)); // ここでは2秒待つだけの例を示しています
+}
+
+class OniMapScreen extends StatefulWidget {
+  const OniMapScreen({
     Key? key,
   }) : super(key: key);
 
   @override
-  State<GameScreen> createState() => GameScreenState();
+  State<OniMapScreen> createState() => _OniMapScreenState();
 }
 
 class QRViewExample extends StatefulWidget {
@@ -257,11 +262,8 @@ class _OniMapScreenState extends State<OniMapScreen> {
     mainTimer?.cancel();
     oniTimer?.cancel();
     mapController.dispose();
-    try {
-      positionStreamSubscription.cancel();
-    } catch (_) {
-      // positionStreamSubscriptionが既にキャンセルされている場合、何もしない
-    }
+    positionStreamSubscription.cancel();
+    authUserStream.cancel();
     super.dispose();
   }
 
