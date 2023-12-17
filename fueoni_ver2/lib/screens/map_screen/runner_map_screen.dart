@@ -1,19 +1,18 @@
 import 'dart:async';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fueoni_ver2/components/locate_permission_check.dart';
-import 'package:fueoni_ver2/screens/result_screen/result_screen.dart';
+import 'package:fueoni_ver2/models/arguments.dart';
+import 'package:fueoni_ver2/services/room_creation/oni_assignment_service.dart';
+import 'package:fueoni_ver2/services/room_management/player_service.dart';
+import 'package:fueoni_ver2/services/room_search/game_monitor_service.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:qr_flutter/qr_flutter.dart';
-import 'package:fueoni_ver2/services/room_creation/oni_assignment_service.dart';
-import 'package:fueoni_ver2/models/arguments.dart';
-// import 'package:firebase_database/firebase_database.dart';
 
 Future<void> initRunnerMapScreen() async {
-  // MapScreenの初期化処理をここに書く
-  // 例えば、Firebaseの初期化やデータの取得など
-  await Future.delayed(const Duration(seconds: 2)); // ここでは2秒待つだけの例を示しています
+  await Future.delayed(const Duration(seconds: 2));
 }
 
 class RunnerMapScreen extends StatefulWidget {
@@ -26,13 +25,19 @@ class RunnerMapScreen extends StatefulWidget {
 }
 
 class _RunnerMapScreenState extends State<RunnerMapScreen> {
+  //初期値
   late GoogleMapController mapController;
   late StreamSubscription<Position> positionStreamSubscription;
   Set<Marker> markers = {};
   late StreamSubscription<User?> authUserStream;
+  LatLng? lastPosition;
 
-  Duration mainTimerDuration = const Duration(minutes: 100); // 残り時間のタイマー
-  Timer? mainTimer;
+  LocationSettings locationSettings = const LocationSettings(
+    accuracy: LocationAccuracy.high,
+    distanceFilter: 10,
+  );
+
+  Timer? oniTimer;
 
   int? roomId;
 
@@ -40,237 +45,73 @@ class _RunnerMapScreenState extends State<RunnerMapScreen> {
 
   bool isLoading = false;
 
+  bool _mapIsLoading = true;
+
   int countOni = 0;
   int countNonOni = 0;
+
+  Duration mainTimerDuration = const Duration(minutes: 100);
+  Duration oniTimerDuration = const Duration(minutes: 2);
+  Timer? mainTimer;
 
   final CameraPosition initialCameraPosition = const CameraPosition(
     target: LatLng(33.570734171832, 130.24635431587),
     zoom: 16.0,
   );
-  // 現在地通知の設定
-  final LocationSettings locationSettings = const LocationSettings(
-    accuracy: LocationAccuracy.high, //正確性:highはAndroid(0-100m),iOS(10m)
-    distanceFilter: 10,
-  );
 
+  //画面のビルド
   @override
   Widget build(BuildContext context) {
     return LocationPermissionCheck(
       child: Scaffold(
-        resizeToAvoidBottomInset: false,
-        appBar: PreferredSize(
-          preferredSize: const Size.fromHeight(40),
-          child: AppBar(
-            automaticallyImplyLeading: false,
-            title: Column(
-              children: [
-                Text(
-                  '残り時間${_formatDuration(mainTimerDuration)}',
-                  style: TextStyle(
-                    color: Theme.of(context).primaryColor,
-                    fontSize: 20,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        body: GoogleMap(
-          initialCameraPosition: initialCameraPosition,
-          onMapCreated: (GoogleMapController controller) async {
-            mapController = controller;
-            // await _requestPermission();
-            await _moveToCurrentLocation();
-            // await _watchPosition();
-          },
-          myLocationEnabled: false,
-          myLocationButtonEnabled: false,
-          markers: markers,
-        ),
-        floatingActionButton: Stack(
-          children: <Widget>[
-            Positioned(
-              left: 0.0,
-              bottom: 50,
-              child: FloatingActionButton(
-                heroTag: null,
-                onPressed: () async {
-                  await _moveToCurrentLocation();
-                },
-                elevation: 6,
-                child: Icon(
-                  Icons.my_location,
-                  color: Theme.of(context).iconTheme.color,
-                ),
-              ),
-            ),
-            Positioned(
-              right: 30,
-              bottom: 10,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).primaryColor,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(20.0),
-                    topRight: Radius.circular(20.0),
-                    bottomLeft: Radius.circular(20.0),
-                  ),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Colors.black26,
-                      offset: Offset(5, 5),
-                      blurRadius: 6,
-                      spreadRadius: 2,
-                    ),
-                  ],
-                ),
-                child: Text(
-                  '鬼残り$countOni人',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold, // テキストを太字に
-                    fontSize: 16,
-                  ),
-                ),
-              ),
-            ),
-            Positioned(
-              left: 3,
-              bottom: 10,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).primaryColor,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(20.0),
-                    topRight: Radius.circular(20.0),
-                    bottomRight: Radius.circular(20.0),
-                  ),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Colors.black26,
-                      offset: Offset(3, 3),
-                      blurRadius: 4,
-                      spreadRadius: 2,
-                    ),
-                  ],
-                ),
-                child: Text(
-                  '逃走者残り$countNonOni人',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
-                ),
-              ),
-            ),
-            Positioned(
-              right: 30,
-              bottom: 50.0,
-              child: FloatingActionButton(
-                heroTag: null,
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (context) {
-                      return Dialog(
-                        // child: Container(
-                        // insetPadding : const EdgeInsets.only(left:5, right: 5, top: 20, bottom:20),
-                        // padding: const EdgeInsets.all(20),
-                        child: QrImageView(
-                          padding: const EdgeInsets.only(
-                              left: 60, right: 20, top: 20, bottom: 20),
-                          data: "https://www.kamo-it.org/blog/36/",
-                          version: QrVersions.auto,
-                          size: 200.0,
-                        ),
-                        // ),
-                      );
-                    },
-                  );
-                },
-                child: Icon(
-                  Icons.qr_code_scanner,
-                  color: Theme.of(context).iconTheme.color,
-                ),
-              ),
-            ),
-          ],
-        ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
+        appBar: _buildAppBar(),
+        body: _buildMap(),
+        floatingActionButton: _buildFloatingActionButtons(),
       ),
     );
   }
 
   @override
   void dispose() {
-    mainTimer?.cancel();
-    mapController.dispose();
     positionStreamSubscription.cancel();
-    authUserStream.cancel();
     super.dispose();
   }
 
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   markers.add(
-  //     const Marker(
-  //       markerId: MarkerId('oni'),
-  //       position: LatLng(33.570734171832, 130.24635431587),
-  //     ),
-  //   );
-  //   startMainTimer(); // 主タイマーを起動します。
-  // }
   @override
   void initState() {
     super.initState();
-    final args = ModalRoute.of(context)!.settings.arguments as RoomArguments;
-    print(args.roomId);
-    markers.add(
-      const Marker(
-        markerId: MarkerId('oni'),
-        position: LatLng(33.570734171832, 130.24635431587),
-      ),
-    );
-    setState(() {
-      roomId = args.roomId;
-    });
-    startMainTimer(); // 主タイマーを起動します。
-    // countOniAndNonOniPlayers(roomId);
-    // WidgetsBinding.instance.addPostFrameCallback((_) async {
-    //   final timeLimit = await OniAssignmentService().getTimeLimit(roomId);
-    //   print("Time Limit: $timeLimit");
-    // });
-    // print(
-    //     "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
-  }
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // contextに依存する処理
-    final args = ModalRoute.of(context)!.settings.arguments as RoomArguments;
-    setState(() {
-      roomId = args.roomId;
-    });
+    _watchPosition();
 
-    // countOniAndNonOniPlayers(roomId);
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final timeLimit = await OniAssignmentService().getTimeLimit(roomId);
-      print("Time Limit: $timeLimit");
-    });
-  }
+      final args = ModalRoute.of(context)!.settings.arguments as RoomArguments;
+      roomId = args.roomId;
 
+      final gameTimeLimit = await OniAssignmentService().getTimeLimit(roomId);
 
-  void setIsLoading(bool value) {
-    setState(() {
-      isLoading = value;
-    });
-  }
+      setState(() {
+        mainTimerDuration = gameTimeLimit;
+        oniTimerDuration = const Duration(minutes: 1);
+      });
 
-  void setIsSignedIn(bool value) {
-    setState(() {
-      isSignedIn = value;
+      startMainTimer();
+
+      // プレイヤーが鬼になったかを監視
+      GameMonitorService().monitorPlayerOniState(
+          roomId, FirebaseAuth.instance.currentUser?.uid, (isOni) {
+        if (isOni) {
+          // プレイヤーが鬼になった場合、鬼用マップ画面に遷移
+          Navigator.pushReplacementNamed(context, '/map/oni',
+              arguments: RoomArguments(roomId: roomId));
+        }
+      });
+
+      GameMonitorService().monitorGameStart(roomId, (gameStarted) {
+        if (!gameStarted) {
+          // ゲームが終了したらリザルト画面へ遷移
+          // Navigator.pushReplacementNamed(context, '/result');
+          print("ゲーム終了");
+        }
+      });
     });
   }
 
@@ -279,12 +120,8 @@ class _RunnerMapScreenState extends State<RunnerMapScreen> {
       setState(() {
         if (mainTimerDuration.inSeconds <= 0) {
           timer.cancel();
-          // Navigator.pushReplacement(
-          //   context,
-          //   MaterialPageRoute(
-          //     builder: (context) => ResultScreen(),
-          //   ),
-          // );
+
+          Navigator.pushReplacementNamed(context, '/result');
         } else {
           mainTimerDuration = mainTimerDuration - const Duration(seconds: 1);
         }
@@ -292,35 +129,203 @@ class _RunnerMapScreenState extends State<RunnerMapScreen> {
     });
   }
 
-  String _formatDuration(Duration duration) {
-    String twoDigits(int n) => n.toString().padLeft(2, '0');
-    String twoDigitMinutes = twoDigits(duration.inMinutes.remainder(60));
-    String twoDigitSeconds = twoDigits(duration.inSeconds.remainder(60));
-    return "$twoDigitMinutes:$twoDigitSeconds";
+  PreferredSizeWidget _buildAppBar() {
+    return AppBar(
+      automaticallyImplyLeading: false,
+      title: Column(
+        children: [
+          Text(
+            '残り時間${_formatDuration(mainTimerDuration)}',
+            style: TextStyle(
+              color: Theme.of(context).primaryColor,
+              fontSize: 20,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
-  Future<void> _moveToCurrentLocation() async {
+  Widget _buildFloatingActionButtons() {
+    // 画面サイズを取得
+    Size screenSize = MediaQuery.of(context).size;
+
+    // 画面高さの10%
+    double bottomPosition = screenSize.height * 0.1;
+
+    return Stack(
+      children: <Widget>[
+        // 現在地へ移動するボタン
+        Positioned(
+          left: 30,
+          bottom: bottomPosition,
+          child: FloatingActionButton(
+            heroTag: "btn1",
+            onPressed: () async {
+              await _moveToCurrentLocation();
+            },
+            elevation: 6,
+            child: Icon(
+              Icons.my_location,
+              color: Theme.of(context).iconTheme.color,
+            ),
+          ),
+        ),
+        // QRコードスキャナーボタン
+        Positioned(
+          right: 30,
+          bottom: bottomPosition,
+          child: FloatingActionButton(
+            heroTag: "btn2",
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (context) {
+                  return Dialog(
+                    child: FutureBuilder<String?>(
+                      future: PlayerService().getPlayer(),
+                      builder: (BuildContext context,
+                          AsyncSnapshot<String?> snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          // ロード中の場合、インジケータを表示
+                          return const CircularProgressIndicator();
+                        } else if (snapshot.hasError) {
+                          // エラーが発生した場合、エラーメッセージを表示
+                          return Text('Error: ${snapshot.error}');
+                        } else if (snapshot.hasData) {
+                          // データが取得できた場合、QrImageViewを表示
+                          return QrImageView(
+                            padding: const EdgeInsets.only(
+                                left: 60, right: 20, top: 20, bottom: 20),
+                            data: snapshot.data ?? '',
+                            version: QrVersions.auto,
+                            size: 200.0,
+                          );
+                        } else {
+                          // データがnullの場合、何も表示しない
+                          return const Text('No data available');
+                        }
+                      },
+                    ),
+                  );
+                },
+              );
+            },
+            child: Icon(
+              Icons.qr_code_scanner,
+              color: Theme.of(context).iconTheme.color,
+            ),
+          ),
+        ),
+
+        // 鬼の残り人数を表示
+        Positioned(
+          right: 30,
+          bottom: 10,
+          child: _buildPlayerCountContainer('鬼残り$countOni人'),
+        ),
+        // 逃走者の残り人数を表示
+        Positioned(
+          left: 30,
+          bottom: 10,
+          child: _buildPlayerCountContainer('逃走者残り$countNonOni人'),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMap() {
+    return Stack(
+      children: [
+        GoogleMap(
+          initialCameraPosition: initialCameraPosition,
+          onMapCreated: (GoogleMapController controller) async {
+            mapController = controller;
+            await _moveToCurrentLocation();
+            await _watchPosition();
+            setState(() {
+              _mapIsLoading = false;
+            });
+          },
+          myLocationEnabled: false,
+          myLocationButtonEnabled: false,
+          markers: markers,
+        ),
+        if (_mapIsLoading)
+          Container(
+            color: Colors.white,
+            child: const Center(
+              child: CircularProgressIndicator(),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildPlayerCountContainer(String text) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: Theme.of(context).primaryColor,
+        borderRadius: const BorderRadius.all(Radius.circular(20.0)),
+        boxShadow: const [
+          BoxShadow(
+            color: Colors.black26,
+            offset: Offset(3, 3),
+            blurRadius: 4,
+            spreadRadius: 2,
+          ),
+        ],
+      ),
+      child: Text(
+        text,
+        style: const TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 16,
+          color: Colors.white,
+        ),
+      ),
+    );
+  }
+
+  String _formatDuration(Duration duration) {
+    String twoDigits(int n) => n.toString().padLeft(2, '0');
+
+    // 全体の分数を取得
+    String minutes = twoDigits(duration.inMinutes);
+    // 分を超える秒数を取得
+    String seconds = twoDigits(duration.inSeconds.remainder(60));
+
+    return "$minutes:$seconds";
+  }
+
+  Future<LatLng> _getCurrentLocation() async {
     LocationPermission permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.always ||
         permission == LocationPermission.whileInUse) {
-      // // 現在地を取得
-      // final Position position = await Geolocator.getCurrentPosition(
-      //   desiredAccuracy: LocationAccuracy.high,
-      // );
-      const double latitude = 33.570734171832;
-      const double longitude = 130.24635431587;
+      // 現在地を取得
+      Position position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high);
+      return LatLng(position.latitude, position.longitude);
+    }
+    throw Exception('Location permission not granted');
+  }
+
+  Future<void> _moveToCurrentLocation() async {
+    try {
+      // 現在地を取得
+      LatLng currentLocation = await _getCurrentLocation();
 
       setState(() {
-        markers.removeWhere((Marker marker) {
-          return marker.markerId.value == 'current_location';
-        });
+        // 現在地のマーカーを更新
+        markers.removeWhere(
+            (Marker marker) => marker.markerId.value == 'current_location');
         markers.add(
-          const Marker(
-            markerId: MarkerId('current_location'),
-            position: LatLng(latitude, longitude),
-            infoWindow: InfoWindow(
-              title: '現在地',
-            ),
+          Marker(
+            markerId: const MarkerId('current_location'),
+            position: currentLocation,
+            infoWindow: const InfoWindow(title: '現在地'),
           ),
         );
       });
@@ -328,106 +333,44 @@ class _RunnerMapScreenState extends State<RunnerMapScreen> {
       // 現在地にカメラを移動
       await mapController.animateCamera(
         CameraUpdate.newCameraPosition(
-          const CameraPosition(
-            target: LatLng(latitude, longitude),
+          CameraPosition(
+            target: currentLocation,
             zoom: 16.0,
           ),
         ),
       );
+    } catch (e) {
+      // エラーハンドリング
+      print('Error getting current location: $e');
     }
   }
 
-  //   Future countOniAndNonOniPlayers(int? roomId) async {
-  //   DatabaseReference playersRef =
-  //       FirebaseDatabase.instance.ref('games/$roomId/players');
-  //   final snapshot = await playersRef.once();
-  //   int oniCount = 0;
-  //   int nonOniCount = 0;
-  //   if (snapshot.snapshot.exists) {
-  //     Map<dynamic, dynamic> playersData =
-  //         snapshot.snapshot.value as Map<dynamic, dynamic>;
-  //     for (var playerData in playersData.values) {
-  //       if (playerData['oni'] == true) {
-  //         oniCount++;
-  //       } else {
-  //         nonOniCount++;
-  //       }
-  //     }
-  //   }
-  //   print({'oni': oniCount, 'nonOni': nonOniCount});
+  Future<void> _watchPosition() async {
+    // 現在地の変化を監視
+    positionStreamSubscription = Geolocator.getPositionStream(
+      locationSettings: locationSettings,
+    ).listen((Position position) async {
+      setState(() {
+        markers.removeWhere(
+            (Marker marker) => marker.markerId.value == 'current_location');
+        markers.add(
+          Marker(
+            markerId: const MarkerId('current_location'),
+            position: LatLng(position.latitude, position.longitude),
+            infoWindow: const InfoWindow(title: '現在地'),
+          ),
+        );
+      });
 
-  //   setState(() {
-  //     countOni = oniCount;
-  //     countNonOni = nonOniCount;
-  //   });
-  // }
-
-  Future<void> _signOut() async {
-    setIsLoading(true);
-    await Future.delayed(const Duration(seconds: 1), () {});
-    await FirebaseAuth.instance.signOut();
-    setIsLoading(false);
+      // 現在地にカメラを移動
+      await mapController.animateCamera(
+        CameraUpdate.newCameraPosition(
+          CameraPosition(
+            target: LatLng(position.latitude, position.longitude),
+            zoom: 16.0,
+          ),
+        ),
+      );
+    });
   }
 }
-
-
-  // Future<void> _requestPermission() async {
-  //   // 位置情報の許可を求める
-  //   LocationPermission permission = await Geolocator.checkPermission();
-  //   if (permission == LocationPermission.denied) {
-  //     await Geolocator.requestPermission();
-  //   }
-  // }
-
-  // Future<void> _watchPosition() async {
-  //   // 現在地の変化を監視
-  //   positionStreamSubscription =
-  //       Geolocator.getPositionStream(locationSettings: locationSettings)
-  //           .listen((Position position) async {
-  //     setState(() {
-  //       markers.removeWhere((Marker marker) {
-  //         return marker.markerId.value == 'current_location';
-  //       });
-
-  //       markers.add(
-  //         Marker(
-  //           markerId: const MarkerId('current_location'),
-  //           position: LatLng(position.latitude, position.longitude),
-  //           infoWindow: const InfoWindow(
-  //             title: '現在地',
-  //           ),
-  //         ),
-  //       );
-  //     });
-
-    //   // 現在地にカメラを移動
-    //   await mapController.animateCamera(
-    //     CameraUpdate.newCameraPosition(
-    //       CameraPosition(
-    //         target: LatLng(position.latitude, position.longitude),
-    //         zoom: 16.0,
-    //       ),
-    //     ),
-    //   );
-    // });
-
-//   void _watchSignInState() {
-//     authUserStream =
-//         FirebaseAuth.instance.authStateChanges().listen((User? user) {
-//       if (user == null) {
-//         setIsSignedIn(false);
-//       } else {
-//         setIsSignedIn(true);
-//       }
-//     });
-//   }
-// }
-      //     Align(
-      //       alignment: Alignment.bottomCenter,
-      //       child: !isSignedIn
-      //           ? const SignInButton()
-      //           : SignOutButton(
-      //               isLoading: isLoading,
-      //               onPressed: () => _signOut(),
-      //             ),
-      //     ),

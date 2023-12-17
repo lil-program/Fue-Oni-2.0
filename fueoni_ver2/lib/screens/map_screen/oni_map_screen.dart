@@ -1,10 +1,16 @@
 import 'dart:async';
 import 'dart:io';
 
+
 import 'package:firebase_database/firebase_database.dart';
+
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fueoni_ver2/components/locate_permission_check.dart';
 import 'package:fueoni_ver2/screens/map_screen/oni_timer_map.dart';
+
+import 'package:fueoni_ver2/screens/result_screen/result_screen.dart';
+
 import 'package:fueoni_ver2/services/room_creation/oni_assignment_service.dart';
 import 'package:fueoni_ver2/services/room_search/game_monitor_service.dart';
 import 'package:geolocator/geolocator.dart';
@@ -38,7 +44,9 @@ class OniMapScreen extends StatefulWidget {
 }
 
 class QRViewExample extends StatefulWidget {
-  const QRViewExample({super.key});
+  final int? roomId; // roomIdを追加
+
+  const QRViewExample({super.key, required this.roomId});
 
   @override
   State<StatefulWidget> createState() => _QRViewExampleState();
@@ -48,6 +56,11 @@ class _OniMapGameScreenState extends State<OniMapGameScreen> {
   GoogleMapController? mapController;
   late StreamSubscription<Position> positionStreamSubscription;
   Set<Marker> markers = {};
+
+  LocationSettings locationSettings = const LocationSettings(
+    accuracy: LocationAccuracy.high, // 高精度の位置情報
+    distanceFilter: 10, // 最小の距離変化（メートル）
+  );
 
   Duration? mainTimerDuration; // 残り時間のタイマー
   Duration oniTimerDuration = const Duration(minutes: 2); // 鬼タイマー
@@ -68,12 +81,6 @@ class _OniMapGameScreenState extends State<OniMapGameScreen> {
   final CameraPosition initialCameraPosition = const CameraPosition(
     target: LatLng(33.570734171832, 130.24635431587),
     zoom: 16.0,
-  );
-
-  // 現在地通知の設定
-  final LocationSettings locationSettings = const LocationSettings(
-    accuracy: LocationAccuracy.high, //正確性:highはAndroid(0-100m),iOS(10m)
-    distanceFilter: 10,
   );
 
   @override
@@ -242,7 +249,9 @@ class _OniMapGameScreenState extends State<OniMapGameScreen> {
               onPressed: () async {
                 var scannedData = await Navigator.of(context).push(
                   MaterialPageRoute(
-                      builder: (context) => const QRViewExample()),
+                      builder: (context) => QRViewExample(
+                            roomId: roomId,
+                          )),
                 );
 
                 if (scannedData != null) {
@@ -366,42 +375,79 @@ class _OniMapGameScreenState extends State<OniMapGameScreen> {
 
   String _formatDuration(Duration duration) {
     String twoDigits(int n) => n.toString().padLeft(2, '0');
-    String twoDigitMinutes = twoDigits(duration.inMinutes.remainder(60));
-    String twoDigitSeconds = twoDigits(duration.inSeconds.remainder(60));
-    return "$twoDigitMinutes:$twoDigitSeconds";
+
+    // 全体の分数を取得
+    String minutes = twoDigits(duration.inMinutes);
+    // 分を超える秒数を取得
+    String seconds = twoDigits(duration.inSeconds.remainder(60));
+
+    return "$minutes:$seconds";
   }
 
   Future<void> _moveToCurrentLocation() async {
+
+    // 現在地を取得
     final Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high);
 
-    if (mounted && mapController != null) {
-      setState(() {
-        // 現在地マーカーを削除
-        markers.removeWhere(
-            (Marker marker) => marker.markerId.value == 'current_location');
+    setState(() {
+      // 現在地マーカーを削除
+      markers.removeWhere(
+          (Marker marker) => marker.markerId.value == 'current_location');
 
-        // 現在地マーカーを追加
-        markers.add(
-          Marker(
-            markerId: const MarkerId('current_location'),
-            position: LatLng(position.latitude, position.longitude),
-            infoWindow: const InfoWindow(title: '現在地'),
-          ),
-        );
-      });
-
-      // 現在地にカメラを移動
-      await mapController!.animateCamera(
-        CameraUpdate.newCameraPosition(
-          CameraPosition(
-            target: LatLng(position.latitude, position.longitude),
-            zoom: 16.0,
-          ),
+      // 現在地マーカーを追加
+      markers.add(
+        Marker(
+          markerId: const MarkerId('current_location'),
+          position: LatLng(position.latitude, position.longitude),
+          infoWindow: const InfoWindow(title: '現在地'),
         ),
       );
-    }
+    });
+
+    // 現在地にカメラを移動
+    await mapController!.animateCamera(
+      CameraUpdate.newCameraPosition(
+        CameraPosition(
+          target: LatLng(position.latitude, position.longitude),
+          zoom: 16.0,
+        ),
+      ),
+    );
   }
+
+  // Future<void> _watchPosition() async {
+  //   // 現在地の変化を監視
+  //   positionStreamSubscription = Geolocator.getPositionStream(
+  //     locationSettings: locationSettings,
+  //   ).listen((Position position) async {
+
+  //     setState(() {
+  //       // 現在地マーカーを削除
+  //       markers.removeWhere(
+  //           (Marker marker) => marker.markerId.value == 'current_location');
+
+  //       // 現在地マーカーを追加
+  //       markers.add(
+  //         Marker(
+  //           markerId: const MarkerId('current_location'),
+  //           position: LatLng(position.latitude, position.longitude),
+  //           infoWindow: const InfoWindow(title: '現在地'),
+  //         ),
+  //       );
+  //     });
+
+  //     // 現在地にカメラを移動
+  //     await mapController!.animateCamera(
+  //       CameraUpdate.newCameraPosition(
+  //         CameraPosition(
+  //           target: LatLng(position.latitude, position.longitude),
+  //           zoom: 16.0,
+  //         ),
+  //       ),
+  //     );
+  //   });
+  // }
 
   Future<void> _watchPosition() async {
     positionStreamSubscription = Geolocator.getPositionStream(
@@ -540,6 +586,7 @@ class _QRViewExampleState extends State<QRViewExample> {
     controller!.resumeCamera();
   }
 
+/*
   void _onQRViewCreated(QRViewController controller) {
     this.controller = controller;
     controller.scannedDataStream.listen((scanData) {
@@ -547,6 +594,21 @@ class _QRViewExampleState extends State<QRViewExample> {
         scannaData = scanData.code;
       });
       // スキャンされたQRコードデータを処理
+      Navigator.pop(context, scannaData);
+      controller.dispose();
+    });
+  }
+*/
+
+  void _onQRViewCreated(QRViewController controller) {
+    this.controller = controller;
+    controller.scannedDataStream.listen((scanData) async {
+      setState(() {
+        scannaData = scanData.code;
+      });
+      // スキャンされたQRコードデータを処理
+      await OniAssignmentService()
+          .setOni(widget.roomId, scannaData); // widgetを使用してroomIdにアクセス
       Navigator.pop(context, scannaData);
       controller.dispose();
     });

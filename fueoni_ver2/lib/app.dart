@@ -34,6 +34,7 @@ class MyApp extends StatelessWidget {
                 ModalRoute.of(context)!.settings.arguments as RoomArguments;
             return OniMapScreen(roomId: args.roomId);
           },
+          // '/result': (BuildContext context) => ResultScreen(),
           '/map/runner': (BuildContext context) => const RunnerMapScreen(),
           '/home/account_settings': (BuildContext context) =>
               const AccountSettingsScreen(),

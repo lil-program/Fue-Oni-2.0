@@ -12,21 +12,34 @@ class GameMonitorService {
     });
   }
 
-  void monitorOniPlayers(int? roomId, Function(Map<String, bool>) onOniPlayersChanged) {
-    DatabaseReference oniPlayersRef = FirebaseDatabase.instance.ref('games/$roomId/oniPlayers');
+  void monitorOniPlayers(
+      int? roomId, Function(Map<String, bool>) onOniPlayersChanged) {
+    DatabaseReference oniPlayersRef =
+        FirebaseDatabase.instance.ref('games/$roomId/oniPlayers');
 
     oniPlayersRef.onValue.listen((event) {
       if (event.snapshot.exists) {
         Map<String, bool> oniPlayers = {};
-        Map<dynamic, dynamic> values = event.snapshot.value as Map<dynamic, dynamic>;
+        Map<dynamic, dynamic> values =
+            event.snapshot.value as Map<dynamic, dynamic>;
         values.forEach((key, value) {
-          // ここでは、keyがplayerId、valueがそのプレイヤーが鬼かどうかを表します
           oniPlayers[key] = value;
         });
         onOniPlayersChanged(oniPlayers);
       }
     });
   }
+
+  void monitorPlayerOniState(
+      int? roomId, String? playerId, Function(bool) onOniStateChanged) {
+    DatabaseReference playerRef =
+        FirebaseDatabase.instance.ref('games/$roomId/players/$playerId');
+
+    playerRef.child('oni').onValue.listen((event) {
+      if (event.snapshot.exists) {
+        bool isOni = event.snapshot.value as bool;
+        onOniStateChanged(isOni);
+      }
+    });
+  }
 }
-
-
